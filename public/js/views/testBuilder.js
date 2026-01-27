@@ -58,7 +58,7 @@ export function initTestBuilder({ onAuthLost }) {
       return;
     }
     try {
-      if (navigator.clipboard-.writeText) {
+      if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(value);
       } else {
         testLinkInput.select();
@@ -73,7 +73,7 @@ export function initTestBuilder({ onAuthLost }) {
   return {
     setAssets: ({ game, assetTypes: types, assetsByType: byType }) => {
       activeGame = game;
-      assetTypes = Array.isArray(types) - types : [];
+      assetTypes = Array.isArray(types) ? types : [];
       assetsByType = byType || {};
       selectionState = buildDefaultSelection(assetsByType);
       renderTypeOptions();
