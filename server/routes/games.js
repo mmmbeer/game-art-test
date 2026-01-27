@@ -323,8 +323,13 @@ async function buildGameImageMap(gameMap, sessionId) {
 }
 
 function groupAssetsByType(assets) {
+  const visibleAssets = [];
   const assetsByType = {};
   for (const asset of assets) {
+    if (isCardAsset(asset)) {
+      continue;
+    }
+    visibleAssets.push(asset);
     if (!assetsByType[asset.asset_type]) {
       assetsByType[asset.asset_type] = [];
     }
@@ -334,5 +339,14 @@ function groupAssetsByType(assets) {
     type,
     count: items.length,
   }));
-  return { assetsByType, assets, types };
+  return { assetsByType, assets: visibleAssets, types };
+}
+
+function isCardAsset(asset) {
+  const type = String(asset?.asset_type || "");
+  if (type.toLowerCase().includes("card")) {
+    return true;
+  }
+  const source = asset?.metadata?.source || {};
+  return String(source.object_type || "").toLowerCase() === "card";
 }

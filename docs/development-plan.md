@@ -349,6 +349,8 @@ No login required for testers. Public art test links must allow anonymous voting
 * Per-type asset selection (default select all; allow excluding specific assets like decks)
 * Preview modal with horizontally scrolling randomized assets
 * Deck asset discovery now pulls deck card relationships for card inclusion
+* Card assets are hidden from asset groups and only flow into tests via their parent decks
+* Card assets are split into face/back entries so deck selection includes both sides
 
 **Testing**
 

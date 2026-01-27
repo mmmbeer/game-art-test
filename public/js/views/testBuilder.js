@@ -95,18 +95,23 @@ function renderTypeOptions() {
     .sort((a, b) => a.type.localeCompare(b.type))
     .forEach((entry) => {
       const type = entry.type;
-      const count = entry.count;
-      const selectedCount = selectionState.get(type)?.size || 0;
+      const { selectedCount, totalCount } = resolveTypeCounts(type, entry.count);
       const option = document.createElement("label");
       option.className = "test-type-option";
       option.innerHTML = `
-        <input type="checkbox" value="${type}" ${selectedCount === count ? "checked" : ""}>
-        <span class="test-type-name">${type}</span>
-        <span class="test-type-meta">${selectedCount}/${count} selected${isDeckType(type) ? " + cards" : ""}</span>
+        <input type="checkbox" value="${type}" ${isTypeFullySelected(type) ? "checked" : ""}>
+        <span class="test-type-name">${type} (${entry.count})</span>
+        <span class="test-type-meta">${selectedCount}/${totalCount}</span>
       `;
       const wrapper = document.createElement("div");
       wrapper.className = "test-type-block";
       wrapper.appendChild(option);
+
+      const selectedList = document.createElement("div");
+      selectedList.className = "type-selected";
+      selectedList.dataset.typeSelected = type;
+      selectedList.innerHTML = renderSelectedAssets(type);
+      wrapper.appendChild(selectedList);
 
       const assetsWrap = document.createElement("div");
       assetsWrap.className = "type-assets";
@@ -228,20 +233,6 @@ function renderPreview(data) {
   `;
 }
 
-function renderPreviewCard(asset) {
-  return `
-    <div class="test-preview-card">
-      <div class="test-preview-thumb">
-        <img src="${asset.image_url}" alt="${asset.asset_type}">
-      </div>
-      <div class="test-preview-meta">
-        <div>${asset.asset_type}</div>
-        <div>DPI: ${asset.dpi || "n/a"}</div>
-      </div>
-    </div>
-  `;
-}
-
 async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
   const signature = selectedAssets.join("|");
   const assetUuids =
@@ -281,16 +272,31 @@ async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
   showToast("Art test started.", "success");
 }
 
-function isDeckType(type) {
-  return String(type || "").toLowerCase().includes("deck");
-}
-
 function buildDefaultSelection(byType) {
   const map = new Map();
   Object.entries(byType || {}).forEach(([type, assets]) => {
     map.set(type, new Set((assets || []).map((asset) => asset.uuid)));
   });
   return map;
+}
+
+function resolveTypeCounts(type, assetCount) {
+  const assets = assetsByType[type] || [];
+  const selected = selectionState.get(type) || new Set();
+  if (!isDeckType(type)) {
+    return { selectedCount: selected.size, totalCount: assetCount };
+  }
+  const totalCount = assets.reduce((sum, asset) => sum + resolveCardCount(asset, 1), 0);
+  const selectedCount = assets
+    .filter((asset) => selected.has(asset.uuid))
+    .reduce((sum, asset) => sum + resolveCardCount(asset, 1), 0);
+  return { selectedCount, totalCount };
+}
+
+function isTypeFullySelected(type) {
+  const assets = assetsByType[type] || [];
+  const selected = selectionState.get(type) || new Set();
+  return assets.length > 0 && selected.size === assets.length;
 }
 
 function renderAssetsForType(type) {
@@ -301,18 +307,15 @@ function renderAssetsForType(type) {
   const selected = selectionState.get(type) || new Set();
   return items
     .map((asset) => {
-      const preview = asset.metadata?.preview_urls?.[0] || asset.image_url;
       const name = resolveAssetName(asset);
+      const cardCount = resolveCardCount(asset);
       return `
         <label class="type-asset-card">
-          <div class="type-asset-thumb">
-            <img src="${preview}" alt="${asset.asset_type}">
-          </div>
-          <div>
-            <div class="type-asset-name">${name}</div>
-            <div class="test-type-meta">${asset.tgc_asset_id}</div>
-          </div>
           <input type="checkbox" data-asset-uuid="${asset.uuid}" ${selected.has(asset.uuid) ? "checked" : ""}>
+          <div>
+            <div class="type-asset-name">${name}${cardCount ? ` (${cardCount})` : ""}</div>
+          </div>
+          <span class="test-type-meta">${selected.has(asset.uuid) ? "Selected" : ""}</span>
         </label>
       `;
     })
@@ -327,12 +330,17 @@ function refreshTypeSelectionUI(type) {
     option.checked = selected.size === assets.length && assets.length > 0;
     const meta = option.closest(".test-type-option")?.querySelector(".test-type-meta");
     if (meta) {
-      meta.textContent = `${selected.size}/${assets.length} selected${isDeckType(type) ? " + cards" : ""}`;
+      const counts = resolveTypeCounts(type, assets.length);
+      meta.textContent = `${counts.selectedCount}/${counts.totalCount}`;
     }
   }
   const container = testTypeSelection.querySelector(`[data-type-assets="${type}"]`);
   if (container) {
     container.innerHTML = renderAssetsForType(type);
+  }
+  const selectedList = testTypeSelection.querySelector(`[data-type-selected="${type}"]`);
+  if (selectedList) {
+    selectedList.innerHTML = renderSelectedAssets(type);
   }
 }
 
@@ -343,6 +351,39 @@ function resolveAssetName(asset) {
     (source.title || "").trim() ||
     (source.object_name || "").trim();
   return name || asset.asset_type;
+}
+
+function resolveCardCount(asset, fallback = 0) {
+  if (!asset || typeof asset !== "object") {
+    return fallback;
+  }
+  const source = asset.metadata?.source || {};
+  const count =
+    Number(source.card_count) ||
+    Number(source.cards_count) ||
+    Number(source.card_total) ||
+    0;
+  return count || fallback;
+}
+
+function renderSelectedAssets(type) {
+  const items = assetsByType[type] || [];
+  const selected = selectionState.get(type) || new Set();
+  if (!selected.size) {
+    return "<div class=\"type-selected-item\">No assets selected</div>";
+  }
+  const selectedItems = items.filter((asset) => selected.has(asset.uuid));
+  return selectedItems
+    .map((asset) => {
+      const name = resolveAssetName(asset);
+      const cardCount = resolveCardCount(asset);
+      return `<div class="type-selected-item">• ${name}${cardCount ? ` (${cardCount})` : ""}</div>`;
+    })
+    .join("");
+}
+
+function isDeckType(type) {
+  return String(type || "").toLowerCase().includes("deck");
 }
 
 function openPreviewModal(data) {

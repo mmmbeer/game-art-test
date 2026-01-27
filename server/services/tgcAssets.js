@@ -64,28 +64,34 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
     }
 
     for (const item of items) {
-      const normalized = await normalizeAsset({
-        relationship: relationship.key,
-        item,
-        sessionId,
-        fileCache,
-      });
-      if (normalized) {
-        assets.push(normalized);
+      if (isCardItem(item, relationship.key)) {
+        const normalizedCards = await normalizeCardAssets({
+          item,
+          sessionId,
+          fileCache,
+        });
+        normalizedCards.forEach((cardAsset) => assets.push(cardAsset));
+      } else {
+        const normalized = await normalizeAsset({
+          relationship: relationship.key,
+          item,
+          sessionId,
+          fileCache,
+        });
+        if (normalized) {
+          assets.push(normalized);
+        }
       }
 
       if (isDeckItem(item, relationship.key)) {
         const deckCards = await fetchDeckCards({ deckId: item.id, sessionId });
         for (const card of deckCards) {
-          const normalizedCard = await normalizeAsset({
-            relationship: "card",
+          const normalizedCards = await normalizeCardAssets({
             item: card,
             sessionId,
             fileCache,
           });
-          if (normalizedCard) {
-            assets.push(normalizedCard);
-          }
+          normalizedCards.forEach((cardAsset) => assets.push(cardAsset));
         }
       }
     }
@@ -124,6 +130,77 @@ function extractRelationshipEntries(gameResult) {
 function isDeckItem(item, relationshipKey) {
   const type = String(item?.object_type || relationshipKey || "");
   return type.toLowerCase().includes("deck");
+}
+
+function isCardItem(item, relationshipKey) {
+  const type = String(item?.object_type || relationshipKey || "");
+  return type.toLowerCase().includes("card");
+}
+
+async function normalizeCardAssets({ item, sessionId, fileCache }) {
+  const assets = [];
+  const faceId = item.face_id || item.face?.id;
+  const backId = item.back_id || item.back?.id;
+  const faceAsset = await buildCardAsset({
+    item,
+    sessionId,
+    fileCache,
+    fileId: faceId,
+    side: "face",
+  });
+  if (faceAsset) {
+    assets.push(faceAsset);
+  }
+  const backAsset = await buildCardAsset({
+    item,
+    sessionId,
+    fileCache,
+    fileId: backId,
+    side: "back",
+  });
+  if (backAsset) {
+    assets.push(backAsset);
+  }
+  if (!assets.length) {
+    const fallback = await normalizeAsset({
+      relationship: "card",
+      item,
+      sessionId,
+      fileCache,
+    });
+    if (fallback) {
+      assets.push(fallback);
+    }
+  }
+  return assets;
+}
+
+async function buildCardAsset({ item, sessionId, fileCache, fileId, side }) {
+  if (!fileId) {
+    return null;
+  }
+  const file = await getFile({ fileId, sessionId, fileCache });
+  if (!file) {
+    return null;
+  }
+  const imageUrl = file.file_uri || file.preview_uri || "";
+  if (!imageUrl) {
+    return null;
+  }
+  const dpi = resolveDpi([pickFileDetails(file)]) || 0;
+  return {
+    tgc_asset_id: item.id,
+    asset_type: `card_${side}`,
+    image_url: imageUrl,
+    dpi,
+    metadata: {
+      relationship: "card",
+      side,
+      file_ids: [fileId],
+      files: [pickFileDetails(file)],
+      source: item,
+    },
+  };
 }
 
 async function fetchDeckCards({ deckId, sessionId }) {

@@ -114,20 +114,22 @@
               <div class="test-builder-header">
                 <div>
                   <p class="app-eyebrow mb-1">Art Test Builder</p>
-                  <h3 class="card-title mb-1">Select asset types to test</h3>
-                  <p class="card-subtitle">Decks automatically expand into their card pool.</p>
+                  <p class="card-subtitle mb-0">Decks automatically expand into their card pool.</p>
                 </div>
+                <div class="test-builder-actions">
+                  <button class="btn btn-outline-light btn-sm" id="previewTest" type="button">
+                    Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" id="startTest" type="button">
+                    Start
+                  </button>
+                </div>
+              </div>
+              <div class="test-builder-row">
+                <h3 class="card-title mb-0">Select asset types to test:</h3>
                 <div class="test-builder-metrics" id="testBuilderMetrics"></div>
               </div>
               <div class="test-types" id="testTypeSelection"></div>
-              <div class="test-actions">
-                <button class="btn btn-outline-light" id="previewTest" type="button">
-                  Preview randomization
-                </button>
-                <button class="btn btn-primary" id="startTest" type="button">
-                  Start art test
-                </button>
-              </div>
               <div class="loading-row d-none" id="testPreviewLoading" aria-live="polite">
                 <span class="loading-spinner" aria-hidden="true"></span>
                 <span>Building preview...</span>
