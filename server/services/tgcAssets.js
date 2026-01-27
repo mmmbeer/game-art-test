@@ -32,18 +32,27 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
   const fileCache = new Map();
 
   for (const relationship of relationshipEntries) {
-    const response = relationship.href
-      ? await listRelationshipByUrl({
-          url: relationship.href,
-          sessionId,
-          includeRelationships: true,
-        })
-      : await listGameRelationship({
-          gameId: tgcGameId,
-          relationship: relationship.key,
-          sessionId,
-          includeRelationships: true,
-        });
+    let response;
+    try {
+      response = relationship.href
+        ? await listRelationshipByUrl({
+            url: relationship.href,
+            sessionId,
+            includeRelationships: true,
+          })
+        : await listGameRelationship({
+            gameId: tgcGameId,
+            relationship: relationship.key,
+            sessionId,
+            includeRelationships: true,
+          });
+    } catch (error) {
+      const message = String(error?.message || "");
+      if (message.toLowerCase().includes("resource not found")) {
+        continue;
+      }
+      throw error;
+    }
     const items = extractItems(response);
 
     for (const item of items) {

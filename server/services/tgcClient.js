@@ -1,9 +1,12 @@
 import env from "../config/env.js";
 
 const baseUrl = env.tgc.apiBaseUrl.replace(/\/$/, "");
+const baseParsed = new URL(baseUrl);
+const baseOrigin = baseParsed.origin;
+const basePath = baseParsed.pathname.replace(/\/$/, "");
 
 async function request(path, { method = "GET", params = {} } = {}) {
-  const url = path.startsWith("http") ? new URL(path) : new URL(`${baseUrl}${path}`);
+  const url = buildRequestUrl(path);
   const bodyParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -35,6 +38,19 @@ async function request(path, { method = "GET", params = {} } = {}) {
   }
 
   return data?.result || data;
+}
+
+function buildRequestUrl(path) {
+  if (path.startsWith("http")) {
+    return new URL(path);
+  }
+  if (path.startsWith("/api/")) {
+    return new URL(`${baseOrigin}${path}`);
+  }
+  if (path.startsWith("/")) {
+    return new URL(`${baseOrigin}${basePath}${path}`);
+  }
+  return new URL(`${baseOrigin}${basePath}/${path}`);
 }
 
 export async function createSession({ username, password }) {
