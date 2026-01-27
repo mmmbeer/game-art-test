@@ -18,6 +18,9 @@ const env = {
   session: {
     cookieName: process.env.SESSION_COOKIE_NAME || "tgc_art_test_session",
   },
+  app: {
+    basePath: process.env.APP_BASE_PATH || "",
+  },
 };
 
 export default env;

@@ -82,7 +82,7 @@ function renderGames(games) {
 }
 
 async function loadGames() {
-  const response = await fetch("/games", { credentials: "include" });
+  const response = await fetch("games", { credentials: "include" });
   if (response.status === 401) {
     setView("login");
     return;
@@ -112,7 +112,7 @@ loginForm.addEventListener("submit", async (event) => {
   };
 
   try {
-    const response = await fetch("/auth/tgc/login", {
+    const response = await fetch("auth/tgc/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
