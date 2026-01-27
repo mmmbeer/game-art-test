@@ -51,12 +51,16 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
 }
 
 function extractRelationshipKeys(gameResult) {
-  const relationships = gameResult?.relationships || gameResult?.relationship || {};
+  const relationships =
+    gameResult?._relationships || gameResult?.relationships || gameResult?.relationship || {};
   return Object.entries(relationships)
     .map(([key, value]) => ({ key, value }))
     .filter(({ value }) => {
       if (!value) {
         return false;
+      }
+      if (typeof value === "string") {
+        return true;
       }
       if (Array.isArray(value)) {
         return value.length > 0;

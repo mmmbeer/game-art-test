@@ -3,7 +3,7 @@ import env from "../config/env.js";
 const baseUrl = env.tgc.apiBaseUrl.replace(/\/$/, "");
 
 async function request(path, { method = "GET", params = {} } = {}) {
-  const url = new URL(`${baseUrl}${path}`);
+  const url = path.startsWith("http") ? new URL(path) : new URL(`${baseUrl}${path}`);
   const bodyParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -101,6 +101,21 @@ export async function listDesignerGames({ designerId, sessionId }) {
     method: "GET",
     params: {
       session_id: sessionId,
+    },
+  });
+}
+
+export async function listUserRelationship({
+  tgcUserId,
+  relationship,
+  sessionId,
+  includeRelationships = false,
+}) {
+  return request(`/user/${tgcUserId}/${relationship}`, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+      _include_relationships: includeRelationships ? 1 : undefined,
     },
   });
 }

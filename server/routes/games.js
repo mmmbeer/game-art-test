@@ -6,6 +6,7 @@ import {
   fetchGame,
   fetchUser,
   listDesignerGames,
+  listUserRelationship,
 } from "../services/tgcClient.js";
 import { getGameByUuidForUser, getGamesByUserId, syncGamesForUser } from "../db/games.js";
 import { discoverGameAssets } from "../services/tgcAssets.js";
@@ -15,7 +16,8 @@ import { createDeterministicUuid } from "../utils/uuid.js";
 const router = Router();
 
 function extractRelationshipItems(userResult, key) {
-  const relationships = userResult?.relationships || userResult?.relationship || {};
+  const relationships =
+    userResult?._relationships || userResult?.relationships || userResult?.relationship || {};
   const rel = relationships?.[key];
   if (!rel) {
     return [];
@@ -118,7 +120,18 @@ router.get("/", requireAuth, async (req, res) => {
       includeRelationships: true,
     });
 
-    const designers = extractRelationshipItems(userResult, "designers");
+    const userRelationships =
+      userResult?._relationships || userResult?.relationships || userResult?.relationship || {};
+
+    let designers = extractRelationshipItems(userResult, "designers");
+    if (designers.length === 0 && userRelationships?.designers) {
+      const response = await listUserRelationship({
+        tgcUserId: user.tgcUserId,
+        relationship: "designers",
+        sessionId: tgcSessionId,
+      });
+      designers = extractItems(response);
+    }
     const designerMap = await buildDesignerMap(designers, tgcSessionId);
     const designerGames = [];
 
@@ -137,6 +150,14 @@ router.get("/", requireAuth, async (req, res) => {
     let gameItems = extractRelationshipItems(userResult, "games");
     if (gameItems.length === 0 && Array.isArray(userResult.games)) {
       gameItems = userResult.games;
+    }
+    if (gameItems.length === 0 && userRelationships?.games) {
+      const response = await listUserRelationship({
+        tgcUserId: user.tgcUserId,
+        relationship: "games",
+        sessionId: tgcSessionId,
+      });
+      gameItems = extractItems(response);
     }
 
     const hydratedGames = [];
