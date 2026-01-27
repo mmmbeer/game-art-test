@@ -76,8 +76,46 @@ export async function fetchUser({ tgcUserId, sessionId, includeRelationships = f
   });
 }
 
+export async function fetchGame({ gameId, sessionId, includeRelationships = false }) {
+  return request(`/game/${gameId}`, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+      _include_relationships: includeRelationships ? 1 : undefined,
+    },
+  });
+}
+
+export async function listGameRelationship({ gameId, relationship, sessionId, includeRelationships = false }) {
+  return request(`/game/${gameId}/${relationship}`, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+      _include_relationships: includeRelationships ? 1 : undefined,
+    },
+  });
+}
+
 export async function listDesignerGames({ designerId, sessionId }) {
   return request(`/designer/${designerId}/games`, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+    },
+  });
+}
+
+export async function fetchDesigner({ designerId, sessionId }) {
+  return request(`/designer/${designerId}`, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+    },
+  });
+}
+
+export async function fetchFile({ fileId, sessionId }) {
+  return request(`/file/${fileId}`, {
     method: "GET",
     params: {
       session_id: sessionId,

@@ -9,6 +9,14 @@ export async function getGamesByUserId(userId) {
   return rows;
 }
 
+export async function getGameByUuidForUser({ userId, gameUuid }) {
+  const [rows] = await pool.query(
+    "SELECT id, uuid, tgc_game_id, name FROM games WHERE user_id = ? AND uuid = ?",
+    [userId, gameUuid]
+  );
+  return rows[0] || null;
+}
+
 export async function syncGamesForUser(userId, games) {
   const [existingRows] = await pool.query(
     "SELECT id, tgc_game_id FROM games WHERE user_id = ?",

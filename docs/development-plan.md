@@ -287,7 +287,7 @@ No login required for testers. Public art test links must allow anonymous voting
 
 ---
 
-## Phase 2 - Asset Discovery & Normalization
+## Phase 2 - Asset Discovery & Normalization (COMPLETED)
 
 **Goals**
 
@@ -298,6 +298,27 @@ No login required for testers. Public art test links must allow anonymous voting
 
 * Asset listing
 * Asset preview
+
+**Implemented**
+
+* Dynamic asset discovery per game by inspecting TGC game relationships for file-backed items
+* Asset normalization with UUIDs, primary image URL, available DPI, and full JSON metadata
+* Asset persistence with update-or-insert behavior to avoid duplicates
+* `GET /games/:uuid/assets` endpoint returning grouped assets and type counts
+* Designer-aware game list with deterministic UUID mapping for TGC designer ids
+* Mobile-first game browser with search, designer filter, and selection state
+* Asset browser with type grouping, expand/collapse, lazy-loaded previews, and load-more pagination
+* Asset preview modal with DPI and TGC asset id metadata
+
+**Assumptions**
+
+* File metadata may include DPI information; otherwise DPI is stored as `0`
+* Asset types are inferred dynamically from relationship keys or object types
+* Designer names are resolved when possible from TGC and cached client-side per session
+
+**Constraints**
+
+* Designer data is not persisted; UUIDs are derived deterministically from TGC designer ids
 
 **Testing**
 
