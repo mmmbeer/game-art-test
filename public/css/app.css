@@ -1,0 +1,112 @@
+body.app-body {
+  font-family: var(--font-sans);
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.6), transparent 45%),
+    linear-gradient(130deg, var(--color-bg), var(--color-surface-alt));
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+.app-shell {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 18px 48px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 6px 24px;
+}
+
+.app-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 6px;
+}
+
+.app-title {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  margin: 0;
+}
+
+.app-main {
+  display: grid;
+  gap: 18px;
+}
+
+.app-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  background: var(--color-surface);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.card-subtitle {
+  color: var(--color-muted);
+  margin-bottom: 0;
+}
+
+.form-control {
+  border-radius: var(--radius-md);
+  border-color: var(--color-border);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.btn-outline-light {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.games-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.game-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+}
+
+.game-item input {
+  accent-color: var(--color-primary);
+}
+
+.game-item label {
+  flex: 1;
+}
+
+.toast {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+@media (min-width: 768px) {
+  .app-shell {
+    padding: 40px 24px 64px;
+  }
+}

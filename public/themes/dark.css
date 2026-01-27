@@ -1,0 +1,10 @@
+:root[data-theme="dark"] {
+  --color-bg: #12110f;
+  --color-surface: #1a1916;
+  --color-surface-alt: #2a2722;
+  --color-text: #f3efe8;
+  --color-muted: #b6a894;
+  --color-primary: #6fd3c0;
+  --color-primary-dark: #4bb6a1;
+  --color-border: #3a352f;
+}

@@ -1,0 +1,10 @@
+@import url("/themes/light.css");
+@import url("/themes/dark.css");
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}

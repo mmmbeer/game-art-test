@@ -11,6 +11,13 @@ const env = {
     user: process.env.DB_USER || "",
     password: process.env.DB_PASSWORD || "",
   },
+  tgc: {
+    apiBaseUrl: process.env.TGC_API_BASE_URL || "https://www.thegamecrafter.com/api",
+    apiKeyId: process.env.TGC_API_KEY_ID || "",
+  },
+  session: {
+    cookieName: process.env.SESSION_COOKIE_NAME || "tgc_art_test_session",
+  },
 };
 
 export default env;

@@ -244,7 +244,7 @@ No login required for testers.
 
 ---
 
-## Phase 1 – TGC Authentication & Game Fetching
+## Phase 1 – TGC Authentication & Game Fetching (COMPLETED)
 
 **Goals**
 
@@ -256,6 +256,27 @@ No login required for testers.
 
 * Login flow
 * Game selection UI
+
+**Implemented**
+
+* TGC session authentication via `/api/session`
+* Secure server-side session storage and UUID session cookie
+* `/auth/tgc/login` and `/games` endpoints
+* User persistence with UUID mapping to TGC user id
+* Game fetching via user relationships or designer games
+* Normalized game storage without duplicates
+* Mobile-first login and game selection UI with Bootstrap
+* Light and dark themes with variables and theme loader
+
+**Assumptions**
+
+* `TGC_API_KEY_ID` is available in server environment variables
+* The authenticated account can use the TGC session login interface
+* User relationships include designers or games for game retrieval
+
+**Constraints**
+
+* Selected game is stored in local browser storage only
 
 **Testing**
 
@@ -414,4 +435,6 @@ No login required for testers.
 * Testers can submit a vote in under 10 seconds
 * Mobile UX is primary
 * Zero tester login friction
+
+
 
