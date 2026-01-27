@@ -1,4 +1,10 @@
-import { extractItems, fetchFile, fetchGame, listGameRelationship } from "./tgcClient.js";
+import {
+  extractItems,
+  fetchFile,
+  fetchGame,
+  listGameRelationship,
+  listRelationshipByUrl,
+} from "./tgcClient.js";
 
 const EXCLUDED_ID_FIELDS = new Set([
   "id",
@@ -21,22 +27,28 @@ const EXCLUDED_ID_FIELDS = new Set([
 
 export async function discoverGameAssets({ tgcGameId, sessionId }) {
   const gameResult = await fetchGame({ gameId: tgcGameId, sessionId, includeRelationships: true });
-  const relationshipKeys = extractRelationshipKeys(gameResult);
+  const relationshipEntries = extractRelationshipEntries(gameResult);
   const assets = [];
   const fileCache = new Map();
 
-  for (const relationship of relationshipKeys) {
-    const response = await listGameRelationship({
-      gameId: tgcGameId,
-      relationship,
-      sessionId,
-      includeRelationships: true,
-    });
+  for (const relationship of relationshipEntries) {
+    const response = relationship.href
+      ? await listRelationshipByUrl({
+          url: relationship.href,
+          sessionId,
+          includeRelationships: true,
+        })
+      : await listGameRelationship({
+          gameId: tgcGameId,
+          relationship: relationship.key,
+          sessionId,
+          includeRelationships: true,
+        });
     const items = extractItems(response);
 
     for (const item of items) {
       const normalized = await normalizeAsset({
-        relationship,
+        relationship: relationship.key,
         item,
         sessionId,
         fileCache,
@@ -50,7 +62,7 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
   return assets;
 }
 
-function extractRelationshipKeys(gameResult) {
+function extractRelationshipEntries(gameResult) {
   const relationships =
     gameResult?._relationships || gameResult?.relationships || gameResult?.relationship || {};
   return Object.entries(relationships)
@@ -70,7 +82,7 @@ function extractRelationshipKeys(gameResult) {
       }
       return false;
     })
-    .map(({ key }) => key);
+    .map(({ key, value }) => ({ key, href: typeof value === "string" ? value : "" }));
 }
 
 async function normalizeAsset({ relationship, item, sessionId, fileCache }) {

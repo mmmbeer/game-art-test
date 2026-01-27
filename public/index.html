@@ -43,6 +43,16 @@
           <div class="card-body">
             <h2 class="card-title">Select a Game</h2>
             <p class="card-subtitle" id="userDisplay"></p>
+            <div class="loading-stack d-none" id="gamesLoading" aria-live="polite">
+              <div class="loading-row">
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span>Loading designers...</span>
+              </div>
+              <div class="loading-row">
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span>Loading games...</span>
+              </div>
+            </div>
             <div class="filter-bar">
               <div class="input-group">
                 <span class="input-group-text">
@@ -102,6 +112,10 @@
                 <img class="icon-sm" src="assets/icons/refresh.svg" alt="">
                 Refresh assets
               </button>
+            </div>
+            <div class="loading-row d-none" id="assetsLoading" aria-live="polite">
+              <span class="loading-spinner" aria-hidden="true"></span>
+              <span>Loading assets...</span>
             </div>
             <div class="asset-status text-muted" id="assetStatus"></div>
             <div class="section-divider"></div>

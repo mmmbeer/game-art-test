@@ -8,6 +8,7 @@ const assetMetrics = document.getElementById("assetMetrics");
 const refreshAssets = document.getElementById("refreshAssets");
 const assetStatus = document.getElementById("assetStatus");
 const assetGroups = document.getElementById("assetGroups");
+const assetsLoading = document.getElementById("assetsLoading");
 const assetPreviewModal = document.getElementById("assetPreviewModal");
 const assetPreviewTitle = document.getElementById("assetPreviewTitle");
 const assetPreviewImage = document.getElementById("assetPreviewImage");
@@ -70,27 +71,32 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
   assetMetrics.textContent = "";
   assetStatus.textContent = "Loading assets...";
   assetGroups.innerHTML = "";
+  assetsLoading.classList.remove("d-none");
 
-  const { response, data } = await fetchJson(`games/${game.uuid}/assets`);
-  if (response.status === 401) {
-    showToast("Session expired. Please sign in again.", "warning");
-    onAuthLost();
-    return;
-  }
-  if (!response.ok) {
-    showToast(data.error || "Unable to load assets.", "danger");
-    assetStatus.textContent = "Failed to load assets.";
-    return;
-  }
+  try {
+    const { response, data } = await fetchJson(`games/${game.uuid}/assets`);
+    if (response.status === 401) {
+      showToast("Session expired. Please sign in again.", "warning");
+      onAuthLost();
+      return;
+    }
+    if (!response.ok) {
+      showToast(data.error || "Unable to load assets.", "danger");
+      assetStatus.textContent = "Failed to load assets.";
+      return;
+    }
 
-  groupedAssets = Array.isArray(data.asset_types) ? data.asset_types : [];
-  assetsByType = data.assets_by_type || {};
-  const assetCount = Array.isArray(data.assets) ? data.assets.length : 0;
-  assetMetrics.textContent = `${assetCount} assets across ${groupedAssets.length} types`;
-  assetStatus.textContent = "Tap a group to browse.";
-  renderGroups();
-  if (showToastOnSuccess) {
-    showToast("Assets refreshed.", "success");
+    groupedAssets = Array.isArray(data.asset_types) ? data.asset_types : [];
+    assetsByType = data.assets_by_type || {};
+    const assetCount = Array.isArray(data.assets) ? data.assets.length : 0;
+    assetMetrics.textContent = `${assetCount} assets across ${groupedAssets.length} types`;
+    assetStatus.textContent = "Tap a group to browse.";
+    renderGroups();
+    if (showToastOnSuccess) {
+      showToast("Assets refreshed.", "success");
+    }
+  } finally {
+    assetsLoading.classList.add("d-none");
   }
 }
 

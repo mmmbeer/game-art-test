@@ -105,6 +105,16 @@ export async function listDesignerGames({ designerId, sessionId }) {
   });
 }
 
+export async function listRelationshipByUrl({ url, sessionId, includeRelationships = false }) {
+  return request(url, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+      _include_relationships: includeRelationships ? 1 : undefined,
+    },
+  });
+}
+
 export async function listUserRelationship({
   tgcUserId,
   relationship,

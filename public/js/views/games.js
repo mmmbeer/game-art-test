@@ -11,6 +11,7 @@ const confirmGame = document.getElementById("confirmGame");
 const selectedGamePanel = document.getElementById("selectedGamePanel");
 const selectedGameName = document.getElementById("selectedGameName");
 const selectedGameMeta = document.getElementById("selectedGameMeta");
+const gamesLoading = document.getElementById("gamesLoading");
 
 let games = [];
 let designers = [];
@@ -64,26 +65,33 @@ export function initGamesView({ onBrowseAssets, onAuthLost }) {
 
   return {
     loadGames: async () => {
-      const { response, data } = await fetchJson("games");
-      if (response.status === 401) {
-        showToast("Session expired. Please sign in again.", "warning");
-        onAuthLost();
-        return false;
+      gamesLoading.classList.remove("d-none");
+      gamesList.innerHTML = "";
+      selectedGamePanel.classList.add("d-none");
+      try {
+        const { response, data } = await fetchJson("games");
+        if (response.status === 401) {
+          showToast("Session expired. Please sign in again.", "warning");
+          onAuthLost();
+          return false;
+        }
+        if (!response.ok) {
+          showToast(data.error || "Unable to load games.", "danger");
+          onAuthLost();
+          return false;
+        }
+        games = Array.isArray(data.games) ? data.games : [];
+        designers = Array.isArray(data.designers) ? data.designers : [];
+        userDisplay.textContent = data.user?.display_name
+          ? `Signed in as ${data.user.display_name}`
+          : "Signed in";
+        renderDesignerFilter();
+        renderSelectedGame();
+        renderGames();
+        return true;
+      } finally {
+        gamesLoading.classList.add("d-none");
       }
-      if (!response.ok) {
-        showToast(data.error || "Unable to load games.", "danger");
-        onAuthLost();
-        return false;
-      }
-      games = Array.isArray(data.games) ? data.games : [];
-      designers = Array.isArray(data.designers) ? data.designers : [];
-      userDisplay.textContent = data.user?.display_name
-        ? `Signed in as ${data.user.display_name}`
-        : "Signed in";
-      renderDesignerFilter();
-      renderSelectedGame();
-      renderGames();
-      return true;
     },
   };
 }

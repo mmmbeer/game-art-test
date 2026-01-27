@@ -96,6 +96,33 @@ body.app-body {
   margin-top: 18px;
 }
 
+.loading-stack {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+
+.loading-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-top-color: var(--color-primary);
+  animation: spin 0.9s linear infinite;
+}
+
+.loading-row + .section-divider {
+  margin-top: 12px;
+}
+
 .section-divider {
   height: 1px;
   background: var(--color-border);
@@ -200,6 +227,12 @@ body.app-body {
 .asset-status {
   font-size: 0.9rem;
   margin-top: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .accordion-button {
