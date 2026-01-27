@@ -1,16 +1,19 @@
 {
-  "name": "tgc-docs-flattener",
+  "name": "tgc-art-test-platform",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=20"
   },
+  "scripts": {
+    "start": "node server/index.js",
+    "convert:tgc": "node scripts/convert-docs.mjs ./docs/tgc-api-docs ./docs/tgc-api.md"
+  },
   "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.19.2",
     "jsdom": "^27.4.0",
     "turndown": "^7.2.2",
     "turndown-plugin-gfm": "^1.0.2"
-  },
-  "scripts": {
-    "convert:tgc": "node scripts/convert-docs.mjs ./docs/tgc-api-docs ./docs/tgc-api.md"
   }
 }

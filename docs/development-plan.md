@@ -17,6 +17,8 @@ All user‑facing identifiers (tests, sessions, links) must be UUID‑based.
 
 All development must follow the docs/golden-rules.md ("golden rules").
 
+TGC's API documentation is saved to docs/tgc-api.md.
+
 ---
 
 ## 2. Core Concepts & Terminology
@@ -210,7 +212,7 @@ No login required for testers.
 
 ## 8. Phased Development Plan
 
-## Phase 0 – Foundation & Setup (Feature‑Complete: Infrastructure)
+## Phase 0 – Foundation & Setup (COMPLETED)
 
 **Goals**
 
@@ -225,6 +227,15 @@ No login required for testers.
 * Node.js API skeleton
 * Env config
 * Basic health endpoint
+
+**Implemented**
+
+* Repository folder structure per Phase 0
+* Express server skeleton with centralized bootstrap
+* Environment configuration via .env.example and loader
+* MySQL datamodel.sql for users, games, assets, tests, test_assets, votes
+* GET /health endpoint returning status, timestamp, environment
+* Minimal static index.html
 
 **Testing**
 
@@ -403,3 +414,4 @@ No login required for testers.
 * Testers can submit a vote in under 10 seconds
 * Mobile UX is primary
 * Zero tester login friction
+

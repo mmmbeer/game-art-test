@@ -1,9 +1,16 @@
-var http = require('http');
-var server = http.createServer(function(req, res) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    var message = 'It works!\n',
-        version = 'NodeJS ' + process.versions.node + '\n',
-        response = [message, version].join('\n');
-    res.end(response);
-});
-server.listen();
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import healthRoutes from "./routes/health.js";
+
+const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicDir = path.resolve(__dirname, "..", "public");
+
+app.use(express.json({ limit: "100kb" }));
+app.use(express.static(publicDir));
+app.use(healthRoutes);
+
+export default app;

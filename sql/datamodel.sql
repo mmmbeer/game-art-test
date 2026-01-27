@@ -1,0 +1,53 @@
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL,
+  tgc_user_id VARCHAR(64) NOT NULL,
+  display_name VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL
+);
+
+CREATE TABLE games (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL,
+  tgc_game_id VARCHAR(64) NOT NULL,
+  user_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE assets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL,
+  tgc_asset_id VARCHAR(64) NOT NULL,
+  game_id INT NOT NULL,
+  asset_type VARCHAR(64) NOT NULL,
+  image_url TEXT NOT NULL,
+  dpi INT NOT NULL,
+  metadata JSON NOT NULL
+);
+
+CREATE TABLE tests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL,
+  user_id INT NOT NULL,
+  game_id INT NOT NULL,
+  status VARCHAR(32) NOT NULL,
+  created_at DATETIME NOT NULL,
+  stopped_at DATETIME NULL
+);
+
+CREATE TABLE test_assets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  test_id INT NOT NULL,
+  asset_id INT NOT NULL,
+  order_index INT NOT NULL
+);
+
+CREATE TABLE votes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  test_asset_id INT NOT NULL,
+  professionalism INT NOT NULL,
+  appeal INT NOT NULL,
+  understandability INT NOT NULL,
+  comment TEXT NULL,
+  created_at DATETIME NOT NULL
+);
