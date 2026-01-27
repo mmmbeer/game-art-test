@@ -1,14 +1,5 @@
 const DEFAULT_SAMPLE_SIZE = 10;
 
-export function normalizeSelectedTypes(input) {
-  if (!Array.isArray(input)) {
-    return [];
-  }
-  return input
-    .map((value) => String(value || "").trim())
-    .filter((value) => value.length > 0);
-}
-
 export function resolveSampleSize(input, fallback = DEFAULT_SAMPLE_SIZE) {
   const parsed = Number.parseInt(input, 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -17,19 +8,19 @@ export function resolveSampleSize(input, fallback = DEFAULT_SAMPLE_SIZE) {
   return Math.min(parsed, 50);
 }
 
-export function buildTestPool({ assets, selectedTypes }) {
-  const selection = new Set(selectedTypes);
+export function buildTestPool({ assets, selectedAssets }) {
   const poolMap = new Map();
   const tgcAssetMap = new Map(assets.map((asset) => [asset.tgc_asset_id, asset]));
   let deckSelections = 0;
   let deckCardAdds = 0;
 
-  for (const asset of assets) {
-    if (!selection.has(asset.asset_type)) {
+  for (const asset of selectedAssets) {
+    if (!asset) {
       continue;
     }
     if (isDeckAsset(asset)) {
       deckSelections += 1;
+      poolMap.set(asset.id, asset);
       const deckCards = resolveDeckCards(asset, assets, tgcAssetMap);
       deckCards.forEach((card) => {
         if (!poolMap.has(card.id)) {
@@ -51,7 +42,7 @@ export function buildTestPool({ assets, selectedTypes }) {
   return {
     pool: Array.from(poolMap.values()),
     meta: {
-      selected_type_count: selection.size,
+      selected_asset_count: selectedAssets.length,
       deck_selections: deckSelections,
       deck_card_adds: deckCardAdds,
     },

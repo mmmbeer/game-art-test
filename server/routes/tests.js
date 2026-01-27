@@ -6,7 +6,6 @@ import { getAssetsByGameIdWithIds, getAssetsByUuidsForGameId } from "../db/asset
 import { createTest, insertTestAssets } from "../db/tests.js";
 import {
   buildTestPool,
-  normalizeSelectedTypes,
   resolveSampleSize,
   sampleAssets,
 } from "../services/testSelection.js";
@@ -14,13 +13,15 @@ import {
 const router = Router();
 
 router.post("/preview", requireAuth, async (req, res) => {
-  const selectedTypes = normalizeSelectedTypes(req.body?.asset_types);
-  if (selectedTypes.length === 0) {
-    return res.status(400).json({ error: "Select at least one asset type." });
-  }
-
   const gameUuid = String(req.body?.game_uuid || "");
+  const assetUuids = Array.isArray(req.body?.asset_uuids)
+    ? req.body.asset_uuids.map((value) => String(value))
+    : [];
   const { user } = req.auth;
+
+  if (assetUuids.length === 0) {
+    return res.status(400).json({ error: "Select at least one asset." });
+  }
 
   try {
     const game = await getGameByUuidForUser({ userId: user.id, gameUuid });
@@ -29,13 +30,16 @@ router.post("/preview", requireAuth, async (req, res) => {
     }
 
     const assets = await getAssetsByGameIdWithIds(game.id);
-    const { pool, meta } = buildTestPool({ assets, selectedTypes });
+    const selectedAssets = await getAssetsByUuidsForGameId(game.id, assetUuids);
+    if (selectedAssets.length !== assetUuids.length) {
+      return res.status(400).json({ error: "Invalid asset selection." });
+    }
+    const { pool, meta } = buildTestPool({ assets, selectedAssets });
     const sampleSize = Math.min(resolveSampleSize(req.body?.sample_size), pool.length);
     const selection = sampleAssets(pool, sampleSize);
 
     return res.status(200).json({
       game: { uuid: game.uuid, name: game.name },
-      selected_types: selectedTypes,
       pool_count: pool.length,
       sample_size: sampleSize,
       meta,
@@ -47,7 +51,6 @@ router.post("/preview", requireAuth, async (req, res) => {
 });
 
 router.post("/start", requireAuth, async (req, res) => {
-  const selectedTypes = normalizeSelectedTypes(req.body?.asset_types);
   const gameUuid = String(req.body?.game_uuid || "");
   const assetUuids = Array.isArray(req.body?.asset_uuids)
     ? req.body.asset_uuids.map((value) => String(value))
@@ -58,8 +61,8 @@ router.post("/start", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "Game is required." });
   }
 
-  if (selectedTypes.length === 0 && assetUuids.length === 0) {
-    return res.status(400).json({ error: "Select at least one asset type." });
+  if (assetUuids.length === 0) {
+    return res.status(400).json({ error: "Select at least one asset." });
   }
 
   try {
@@ -68,20 +71,14 @@ router.post("/start", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Game not found." });
     }
 
-    let selection = [];
-    if (assetUuids.length > 0) {
-      const assets = await getAssetsByUuidsForGameId(game.id, assetUuids);
-      if (assets.length !== assetUuids.length) {
-        return res.status(400).json({ error: "Invalid asset selection." });
-      }
-      const assetMap = new Map(assets.map((asset) => [asset.uuid, asset]));
-      selection = assetUuids.map((uuid) => assetMap.get(uuid)).filter(Boolean);
-    } else {
-      const assets = await getAssetsByGameIdWithIds(game.id);
-      const { pool } = buildTestPool({ assets, selectedTypes });
-      const sampleSize = Math.min(resolveSampleSize(req.body?.sample_size), pool.length);
-      selection = sampleAssets(pool, sampleSize);
+    const assets = await getAssetsByGameIdWithIds(game.id);
+    const selectedAssets = await getAssetsByUuidsForGameId(game.id, assetUuids);
+    if (selectedAssets.length !== assetUuids.length) {
+      return res.status(400).json({ error: "Invalid asset selection." });
     }
+    const { pool } = buildTestPool({ assets, selectedAssets });
+    const sampleSize = Math.min(resolveSampleSize(req.body?.sample_size), pool.length);
+    const selection = sampleAssets(pool, sampleSize);
 
     if (selection.length === 0) {
       return res.status(400).json({ error: "No assets available for this selection." });

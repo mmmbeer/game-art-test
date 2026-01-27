@@ -11,12 +11,16 @@ const testPreview = document.getElementById("testPreview");
 const testLinkPanel = document.getElementById("testLinkPanel");
 const testLinkInput = document.getElementById("testLinkInput");
 const copyTestLink = document.getElementById("copyTestLink");
+const testPreviewModal = document.getElementById("testPreviewModal");
+const testPreviewSummary = document.getElementById("testPreviewSummary");
+const testPreviewScroll = document.getElementById("testPreviewScroll");
 
 let activeGame = null;
 let assetTypes = [];
 let assetsByType = {};
 let lastPreview = null;
 let lastPreviewSignature = "";
+let selectionState = new Map();
 
 export function initTestBuilder({ onAuthLost }) {
   testTypeSelection.addEventListener("change", () => {
@@ -28,24 +32,24 @@ export function initTestBuilder({ onAuthLost }) {
     if (!activeGame) {
       return;
     }
-    const selectedTypes = getSelectedTypes();
-    if (!selectedTypes.length) {
-      showToast("Select at least one asset type to preview.", "warning");
+    const selectedAssets = getSelectedAssets();
+    if (!selectedAssets.length) {
+      showToast("Select at least one asset to preview.", "warning");
       return;
     }
-    await loadPreview({ gameUuid: activeGame.uuid, selectedTypes, onAuthLost });
+    await loadPreview({ gameUuid: activeGame.uuid, selectedAssets, onAuthLost });
   });
 
   startTest.addEventListener("click", async () => {
     if (!activeGame) {
       return;
     }
-    const selectedTypes = getSelectedTypes();
-    if (!selectedTypes.length) {
-      showToast("Select at least one asset type to start a test.", "warning");
+    const selectedAssets = getSelectedAssets();
+    if (!selectedAssets.length) {
+      showToast("Select at least one asset to start a test.", "warning");
       return;
     }
-    await startArtTest({ gameUuid: activeGame.uuid, selectedTypes, onAuthLost });
+    await startArtTest({ gameUuid: activeGame.uuid, selectedAssets, onAuthLost });
   });
 
   copyTestLink.addEventListener("click", async () => {
@@ -71,6 +75,7 @@ export function initTestBuilder({ onAuthLost }) {
       activeGame = game;
       assetTypes = Array.isArray(types) ? types : [];
       assetsByType = byType || {};
+      selectionState = buildDefaultSelection(assetsByType);
       renderTypeOptions();
       updateMetrics();
       clearPreview();
@@ -91,28 +96,79 @@ function renderTypeOptions() {
     .forEach((entry) => {
       const type = entry.type;
       const count = entry.count;
+      const selectedCount = selectionState.get(type)?.size || 0;
       const option = document.createElement("label");
       option.className = "test-type-option";
       option.innerHTML = `
-        <input type="checkbox" value="${type}">
+        <input type="checkbox" value="${type}" ${selectedCount === count ? "checked" : ""}>
         <span class="test-type-name">${type}</span>
-        <span class="test-type-meta">${count} assets${isDeckType(type) ? " + cards" : ""}</span>
+        <span class="test-type-meta">${selectedCount}/${count} selected${isDeckType(type) ? " + cards" : ""}</span>
       `;
-      testTypeSelection.appendChild(option);
+      const wrapper = document.createElement("div");
+      wrapper.className = "test-type-block";
+      wrapper.appendChild(option);
+
+      const assetsWrap = document.createElement("div");
+      assetsWrap.className = "type-assets";
+      assetsWrap.dataset.typeAssets = type;
+      assetsWrap.innerHTML = renderAssetsForType(type);
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "btn btn-outline-light btn-sm";
+      toggle.textContent = "Pick assets";
+      toggle.addEventListener("click", () => {
+        const isOpen = assetsWrap.classList.toggle("is-open");
+        toggle.textContent = isOpen ? "Hide assets" : "Pick assets";
+      });
+
+      wrapper.appendChild(toggle);
+      wrapper.appendChild(assetsWrap);
+      testTypeSelection.appendChild(wrapper);
+
+      const checkbox = option.querySelector("input");
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
+          selectionState.set(type, new Set((assetsByType[type] || []).map((asset) => asset.uuid)));
+        } else {
+          selectionState.set(type, new Set());
+        }
+        updateMetrics();
+        refreshTypeSelectionUI(type);
+        clearPreview();
+      });
+
+      assetsWrap.addEventListener("change", (event) => {
+        const assetInput = event.target.closest("input[data-asset-uuid]");
+        if (!assetInput) {
+          return;
+        }
+        const uuid = assetInput.dataset.assetUuid;
+        const set = selectionState.get(type) || new Set();
+        if (assetInput.checked) {
+          set.add(uuid);
+        } else {
+          set.delete(uuid);
+        }
+        selectionState.set(type, set);
+        refreshTypeSelectionUI(type);
+        updateMetrics();
+        clearPreview();
+      });
     });
 }
 
 function updateMetrics() {
-  const selected = getSelectedTypes();
+  const selected = getSelectedAssets();
   if (!assetTypes.length) {
     testBuilderMetrics.textContent = "";
     return;
   }
   if (!selected.length) {
-    testBuilderMetrics.textContent = "No types selected";
+    testBuilderMetrics.textContent = "No assets selected";
     return;
   }
-  testBuilderMetrics.textContent = `${selected.length} type${selected.length === 1 ? "" : "s"} selected`;
+  testBuilderMetrics.textContent = `${selected.length} assets selected`;
 }
 
 function clearPreview() {
@@ -123,17 +179,13 @@ function clearPreview() {
   testLinkPanel.classList.add("d-none");
 }
 
-function getSelectedTypes() {
+function getSelectedAssets() {
   const selected = [];
-  testTypeSelection.querySelectorAll("input[type=\"checkbox\"]").forEach((input) => {
-    if (input.checked) {
-      selected.push(input.value);
-    }
-  });
+  selectionState.forEach((set) => set.forEach((uuid) => selected.push(uuid)));
   return selected;
 }
 
-async function loadPreview({ gameUuid, selectedTypes, onAuthLost }) {
+async function loadPreview({ gameUuid, selectedAssets, onAuthLost }) {
   testPreviewLoading.classList.remove("d-none");
   testLinkPanel.classList.add("d-none");
   try {
@@ -142,7 +194,7 @@ async function loadPreview({ gameUuid, selectedTypes, onAuthLost }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         game_uuid: gameUuid,
-        asset_types: selectedTypes,
+        asset_uuids: selectedAssets,
       }),
     });
     if (response.status === 401) {
@@ -155,8 +207,9 @@ async function loadPreview({ gameUuid, selectedTypes, onAuthLost }) {
       return;
     }
     lastPreview = data;
-    lastPreviewSignature = selectedTypes.join("|");
+    lastPreviewSignature = selectedAssets.join("|");
     renderPreview(data);
+    openPreviewModal(data);
   } finally {
     testPreviewLoading.classList.add("d-none");
   }
@@ -171,9 +224,7 @@ function renderPreview(data) {
   const metaLine = `Previewing ${data.sample_size} of ${data.pool_count} eligible assets.`;
   testPreview.innerHTML = `
     <p class="mb-2">${metaLine}</p>
-    <div class="test-preview-grid">
-      ${assets.map((asset) => renderPreviewCard(asset)).join("")}
-    </div>
+    <p class="text-muted mb-0">Open preview modal to view the randomized set.</p>
   `;
 }
 
@@ -191,8 +242,8 @@ function renderPreviewCard(asset) {
   `;
 }
 
-async function startArtTest({ gameUuid, selectedTypes, onAuthLost }) {
-  const signature = selectedTypes.join("|");
+async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
+  const signature = selectedAssets.join("|");
   const assetUuids =
     lastPreview && lastPreviewSignature === signature
       ? (lastPreview.assets || []).map((asset) => asset.uuid)
@@ -203,8 +254,7 @@ async function startArtTest({ gameUuid, selectedTypes, onAuthLost }) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       game_uuid: gameUuid,
-      asset_types: selectedTypes,
-      asset_uuids: assetUuids,
+      asset_uuids: assetUuids.length ? assetUuids : selectedAssets,
     }),
   });
 
@@ -233,4 +283,81 @@ async function startArtTest({ gameUuid, selectedTypes, onAuthLost }) {
 
 function isDeckType(type) {
   return String(type || "").toLowerCase().includes("deck");
+}
+
+function buildDefaultSelection(byType) {
+  const map = new Map();
+  Object.entries(byType || {}).forEach(([type, assets]) => {
+    map.set(type, new Set((assets || []).map((asset) => asset.uuid)));
+  });
+  return map;
+}
+
+function renderAssetsForType(type) {
+  const items = assetsByType[type] || [];
+  if (!items.length) {
+    return "<p class=\"text-muted mb-0\">No assets in this type.</p>";
+  }
+  const selected = selectionState.get(type) || new Set();
+  return items
+    .map((asset) => {
+      const preview = asset.metadata?.preview_urls?.[0] || asset.image_url;
+      const name = resolveAssetName(asset);
+      return `
+        <label class="type-asset-card">
+          <div class="type-asset-thumb">
+            <img src="${preview}" alt="${asset.asset_type}">
+          </div>
+          <div>
+            <div class="type-asset-name">${name}</div>
+            <div class="test-type-meta">${asset.tgc_asset_id}</div>
+          </div>
+          <input type="checkbox" data-asset-uuid="${asset.uuid}" ${selected.has(asset.uuid) ? "checked" : ""}>
+        </label>
+      `;
+    })
+    .join("");
+}
+
+function refreshTypeSelectionUI(type) {
+  const option = testTypeSelection.querySelector(`.test-type-option input[value="${type}"]`);
+  const assets = assetsByType[type] || [];
+  const selected = selectionState.get(type) || new Set();
+  if (option) {
+    option.checked = selected.size === assets.length && assets.length > 0;
+    const meta = option.closest(".test-type-option")?.querySelector(".test-type-meta");
+    if (meta) {
+      meta.textContent = `${selected.size}/${assets.length} selected${isDeckType(type) ? " + cards" : ""}`;
+    }
+  }
+  const container = testTypeSelection.querySelector(`[data-type-assets="${type}"]`);
+  if (container) {
+    container.innerHTML = renderAssetsForType(type);
+  }
+}
+
+function resolveAssetName(asset) {
+  const source = asset?.metadata?.source || {};
+  const name =
+    (source.name || "").trim() ||
+    (source.title || "").trim() ||
+    (source.object_name || "").trim();
+  return name || asset.asset_type;
+}
+
+function openPreviewModal(data) {
+  const assets = Array.isArray(data.assets) ? data.assets : [];
+  testPreviewSummary.textContent = `Previewing ${data.sample_size} of ${data.pool_count} eligible assets.`;
+  testPreviewScroll.innerHTML = assets
+    .map(
+      (asset) => `
+      <div class="test-preview-scroll-card">
+        <img src="${asset.image_url}" alt="${asset.asset_type}">
+        <div class="test-preview-meta">${asset.asset_type}</div>
+      </div>
+    `
+    )
+    .join("");
+  const modal = bootstrap.Modal.getOrCreateInstance(testPreviewModal);
+  modal.show();
 }

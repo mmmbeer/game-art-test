@@ -346,6 +346,8 @@ No login required for testers. Public art test links must allow anonymous voting
 * Test preview endpoint and UI to re-roll randomized 10-asset selections
 * Test creation endpoint storing tests and test_assets with UUID-based public links
 * Optional "start from preview" flow to preserve the last randomized selection
+* Per-type asset selection (default select all; allow excluding specific assets like decks)
+* Preview modal with horizontally scrolling randomized assets
 
 **Testing**
 
