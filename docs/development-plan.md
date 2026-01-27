@@ -1,19 +1,19 @@
-# TGC Art Test Platform – Full Development Plan
+# TGC Art Test Platform - Full Development Plan
 
 ## 1. Purpose & Goals
 
-Build a mobile‑first web application that integrates with **The Game Crafter (TGC)** API to allow creators to run structured art tests on their printable game assets.
+Build a mobile-first web application that integrates with **The Game Crafter (TGC)** API to allow creators to run structured art tests on their printable game assets.
 
 Core goals:
 
-* Authenticate a TGC user
+* Authenticate a TGC user via TGC SSO
 * Let them select a game and its printable assets
 * Randomly sample art assets into controlled art tests
 * Collect fast, lightweight feedback from testers via a shareable UUID URL
 * Aggregate, monitor, pause, resume, and analyze test results
 * Remain simple, fast, and usable on mobile devices
 
-All user‑facing identifiers (tests, sessions, links) must be UUID‑based.
+All user-facing identifiers (tests, sessions, links) must be UUID-based.
 
 All development must follow the docs/golden-rules.md ("golden rules").
 
@@ -59,7 +59,7 @@ A tester is an anonymous participant who:
 * Scores them on defined criteria
 * Optionally leaves comments
 
-No login required for testers.
+No login required for testers. Public art test links must allow anonymous voting.
 
 ---
 
@@ -67,7 +67,8 @@ No login required for testers.
 
 ### 3.1 User (Creator) Features
 
-* Login via TGC account
+* Login via TGC SSO
+* Landing page for unauthenticated users with SSO entry point
 * Select a game
 * Browse all printable assets in that game
 * Start an art test:
@@ -76,14 +77,14 @@ No login required for testers.
   * Generate shareable UUID URL
 * Monitor test progress in real time
 * View aggregated results per asset
-* Stop, restart, or re‑roll tests
+* Stop, restart, or re-roll tests
 * View historical tests
 
-### 3.2 Tester Features (Mobile‑First)
+### 3.2 Tester Features (Mobile-First)
 
 * View one art piece at a time
 * Rate quickly using sliders or taps
-* Scoring dimensions (1–5):
+* Scoring dimensions (1-5):
 
   * Professionalism
   * Appeal
@@ -94,14 +95,14 @@ No login required for testers.
 
 * Toggle template overlays (cut lines, box folds, etc.)
 * Change background color (white, gray, black, custom)
-* View at approximate real‑world size (300 DPI scaling)
-* Enable **random drift** (0–80px, any direction)
+* View at approximate real-world size (300 DPI scaling)
+* Enable **random drift** (0-80px, any direction)
 
 ---
 
-## 4. Non‑Functional Requirements
+## 4. Non-Functional Requirements
 
-* Mobile‑first UI
+* Mobile-first UI
 * Fast interaction (few taps per asset)
 * Stateless tester access via UUID
 * MySQL for persistence
@@ -112,7 +113,7 @@ No login required for testers.
 
 ---
 
-## 5. High‑Level Architecture
+## 5. High-Level Architecture
 
 ```
 [ Mobile / Desktop Browser ]
@@ -182,9 +183,9 @@ No login required for testers.
 
 * id
 * test_asset_id
-* professionalism (1–5)
-* appeal (1–5)
-* understandability (1–5)
+* professionalism (1-5)
+* appeal (1-5)
+* understandability (1-5)
 * comment (TEXT)
 * created_at
 
@@ -194,7 +195,8 @@ No login required for testers.
 
 ### Creator APIs
 
-* POST /auth/tgc/login
+* GET /auth/tgc/sso/start
+* GET /auth/tgc/sso/callback
 * GET /games
 * GET /games/:uuid/assets
 * POST /tests
@@ -212,7 +214,7 @@ No login required for testers.
 
 ## 8. Phased Development Plan
 
-## Phase 0 – Foundation & Setup (COMPLETED)
+## Phase 0 - Foundation & Setup (COMPLETED)
 
 **Goals**
 
@@ -244,34 +246,34 @@ No login required for testers.
 
 ---
 
-## Phase 1 – TGC Authentication & Game Fetching (COMPLETED)
+## Phase 1 - TGC Authentication & Game Fetching (COMPLETED)
 
 **Goals**
 
-* Authenticate user via TGC
+* Authenticate user via TGC SSO
 * Secure token handling
 * Fetch games list
 
 **Features**
 
-* Login flow
+* SSO login flow
 * Game selection UI
 
 **Implemented**
 
-* TGC session authentication via `/api/session`
+* TGC session authentication via `/api/session/sso/{sso_id}`
 * Secure server-side session storage and UUID session cookie
-* `/auth/tgc/login` and `/games` endpoints
+* `/auth/tgc/sso/start`, `/auth/tgc/sso/callback`, and `/games` endpoints
 * User persistence with UUID mapping to TGC user id
 * Game fetching via user relationships or designer games
 * Normalized game storage without duplicates
-* Mobile-first login and game selection UI with Bootstrap
+* Mobile-first landing page with SSO entry and game selection UI with Bootstrap
 * Light and dark themes with variables and theme loader
 
 **Assumptions**
 
 * `TGC_API_KEY_ID` is available in server environment variables
-* The authenticated account can use the TGC session login interface
+* The authenticated account can complete the TGC SSO flow
 * User relationships include designers or games for game retrieval
 
 **Constraints**
@@ -285,7 +287,7 @@ No login required for testers.
 
 ---
 
-## Phase 2 – Asset Discovery & Normalization
+## Phase 2 - Asset Discovery & Normalization
 
 **Goals**
 
@@ -304,7 +306,7 @@ No login required for testers.
 
 ---
 
-## Phase 3 – Art Test Creation Engine
+## Phase 3 - Art Test Creation Engine
 
 **Goals**
 
@@ -324,7 +326,7 @@ No login required for testers.
 
 ---
 
-## Phase 4 – Tester Experience (Mobile‑First)
+## Phase 4 - Tester Experience (Mobile-First)
 
 **Goals**
 
@@ -339,11 +341,11 @@ No login required for testers.
 **Testing**
 
 * Mobile browsers
-* One‑hand usability
+* One-hand usability
 
 ---
 
-## Phase 5 – Review Assistance Tools
+## Phase 5 - Review Assistance Tools
 
 **Goals**
 
@@ -353,7 +355,7 @@ No login required for testers.
 
 * Template overlays
 * Background color switching
-* Real‑size scaling
+* Real-size scaling
 * Random drift toggle
 
 **Testing**
@@ -363,7 +365,7 @@ No login required for testers.
 
 ---
 
-## Phase 6 – Test Monitoring & Control
+## Phase 6 - Test Monitoring & Control
 
 **Goals**
 
@@ -373,16 +375,16 @@ No login required for testers.
 
 * Progress per asset
 * Pause / resume tests
-* Auto‑complete at vote limit
+* Auto-complete at vote limit
 
 **Testing**
 
 * Concurrent testers
-* Pause mid‑vote
+* Pause mid-vote
 
 ---
 
-## Phase 7 – Results & Analysis
+## Phase 7 - Results & Analysis
 
 **Goals**
 
@@ -391,7 +393,7 @@ No login required for testers.
 **Features**
 
 * Aggregated scores
-* Per‑asset breakdown
+* Per-asset breakdown
 * Comment review
 
 **Testing**
@@ -400,7 +402,7 @@ No login required for testers.
 
 ---
 
-## Phase 8 – Hardening & Polish
+## Phase 8 - Hardening & Polish
 
 **Goals**
 
@@ -425,7 +427,7 @@ No login required for testers.
 * Comparative A/B tests
 * Weighted reviewer trust
 * Export to CSV
-* AI‑assisted insight summaries
+* AI-assisted insight summaries
 
 ---
 
