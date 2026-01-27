@@ -1,6 +1,6 @@
 import { fetchJson } from "../api.js";
 import { showToast } from "../toast.js";
-import { initTestBuilder } from "./testBuilder.js";
+import { initTestBuilder } from "./testBuilder/index.js";
 
 const backToGames = document.getElementById("backToGames");
 const assetGameTitle = document.getElementById("assetGameTitle");
