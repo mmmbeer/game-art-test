@@ -1,0 +1,672 @@
+<html><head><link type="text/css" rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><title>The Game Crafter API - Designer Properties</title>
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+     <link rel="stylesheet" type="text/css" href="/api.css">
+     <body id="top"><div class="container"><div class="row"><div class="col-sm-9 col-sm-push-3"><a name='___top' class='dummyTopAnchor' ></a>
+
+<div class='indexgroup'>
+<ul   class='indexList indexList1'>
+  <li class='indexItem indexItem1'><a href='#Designer_Properties'>Designer Properties</a>
+  <li class='indexItem indexItem1'><a href='#Relationships'>Relationships</a>
+  <li class='indexItem indexItem1'><a href='#Related_Objects'>Related Objects</a>
+  <ul   class='indexList indexList2'>
+    <li class='indexItem indexItem2'><a href='#Designer_Options'>Designer Options</a>
+  </ul>
+  <li class='indexItem indexItem1'><a href='#Designer_Methods'>Designer Methods</a>
+  <ul   class='indexList indexList2'>
+    <li class='indexItem indexItem2'><a href='#Create_Designer'>Create Designer</a>
+    <li class='indexItem indexItem2'><a href='#Update_Designer'>Update Designer</a>
+    <li class='indexItem indexItem2'><a href='#Delete_Designer'>Delete Designer</a>
+    <li class='indexItem indexItem2'><a href='#Fetch_Designer'>Fetch Designer</a>
+    <li class='indexItem indexItem2'><a href='#List_All_Designers'>List All Designers</a>
+    <li class='indexItem indexItem2'><a href='#List_Designer%27s_Games'>List Designer&#39;s Games</a>
+  </ul>
+</ul>
+</div>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Designer_Properties"
+>Designer Properties</a></h1>
+
+<p>A designer is an entity that designs games.
+Often times it represents a company or a brand.
+Each designer has the following properties.
+Complete details in <a href="/developer/DesignerProperties.html" class="podlinkpod"
+>DesignerProperties</a>.</p>
+
+<dl>
+<dt><a name="id"
+>id</a></dt>
+
+<dd>
+<p>The unique id for this designer.
+It will never change.</p>
+
+<dt><a name="wing_object_type"
+>wing_object_type</a></dt>
+
+<dd>
+<p><code>designer</code></p>
+
+<dt><a name="name"
+>name</a></dt>
+
+<dd>
+<p>Another unique way of identifying a designer.
+However,
+this can be changed by an admin or the user that controls the designer.</p>
+
+<dt><a name="user_id"
+>user_id</a></dt>
+
+<dd>
+<p>A <a href="/developer/User.html" class="podlinkpod"
+>User</a> id.
+The unique id of a user that has control over a designer,
+and therefore the games that the designer owns.</p>
+
+<dt><a name="contact_email"
+>contact_email</a></dt>
+
+<dd>
+<p>An email address associated with this designer.
+This will be publicly available so people can contact the designer.</p>
+
+<dt><a name="website_uri"
+>website_uri</a></dt>
+
+<dd>
+<p>A URI for the designer&#39;s public web site.</p>
+
+<dt><a name="shop_uri"
+>shop_uri</a></dt>
+
+<dd>
+<p>A URI for the designer&#39;s profile in the shop.</p>
+
+<dt><a name="date_created"
+>date_created</a></dt>
+
+<dd>
+<p>A date when the designer was created.</p>
+
+<dt><a name="date_updated"
+>date_updated</a></dt>
+
+<dd>
+<p>A date when the designer was last updated.</p>
+
+<dt><a name="logo_id"
+>logo_id</a></dt>
+
+<dd>
+<p>A <a href="/developer/File.html" class="podlinkpod"
+>File</a> id.
+Sets the logo.
+The ID is from a <a href="/developer/File.html" class="podlinkpod"
+>File</a>.
+If a <code>logo_id</code> is specified,
+then an extra property called <code>logo</code> will be added which will briefly describe the image.</p>
+</dd>
+</dl>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Relationships"
+>Relationships</a></h1>
+
+<dl>
+<dt><a name="games"
+>games</a></dt>
+
+<dd>
+<p>The list of <a href="/developer/Game.html" class="podlinkpod"
+>Game</a>s that are controlled by this designer.</p>
+
+<dt><a name="associates"
+>associates</a></dt>
+
+<dd>
+<p>The list of <a href="/developer/DesignerAssociate.html" class="podlinkpod"
+>DesignerAssociate</a>s attached to this designer.</p>
+</dd>
+</dl>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Related_Objects"
+>Related Objects</a></h1>
+
+<dl>
+<dt><a name="user"
+>user</a></dt>
+
+<dd>
+<p>The <a href="/developer/User.html" class="podlinkpod"
+>User</a> that controls this designer.</p>
+</dd>
+</dl>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Designer_Options"
+>Designer Options</a></h2>
+
+<p>Provides a list of the options that can be used to fill out various fields when creating or updating a designer.</p>
+
+<pre> GET /api/designer/_options</pre>
+
+<p>Returns:</p>
+
+<pre> {
+    &#34;payout_via&#34; : [...]
+ }</pre>
+
+<p><b>NOTE:</b> You can also get this data by adding <code>_include_options=1</code> to the parameter list when fetching a designer.</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Designer_Methods"
+>Designer Methods</a></h1>
+
+<p>The methods used to fetch and manipulate designers.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Create_Designer"
+>Create Designer</a></h2>
+
+<pre> POST /api/designer</pre>
+
+<dl>
+<dt><a name="session_id"
+>session_id</a></dt>
+
+<dd>
+<p>Required. The unique session id provided by a <a href="/developer/Session.html" class="podlinkpod"
+>Session</a> method.</p>
+
+<dt><a name="name"
+>name</a></dt>
+
+<dd>
+<p>Required.</p>
+
+<dt><a name="user_id"
+>user_id</a></dt>
+
+<dd>
+<p>Required.</p>
+
+<dt><a name="contact_email"
+>contact_email</a></dt>
+
+<dd>
+<p>Optional.</p>
+
+<dt><a name="website_uri"
+>website_uri</a></dt>
+
+<dd>
+<p>Optional.</p>
+
+<dt><a name="logo_id"
+>logo_id</a></dt>
+
+<dd>
+<p>Optional.</p>
+
+<dt><a name="payout_via"
+>payout_via</a></dt>
+
+<dd>
+<p>Optional.</p>
+
+<dt><a name="paypal_email"
+>paypal_email</a></dt>
+
+<dd>
+<p>Optional.</p>
+</dd>
+</dl>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;id&#34; : &#34;xxx&#34;,
+   &#34;name&#34; : &#34;Shawshank Games&#34;,
+   ...
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Update_Designer"
+>Update Designer</a></h2>
+
+<pre> PUT /api/designer/xxx</pre>
+
+<p>See <b>Create Designer</b> for details.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Delete_Designer"
+>Delete Designer</a></h2>
+
+<pre> DELETE /api/designer/xxx</pre>
+
+<dl>
+<dt><a name="session_id"
+>session_id</a></dt>
+
+<dd>
+<p>Required. The unique session id provided by a <a href="/developer/Session.html" class="podlinkpod"
+>Session</a> method.</p>
+</dd>
+</dl>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;success&#34; : 1
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Fetch_Designer"
+>Fetch Designer</a></h2>
+
+<pre> GET /api/designer/xxx</pre>
+
+<dl>
+<dt><a name="session_id"
+>session_id</a></dt>
+
+<dd>
+<p>Optional. The unique session id provided by a <a href="/developer/Session.html" class="podlinkpod"
+>Session</a> method.</p>
+
+<dt><a name="_include_options"
+>_include_options</a></dt>
+
+<dd>
+<p>Optional. See <a href="/developer/Intro.html#Options" class="podlinkpod"
+>&#34;Options&#34; in Intro</a> and <b>Designer Options</b> above for details.</p>
+
+<dt><a name="_include_relationships"
+>_include_relationships</a></dt>
+
+<dd>
+<p>Optional. See <a href="/developer/Intro.html#Relationships" class="podlinkpod"
+>&#34;Relationships&#34; in Intro</a> and <b>Designer Relationships</b> above for details.</p>
+</dd>
+</dl>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;id&#34; : &#34;xxx&#34;,
+   &#34;name&#34; : &#34;Shawshank Games&#34;,
+   ...
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="List_All_Designers"
+>List All Designers</a></h2>
+
+<pre> GET /api/designer</pre>
+
+<dl>
+<dt><a name="session_id"
+>session_id</a></dt>
+
+<dd>
+<p>Optional. The unique session id provided by a <a href="/developer/Session.html" class="podlinkpod"
+>Session</a> method.</p>
+</dd>
+</dl>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;pager&#34; : { ... },
+   &#34;items&#34; : [
+     {
+       &#34;id&#34; : &#34;xxx&#34;,
+       &#34;name&#34; : &#34;Shawshank Games&#34;,
+       ...
+     },
+     ...
+   ]
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="List_Designer&#39;s_Games"
+>List Designer&#39;s Games</a></h2>
+
+<pre> GET /api/designer/xxx/games</pre>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;pager&#34; : { ... },
+   &#34;items&#34; : [
+     {
+       &#34;id&#34; : &#34;xxx&#34;,
+       &#34;name&#34; : &#34;Prison Break&#34;,
+       ...
+     },
+     ...
+   ]
+ }</pre>
+</div><div class="col-sm-3 col-sm-pull-9"><div class="panel panel-default"><div class="panel-heading">Developer Documentation</div><div class="panel-body"><!--  --><a name='___top' class='dummyTopAnchor' ></a>
+
+<dl>
+<dt><a name="Intro"
+><a href="/developer/Intro.html" class="podlinkpod"
+>Intro</a></a></dt>
+
+<dd>
+<dt><a name="Changes"
+><a href="/developer/Changes.html" class="podlinkpod"
+>Changes</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="General_APIs"
+>General APIs</a></h4>
+
+<dl>
+<dt><a name="APIKey"
+><a href="/developer/APIKey.html" class="podlinkpod"
+>APIKey</a></a></dt>
+
+<dd>
+<dt><a name="Address"
+><a href="/developer/Address.html" class="podlinkpod"
+>Address</a></a></dt>
+
+<dd>
+<dt><a name="Session"
+><a href="/developer/Session.html" class="podlinkpod"
+>Session</a></a></dt>
+
+<dd>
+<dt><a name="Status"
+><a href="/developer/Status.html" class="podlinkpod"
+>Status</a></a></dt>
+
+<dd>
+<dt><a name="TGC"
+><a href="/developer/TGC.html" class="podlinkpod"
+>TGC</a></a></dt>
+
+<dd>
+<dt><a name="User"
+><a href="/developer/User.html" class="podlinkpod"
+>User</a></a></dt>
+
+<dd>
+<dt><a name="WebHook"
+><a href="/developer/WebHook.html" class="podlinkpod"
+>WebHook</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Game_Publishing_APIs"
+>Game Publishing APIs</a></h4>
+
+<dl>
+<dt><a name="ActionShot"
+><a href="/developer/ActionShot.html" class="podlinkpod"
+>ActionShot</a></a></dt>
+
+<dd>
+<dt><a name="Designer"
+><a href="/developer/Designer.html" class="podlinkpod"
+>Designer</a></a></dt>
+
+<dd>
+<dt><a name="DesignerAssociate"
+><a href="/developer/DesignerAssociate.html" class="podlinkpod"
+>DesignerAssociate</a></a></dt>
+
+<dd>
+<dt><a name="File"
+><a href="/developer/File.html" class="podlinkpod"
+>File</a></a></dt>
+
+<dd>
+<dt><a name="Folder"
+><a href="/developer/Folder.html" class="podlinkpod"
+>Folder</a></a></dt>
+
+<dd>
+<dt><a name="Game"
+><a href="/developer/Game.html" class="podlinkpod"
+>Game</a></a></dt>
+
+<dd>
+<dt><a name="GameDownload"
+><a href="/developer/GameDownload.html" class="podlinkpod"
+>GameDownload</a></a></dt>
+
+<dd>
+<dt><a name="GamePart"
+><a href="/developer/GamePart.html" class="podlinkpod"
+>GamePart</a></a></dt>
+
+<dd>
+<dt><a name="Part"
+><a href="/developer/Part.html" class="podlinkpod"
+>Part</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Game_Component_APIs"
+>Game Component APIs</a></h4>
+
+<dl>
+<dt><a name="AcrylicShape"
+><a href="/developer/AcrylicShape.html" class="podlinkpod"
+>AcrylicShape</a></a></dt>
+
+<dd>
+<dt><a name="Booklet_&#38;_BookletPage"
+><a href="/developer/Booklet.html" class="podlinkpod"
+>Booklet</a> &#38; <a href="/developer/BookletPage.html" class="podlinkpod"
+>BookletPage</a></a></dt>
+
+<dd>
+<dt><a name="BoxFace"
+><a href="/developer/BoxFace.html" class="podlinkpod"
+>BoxFace</a></a></dt>
+
+<dd>
+<dt><a name="BoxTop"
+><a href="/developer/BoxTop.html" class="podlinkpod"
+>BoxTop</a></a></dt>
+
+<dd>
+<dt><a name="BoxTopGloss"
+><a href="/developer/BoxTopGloss.html" class="podlinkpod"
+>BoxTopGloss</a></a></dt>
+
+<dd>
+<dt><a name="CoilBook_&#38;_CoilBookPage"
+><a href="/developer/CoilBook.html" class="podlinkpod"
+>CoilBook</a> &#38; <a href="/developer/CoilBookPage.html" class="podlinkpod"
+>CoilBookPage</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD6"
+><a href="/developer/CustomColorD6.html" class="podlinkpod"
+>CustomColorD6</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD4"
+><a href="/developer/CustomColorD4.html" class="podlinkpod"
+>CustomColorD4</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD8"
+><a href="/developer/CustomColorD8.html" class="podlinkpod"
+>CustomColorD8</a></a></dt>
+
+<dd>
+<dt><a name="CustomCutOneSidedSlugged"
+><a href="/developer/CustomCutOneSidedSlugged.html" class="podlinkpod"
+>CustomCutOneSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="CustomCutTwoSidedSlugged"
+><a href="/developer/CustomCutTwoSidedSlugged.html" class="podlinkpod"
+>CustomCutTwoSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="CustomPrintedMeeple"
+><a href="/developer/CustomPrintedMeeple.html" class="podlinkpod"
+>CustomPrintedMeeple</a></a></dt>
+
+<dd>
+<dt><a name="CustomWoodD6"
+><a href="/developer/CustomWoodD6.html" class="podlinkpod"
+>CustomWoodD6</a></a></dt>
+
+<dd>
+<dt><a name="Deck_&#38;_Card"
+><a href="/developer/Deck.html" class="podlinkpod"
+>Deck</a> &#38; <a href="/developer/Card.html" class="podlinkpod"
+>Card</a></a></dt>
+
+<dd>
+<dt><a name="Dial"
+><a href="/developer/Dial.html" class="podlinkpod"
+>Dial</a></a></dt>
+
+<dd>
+<dt><a name="Document"
+><a href="/developer/Document.html" class="podlinkpod"
+>Document</a></a></dt>
+
+<dd>
+<dt><a name="HookBox"
+><a href="/developer/HookBox.html" class="podlinkpod"
+>HookBox</a></a></dt>
+
+<dd>
+<dt><a name="OneSided"
+><a href="/developer/OneSided.html" class="podlinkpod"
+>OneSided</a></a></dt>
+
+<dd>
+<dt><a name="OneSidedGloss"
+><a href="/developer/OneSidedGloss.html" class="podlinkpod"
+>OneSidedGloss</a></a></dt>
+
+<dd>
+<dt><a name="OneSidedSluggedSet_&#38;_OneSidedSlugged"
+><a href="/developer/OneSidedSluggedSet.html" class="podlinkpod"
+>OneSidedSluggedSet</a> &#38; <a href="/developer/OneSidedSlugged.html" class="podlinkpod"
+>OneSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="PerfectBoundBook_&#38;_PerfectBoundBookPage"
+><a href="/developer/PerfectBoundBook.html" class="podlinkpod"
+>PerfectBoundBook</a> &#38; <a href="/developer/PerfectBoundBookPage.html" class="podlinkpod"
+>PerfectBoundBookPage</a></a></dt>
+
+<dd>
+<dt><a name="ScorePad"
+><a href="/developer/ScorePad.html" class="podlinkpod"
+>ScorePad</a></a></dt>
+
+<dd>
+<dt><a name="TuckBox"
+><a href="/developer/TuckBox.html" class="podlinkpod"
+>TuckBox</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedSet_&#38;_TwoSided"
+><a href="/developer/TwoSidedSet.html" class="podlinkpod"
+>TwoSidedSet</a> &#38; <a href="/developer/TwoSided.html" class="podlinkpod"
+>TwoSided</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedBox"
+><a href="/developer/TwoSidedBox.html" class="podlinkpod"
+>TwoSidedBox</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedBoxGloss"
+><a href="/developer/TwoSidedBoxGloss.html" class="podlinkpod"
+>TwoSidedBoxGloss</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedSluggedSet_&#38;_TwoSidedSlugged"
+><a href="/developer/TwoSidedSluggedSet.html" class="podlinkpod"
+>TwoSidedSluggedSet</a> &#38; <a href="/developer/TwoSidedSlugged.html" class="podlinkpod"
+>TwoSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="ThreeSidedCustomCutSet_&#38;_ThreeSidedCustomCut"
+><a href="/developer/ThreeSidedCustomCutSet.html" class="podlinkpod"
+>ThreeSidedCustomCutSet</a> &#38; <a href="/developer/ThreeSidedCustomCut.html" class="podlinkpod"
+>ThreeSidedCustomCut</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Commerce_APIs"
+>Commerce APIs</a></h4>
+
+<dl>
+<dt><a name="Cart"
+><a href="/developer/Cart.html" class="podlinkpod"
+>Cart</a></a></dt>
+
+<dd>
+<dt><a name="CrafterPointCurrency"
+><a href="/developer/CrafterPointCurrency.html" class="podlinkpod"
+>CrafterPointCurrency</a></a></dt>
+
+<dd>
+<dt><a name="Receipt"
+><a href="/developer/Receipt.html" class="podlinkpod"
+>Receipt</a></a></dt>
+
+<dd>
+<dt><a name="Shipment"
+><a href="/developer/Shipment.html" class="podlinkpod"
+>Shipment</a></a></dt>
+
+<dd>
+<dt><a name="Sku"
+><a href="/developer/Sku.html" class="podlinkpod"
+>Sku</a></a></dt>
+
+<dd>
+<dt><a name="Wishlist"
+><a href="/developer/Wishlist.html" class="podlinkpod"
+>Wishlist</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Community_APIs"
+>Community APIs</a></h4>
+
+<dl>
+<dt><a name="Announcement"
+><a href="/developer/Announcement.html" class="podlinkpod"
+>Announcement</a></a></dt>
+
+<dd>
+<dt><a name="ArtTest"
+><a href="/developer/ArtTest.html" class="podlinkpod"
+>ArtTest</a></a></dt>
+
+<dd>
+<dt><a name="Idea"
+><a href="/developer/Idea.html" class="podlinkpod"
+>Idea</a></a></dt>
+
+<dd>
+<dt><a name="IdeaOpinion"
+><a href="/developer/IdeaOpinion.html" class="podlinkpod"
+>IdeaOpinion</a></a></dt>
+
+<dd>
+<dt><a name="Review"
+><a href="/developer/Review.html" class="podlinkpod"
+>Review</a></a></dt>
+</dl>
+ </div></div>&copy;2009-2026 <a href="https://www.thegamecrafter.com">The Game Crafter, LLC</a></div></div></div><div class="text-center" style="padding: 20px;"><a href="#top">^ Back to Top ^</a></div></body></html>

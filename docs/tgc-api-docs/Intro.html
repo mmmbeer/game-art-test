@@ -1,0 +1,968 @@
+<html><head><link type="text/css" rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><title>The Game Crafter API - Introduction to the Wing API</title>
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+     <link rel="stylesheet" type="text/css" href="/api.css">
+     <body id="top"><div class="container"><div class="row"><div class="col-sm-9 col-sm-push-3"><a name='___top' class='dummyTopAnchor' ></a>
+
+<div class='indexgroup'>
+<ul   class='indexList indexList1'>
+  <li class='indexItem indexItem1'><a href='#Introduction_to_the_Wing_API'>Introduction to the Wing API</a>
+  <ul   class='indexList indexList2'>
+    <li class='indexItem indexItem2'><a href='#Conventions'>Conventions</a>
+    <ul   class='indexList indexList3'>
+      <li class='indexItem indexItem3'><a href='#Ellipsis'>Ellipsis</a>
+      <li class='indexItem indexItem3'><a href='#No_Result_Wrappers'>No Result Wrappers</a>
+      <li class='indexItem indexItem3'><a href='#ID%27s'>ID&#39;s</a>
+      <li class='indexItem indexItem3'><a href='#Prefix'>Prefix</a>
+    </ul>
+    <li class='indexItem indexItem2'><a href='#Requests_and_Responses'>Requests and Responses</a>
+    <ul   class='indexList indexList3'>
+      <li class='indexItem indexItem3'><a href='#Authenticated_Requests'>Authenticated Requests</a>
+    </ul>
+    <li class='indexItem indexItem2'><a href='#Consistency'>Consistency</a>
+    <ul   class='indexList indexList3'>
+      <li class='indexItem indexItem3'><a href='#Object_Properties'>Object Properties</a>
+      <li class='indexItem indexItem3'><a href='#Dates'>Dates</a>
+      <li class='indexItem indexItem3'><a href='#Response_Format'>Response Format</a>
+      <ul   class='indexList indexList4'>
+        <li class='indexItem indexItem4'><a href='#Success'>Success</a>
+        <li class='indexItem indexItem4'><a href='#Success_With_Pagination'>Success With Pagination</a>
+        <li class='indexItem indexItem4'><a href='#Exceptions'>Exceptions</a>
+        <li class='indexItem indexItem4'><a href='#Warnings'>Warnings</a>
+      </ul>
+      <li class='indexItem indexItem3'><a href='#Relationships'>Relationships</a>
+      <ul   class='indexList indexList4'>
+        <li class='indexItem indexItem4'><a href='#Queryable'>Queryable</a>
+        <li class='indexItem indexItem4'><a href='#Qualifiers'>Qualifiers</a>
+      </ul>
+      <li class='indexItem indexItem3'><a href='#Related_Objects'>Related Objects</a>
+      <li class='indexItem indexItem3'><a href='#Includes'>Includes</a>
+      <li class='indexItem indexItem3'><a href='#Options'>Options</a>
+    </ul>
+    <li class='indexItem indexItem2'><a href='#HTTP_Method_Tunnelling'>HTTP Method Tunnelling</a>
+    <li class='indexItem indexItem2'><a href='#Rate_Limiting'>Rate Limiting</a>
+    <li class='indexItem indexItem2'><a href='#Fault_Tolerance'>Fault Tolerance</a>
+    <ul   class='indexList indexList3'>
+      <li class='indexItem indexItem3'><a href='#Scheduled_Maintenance'>Scheduled Maintenance</a>
+    </ul>
+    <li class='indexItem indexItem2'><a href='#Clients'>Clients</a>
+    <li class='indexItem indexItem2'><a href='#Language_Specific_Examples'>Language Specific Examples</a>
+    <li class='indexItem indexItem2'><a href='#Testing'>Testing</a>
+  </ul>
+</ul>
+</div>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Introduction_to_the_Wing_API"
+>Introduction to the Wing API</a></h1>
+
+<p>The Wing API (<a href="http://wingapi.com" class="podlinkurl"
+>http://wingapi.com</a>) is a restful protocol developed by Plain Black Corporation (<a href="http://www.plainblack.com" class="podlinkurl"
+>http://www.plainblack.com</a>).
+It is designed to make web services easy to use,
+easy to implement,
+easy to wrap in a software layer,
+and most important,
+maintain absolute consistency.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Conventions"
+>Conventions</a></h2>
+
+<p>There are several conventions used in this documentation to keep things shorter.
+They are documented here.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Ellipsis"
+>Ellipsis</a></h3>
+
+<p>We often shorten pieces of return values with ellipsis (three dots: ...) to show that there would be additional data there,
+but it is not directly relevent to the documentation at hand.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="No_Result_Wrappers"
+>No Result Wrappers</a></h3>
+
+<p>Though all Wing results have a wrapper like:</p>
+
+<pre> { &#34;result&#34; : { ... } }</pre>
+
+<p>Or</p>
+
+<pre> { &#34;error&#34; : { ... } }</pre>
+
+<p>They are left out in most of the documentaiton for the sake of brevity. Only the <code>{...}</code> portion is discussed in most cases.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="ID&#39;s"
+>ID&#39;s</a></h3>
+
+<p>ID&#39;s everywhere are represented as 3 x&#39;s: <code>xxx</code>. If you see <code>xxx</code> anywhere that means that would be replaced by a legitimate ID and shouldn&#39;t be interpreted literally. Also, ID&#39;s are case-sensitive strings, so store them as such.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Prefix"
+>Prefix</a></h3>
+
+<p>When referencing any object herein, the following prefix is assumed:</p>
+
+<pre> https://www.thegamecrafter.com/</pre>
+
+<p>Therefore if you were going to fetch information about a game, you&#39;d do:</p>
+
+<pre> GET https://www.thegamecrafter.com/api/game/xxx</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Requests_and_Responses"
+>Requests and Responses</a></h2>
+
+<p>To make a request to a Wing web service you need nothing more than a command line tool like <code>curl</code>, but you can of course use any network aware programming language as well. Here&#39;s an example request:</p>
+
+<p>Create an object:</p>
+
+<pre> curl -X POST -F title=&#34;Ethics in Prisons&#34; -F author=&#34;Andy Dufresne&#34; http://wing.example.com/article
+
+ {
+   &#34;result&#34; : {
+     &#34;id&#34; : &#34;xxx&#34;,
+     &#34;author&#34; : &#34;Andy Dufresne&#34;,
+     &#34;title&#34; : &#34;Ethics in Prisons&#34;
+   }
+ }</pre>
+
+<p>Read an object:</p>
+
+<pre> curl http://wing.example.com/article/xxx
+
+ {
+   &#34;result&#34; : {
+     &#34;id&#34; : &#34;xxx&#34;,
+     &#34;author&#34; : &#34;Andy Dufresne&#34;,
+     &#34;title&#34; : &#34;Ethics in Prisons&#34;
+   }
+ }</pre>
+
+<p>Update an object:</p>
+
+<pre> curl -X PUT -F body=&#34;...&#34; http://wing.example.com/article/xxx
+
+ {
+   &#34;result&#34; : {
+     &#34;id&#34; : &#34;xxx&#34;,
+     &#34;author&#34; : &#34;Andy Dufresne&#34;,
+     &#34;title&#34; : &#34;Ethics in Prisons&#34;,
+     &#34;body&#34; : &#34;...&#34;
+   }
+ }</pre>
+
+<p>Delete an object:</p>
+
+<pre> curl -X DELETE http://wing.example.com/article/xxx
+
+ {
+   &#34;result&#34; : { &#34;success&#34; : 1 }
+ }</pre>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Authenticated_Requests"
+>Authenticated Requests</a></h3>
+
+<p>With each request you can choose to either send a cookie with <code>session_id</code> or pass it in the query params. If you choose not to pass the <code>session_id</code>, then the result you receive will be the public result set. If you do pass the <code>session_id</code> then you&#39;ll get the private result set (provided your session has the privileges to receive the private result set). For example, if you request information about your user account without specifying a <code>session_id</code> then all you&#39;d get back is an ID and some other basic information, like this:</p>
+
+<pre> {
+    &#34;id&#34; : &#34;xxx&#34;,
+    &#34;display_name&#34; : &#34;Andy Dufresne&#34;
+ }</pre>
+
+<p>But if you request your account information with your <code>session_id</code>, then you&#39;d get a result set with everything we know about you:</p>
+
+<pre> {
+    &#34;id&#34; : &#34;xxx&#34;,
+    &#34;display_name&#34; : &#34;Andy Dufresne&#34;,
+    &#34;username&#34; : &#34;andy&#34;,
+    &#34;email&#34; : &#34;andy@shawshank.jail&#34;,
+    ...
+ }</pre>
+
+<p>However, if I requested information about your account, and specified my own <code>session_id</code>, then I would only get the public data. Because I don&#39;t have the privileges necessary to access your private information.</p>
+
+<p>See Also: <a href="/developer/Session.html" class="podlinkpod"
+>Session</a></p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Consistency"
+>Consistency</a></h2>
+
+<p>A big part of the Wing specification is that you can reliably expect it to do the same thing in all circumstances. Here are a few key points of consistency.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Object_Properties"
+>Object Properties</a></h3>
+
+<p>All objects contain the following minimum shared set of properties.</p>
+
+<dl>
+<dt><a name="id"
+>id</a></dt>
+
+<dd>
+<p>A unique id that will never change. It is a 36 character GUID (global unique id).</p>
+
+<dt><a name="date_created"
+>date_created</a></dt>
+
+<dd>
+<p>The date this object came into existence.</p>
+
+<dt><a name="date_updated"
+>date_updated</a></dt>
+
+<dd>
+<p>The last time this object was written to the database.</p>
+
+<dt><a name="view_uri"
+>view_uri</a></dt>
+
+<dd>
+<p>A link to where you can see this object on the Tabletop.Events web site.</p>
+
+<dt><a name="edit_uri"
+>edit_uri</a></dt>
+
+<dd>
+<p>A link to where you can edit this object on the Tabletop.Events web site.</p>
+
+<dt><a name="object_type"
+>object_type</a></dt>
+
+<dd>
+<p>A string representing the type of object this is in case you need to identify it in the future.</p>
+
+<dt><a name="object_name"
+>object_name</a></dt>
+
+<dd>
+<p>A human friendly version of the object_type.</p>
+</dd>
+</dl>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Dates"
+>Dates</a></h3>
+
+<p>Dates are always returned in the format of <code>YYYY-MM-DD HH:MM:SS</code> and are represented as the UTC time zone.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Response_Format"
+>Response Format</a></h3>
+
+<p>Wing will always return a JSON response in the form of an object.</p>
+
+<pre> {
+   &#34;result&#34; : { &#34;success&#34; : 1 }
+ }</pre>
+
+<h4><a class='u' href='#___top' title='click to go to top of document'
+name="Success"
+>Success</a></h4>
+
+<p>Results will always start with a top level element called &#34;result&#34; and the data contained therein will always be returned as a hash.</p>
+
+<pre> {
+    &#34;result&#34; : {
+      &#34;session_id&#34; : &#34;xxx&#34;,
+      &#34;user&#34; : {
+        &#34;username&#34; : &#34;andy&#34;,
+        &#34;email&#34; : &#34;andy@shawshank.jail&#34;
+      }
+    }
+ }</pre>
+
+<h4><a class='u' href='#___top' title='click to go to top of document'
+name="Success_With_Pagination"
+>Success With Pagination</a></h4>
+
+<p>Paginated lists are always handled exactly the same way, and always have the same minimum set of parameters for manipulation.</p>
+
+<pre> curl -X GET -F _items_per_page=25 -F _page_number=3 http://example.com/api/article</pre>
+
+<p>You can tell how many items per page to return and which page number to return. That will give you a result set like this:</p>
+
+<pre> {
+   &#34;result&#34; : {
+     &#34;paging&#34; : {
+       &#34;total_items&#34; : 937,
+       &#34;page_number&#34; : 3,
+       &#34;items_per_page&#34; : 25,
+       &#34;total_pages&#34; : 313,
+       &#34;next_page_number&#34; : 4,
+       &#34;previous_page_number&#34; : 2,
+     },
+     &#34;items&#34; : [
+       {
+         &#34;id&#34; : &#34;xxx&#34;,
+         &#34;title&#34; : &#34;Ethics in Prisons&#34;,
+         &#34;author&#34; : &#34;Andy Dufresne&#34;,
+         &#34;body&#34; : &#34;...&#34;
+       },
+       ...
+     ]
+   }
+ }</pre>
+
+<dl>
+<dt><a name="_items_per_page"
+>_items_per_page</a></dt>
+
+<dd>
+<p>Defaults to 25. Minimum 1. Maximum 100. The number of items to be returned in a given result set.</p>
+
+<dt><a name="_page_number"
+>_page_number</a></dt>
+
+<dd>
+<p>Defaults to 1. The page of results to return.</p>
+
+<dt><a name="_max_items"
+>_max_items</a></dt>
+
+<dd>
+<p>If you wish to abitrarily limit the number of items that can be pulled from a query, rather than allowing pagination until you run out of records in the database, then you can set this to that limit.</p>
+
+<dt><a name="_order_by"
+>_order_by</a></dt>
+
+<dd>
+<p>By default result set order is determined by the server, and will be different based upon the object you&#39;re accessing. However, you can order by any field that you can edit.</p>
+
+<dt><a name="_sort_order"
+>_sort_order</a></dt>
+
+<dd>
+<p>By default result sets are returned in ascending order (<code>asc</code>). You can set <code>_sort_order</code> equal to <code>desc</code> to reverse the order.</p>
+</dd>
+</dl>
+
+<h4><a class='u' href='#___top' title='click to go to top of document'
+name="Exceptions"
+>Exceptions</a></h4>
+
+<p>Exceptions will always start with a top level element called <code>error</code> and then will have a hash of 3 properties: <code>code</code>, <code>message</code>, and <code>data</code>.</p>
+
+<pre> {
+   &#34;error&#34; : {
+     &#34;code&#34; : 500,
+     &#34;message&#34; : &#34;An unknown error has occurred.&#34;,
+     &#34;data&#34; : null
+   }
+ }</pre>
+
+<p>The code is always an integer and conforms to the standard list of Wing <a href="/developer/ErrorCodes.html" class="podlinkpod"
+>ErrorCodes</a>. These numbers are used consistently so that app developers can trap and handle specific types of exceptions more gracefully.</p>
+
+<p>The message is a human readable message that you can display to a user.</p>
+
+<p>The data element many times will be null, but it can have important debug information. For example, if a required field was left empty, the field name could be put in the data element so that the app could highlight the field for the user.</p>
+
+<h4><a class='u' href='#___top' title='click to go to top of document'
+name="Warnings"
+>Warnings</a></h4>
+
+<p>In addition to exceptions there can be less severe issues that come up. These are handled via warnings. Warnings are just like exceptions, but they don&#39;t cause execution to halt. As such there can be any number of warnings. And warnings are returned with the result.</p>
+
+<pre> {
+    &#34;result&#34; : {
+        &#34;_warnings&#34; : [
+            {
+                &#34;code&#34; : 445,
+                &#34;message&#34; : &#34;Logo image is too big.&#34;,
+                &#34;data&#34; : &#34;logo&#34;
+            }
+        ],
+        ...
+    }
+ }</pre>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Relationships"
+>Relationships</a></h3>
+
+<p>All objects can have relationships to each other. When you fetch an object, you can pass <code>_include_relationships=1</code> as a parameter if you want to get the relationship data as well.</p>
+
+<pre> curl -X GET -F _include_relationships=1  http://wing.example.com/article/xxx
+
+ {
+   &#34;result&#34; : {
+     &#34;id&#34; : &#34;xxx&#34;,
+     &#34;author&#34; : &#34;Andy Dufresne&#34;,
+     &#34;title&#34; : &#34;Ethics in Prisons&#34;,
+     &#34;body&#34; : &#34;...&#34;,
+     &#34;user_id&#34; : &#34;xxx&#34;,
+     &#34;_relationships&#34; : {
+        &#34;user&#34; : &#34;http://wing.example.com/api/user/xxx&#34;,
+        &#34;related_articles&#34; : &#34;http://wing.example.com/article/xxx/related_articles&#34;
+     }
+   }
+ }</pre>
+
+<p>You can then in-turn call the URI provided by each relationship to fetch the items in that list.</p>
+
+<h4><a class='u' href='#___top' title='click to go to top of document'
+name="Queryable"
+>Queryable</a></h4>
+
+<p>Some relationships will allow you to use a <code>query</code> parameter on the URL that will allow you to search the result set. The documentation will tell you when this is the case and which fields will be searched to provide you with a result set.</p>
+
+<pre> GET /api/article/xxx/related-articles?query=prison</pre>
+
+<h4><a class='u' href='#___top' title='click to go to top of document'
+name="Qualifiers"
+>Qualifiers</a></h4>
+
+<p>In search engines these are sometimes called facets. They are criteria that allow you to filter the result set that comes back from a relationship. The documentation will tell you when a relationship has a qualifier. To use it you&#39;d add a parameter of the name of the qualifier to the URL along with the value you want to search for.</p>
+
+<pre> GET /api/article/xxx/related-articles?user_id=xxx</pre>
+
+<p>That will search for all related articles with a user_id of xxx.</p>
+
+<p>You can also modify the qualifier by prepending operators such as &#62;, &#62;=, &#60;=, and &#60;&#62; onto the value. For example:</p>
+
+<pre> GET /api/article/xxx/related-articles?word_count=&#62;=100</pre>
+
+<p>Get all related articles with a word count greater than or equal to 100.</p>
+
+<p>You can also request that a qualifier be limited to a <code>null</code> value.</p>
+
+<pre> GET /api/article/xxx/related-articles?user_id=null</pre>
+
+<p>If you did this with an empty value rather than specifically <code>null</code> then this qualifier will be skipped.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Related_Objects"
+>Related Objects</a></h3>
+
+<p>Likewise you can request that the short version of the related objects be included directly in the result by adding the name of the related object like <code>_include_related_objects=user</code> as a parameter:</p>
+
+<pre> curl -X GET -F _include_related_objects=user  http://wing.example.com/article/xxx
+
+ {
+   &#34;result&#34; : {
+     &#34;id&#34; : &#34;xxx&#34;,
+     &#34;author&#34; : &#34;Andy Dufresne&#34;,
+     &#34;title&#34; : &#34;Ethics in Prisons&#34;,
+     &#34;body&#34; : &#34;...&#34;,
+     &#34;user_id&#34; : &#34;xxx&#34;,
+     &#34;user&#34; : {
+        &#34;id&#34; : &#34;xxx&#34;,
+        &#34;username&#34; : &#34;andy&#34;,
+        &#34;display_name&#34; : &#34;Andy Dufresne&#34;
+     }
+   }
+ }</pre>
+
+<p>All related objects are also inherently relationships of the object. Therefore the documentation will leave them out of the list of relationships in each object, but will include them in the list of related objects.</p>
+
+<p><b>NOTE:</b> The only related objects that can be returned in this manner are 1:1 relationships. If the relationship is 1:N as in the case of related articles above, then those cannot not be included in the result, and must be fetched separately.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Includes"
+>Includes</a></h3>
+
+<p>Some objects will allow for Includes, and will show this in the documenation. Includes are extra bits of data you can pull back when you request the object. If you want to include a single thing you can add this to the URL:</p>
+
+<pre> _include=foo</pre>
+
+<p>And you can add multiple includes to the URL if you want to include many things. The result will then have <code>foo</code> in it like so:</p>
+
+<pre> {
+    &#34;id&#34; : &#34;xxx&#34;,
+    &#34;foo&#34; : {...},
+    ...
+ }</pre>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Options"
+>Options</a></h3>
+
+<p>Sometimes an object will have fields that require you to choose an option from an enumerated list. There are two ways to see what those options are:</p>
+
+<p>This way would be most often used when you need the list of options in order to create an object.</p>
+
+<pre> curl http://wing.example.com/article/_options
+ 
+ {
+    &#34;result&#34; : {
+        &#34;book_type&#34; : [&#34;Hardcover&#34;,&#34;Paperback&#34;]
+    }
+ }</pre>
+
+<p>This way would be most often used when you need the list of options to update an object, because you can get the properties of the object and the options in one call.</p>
+
+<pre> curl -X GET -F _include_options=1  http://wing.example.com/article/xxx
+
+ {
+   &#34;result&#34; : {
+     &#34;id&#34; : &#34;xxx&#34;,
+     &#34;author&#34; : &#34;Andy Dufresne&#34;,
+     &#34;title&#34; : &#34;Ethics in Prisons&#34;,
+     &#34;body&#34; : &#34;...&#34;,
+     &#34;book_type&#34; : &#34;Hardcover&#34;
+     &#34;_options&#34; : {
+        &#34;book_type&#34; : [&#34;Hardcover&#34;,&#34;Paperback&#34;]
+     }
+   }
+ }</pre>
+
+<p>Options will always be returned as an array as displayed above. However, they can be accompanied by a hash of human readable labels such as:</p>
+
+<pre> {
+    &#34;result&#34; : {
+        &#34;_options&#34; : {
+            &#34;country&#34; : [&#34;CA&#34;,&#34;GB&#34;,&#34;US&#34;,...],
+            &#34;_country&#34; : {
+                &#34;US&#34; : &#34;United States of America&#34;,
+                &#34;GB: : &#34;Great Britain&#34;,
+                &#34;CA&#34; : &#34;Canada&#34;,
+                ...
+            }
+        }
+    }
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="HTTP_Method_Tunnelling"
+>HTTP Method Tunnelling</a></h2>
+
+<p>Sometimes it&#39;s not possible to use all HTTP methods. For example if you were to trigger a form post through Javascript the browser only knows how to do GET and POST. You can get around this by using XmlHttpRequest, but there is another way: HTTP Method Tunnelling.</p>
+
+<p>Instead of doing a request like:</p>
+
+<pre> curl -X DELETE http://wing.example.com/article/xxx</pre>
+
+<p>You can instead do a POST and pass the actual method via an HTTP Header like this:</p>
+
+<pre> curl -H &#34;X-HTTP-Method: DELETE&#34; -X POST http://wing.example.com/article/xxx</pre>
+
+<p>Or you can pass it as part of the URI like:</p>
+
+<pre> curl -X POST http://wing.example.com/article/xxx?X-HTTP-Method=DELETE</pre>
+
+<p>Here&#39;s the same example as an HTML form:</p>
+
+<pre> &#60;form method=&#34;POST&#34; action=&#34;http://wing.example.com/article/xxx?X-HTTP-Method=DELETE&#34;&#62;
+ ...
+ &#60;/form&#62;</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Rate_Limiting"
+>Rate Limiting</a></h2>
+
+<p>Our API will return <code>500</code> errors if you exceed <b>240 requests per minute</b> (4 requests per second). Therefore you should build your application so that it&#39;s mindful of how many requests its sending to our API.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Fault_Tolerance"
+>Fault Tolerance</a></h2>
+
+<p>Our site will automatically scale out extra servers when under increased load. And its capable of self-healing for most things. That said, we will experience down time from time to time either due to human error or unforseeable circumstances (like our hosting provider having trouble). Therefore you should build your applications to be as fault tolerant as possible and not expect 100% uptime from our APIs.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Scheduled_Maintenance"
+>Scheduled Maintenance</a></h3>
+
+<p>Sometimes for large database structure changes we will have to take the site down to ensure data consistency. These maintenance windows will be posted to our blog (<a href="http://news.thegamecrafter.com" class="podlinkurl"
+>http://news.thegamecrafter.com</a>) and will occur between 11pm and 7am US Central time.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Clients"
+>Clients</a></h2>
+
+<p>There are clients available to help you interface with our APIs.</p>
+
+<p>Perl: <a href="http://search.cpan.org/~rizen/TheGameCrafter-Client/lib/TheGameCrafter/Client.pm" class="podlinkurl"
+>http://search.cpan.org/~rizen/TheGameCrafter-Client/lib/TheGameCrafter/Client.pm</a></p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Language_Specific_Examples"
+>Language Specific Examples</a></h2>
+
+<dl>
+<dt><a name="CurlExample"
+><a href="/developer/CurlExample.html" class="podlinkpod"
+>CurlExample</a></a></dt>
+
+<dd>
+<dt><a name="PerlExample"
+><a href="/developer/PerlExample.html" class="podlinkpod"
+>PerlExample</a></a></dt>
+
+<dd>
+<dt><a name="JqueryExample"
+><a href="/developer/JqueryExample.html" class="podlinkpod"
+>JqueryExample</a></a></dt>
+
+<dd>
+<dt><a name="JavaExample"
+><a href="/developer/JavaExample.html" class="podlinkpod"
+>JavaExample</a></a></dt>
+
+<dd>
+<dt><a name="PhpExample"
+><a href="/developer/PhpExample.html" class="podlinkpod"
+>PhpExample</a></a></dt>
+
+<dd>
+<dt><a name="CSharpExample"
+><a href="/developer/CSharpExample.html" class="podlinkpod"
+>CSharpExample</a></a></dt>
+
+<dd>
+<dt><a name="FSharpExample"
+><a href="/developer/FSharpExample.html" class="podlinkpod"
+>FSharpExample</a></a></dt>
+
+<dd>
+<dt><a name="VisualBasicExample"
+><a href="/developer/VisualBasicExample.html" class="podlinkpod"
+>VisualBasicExample</a></a></dt>
+
+<dd>
+<dt><a name="RubyExample"
+><a href="/developer/RubyExample.html" class="podlinkpod"
+>RubyExample</a></a></dt>
+
+<dd>
+<dt><a name="PythonExample"
+><a href="/developer/PythonExample.html" class="podlinkpod"
+>PythonExample</a></a></dt>
+
+<dd>
+<dt><a name="LuaExample"
+><a href="/developer/LuaExample.html" class="podlinkpod"
+>LuaExample</a></a></dt>
+</dl>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Testing"
+>Testing</a></h2>
+
+<p>If you don&#39;t want to use an available client, but instead write your own, there is a <a href="/developer/Test.html" class="podlinkpod"
+>Test</a> API that can help make sure your client is working before you start using the real web service.</p>
+</div><div class="col-sm-3 col-sm-pull-9"><div class="panel panel-default"><div class="panel-heading">Developer Documentation</div><div class="panel-body"><!--  --><a name='___top' class='dummyTopAnchor' ></a>
+
+<dl>
+<dt><a name="Intro"
+><a href="/developer/Intro.html" class="podlinkpod"
+>Intro</a></a></dt>
+
+<dd>
+<dt><a name="Changes"
+><a href="/developer/Changes.html" class="podlinkpod"
+>Changes</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="General_APIs"
+>General APIs</a></h4>
+
+<dl>
+<dt><a name="APIKey"
+><a href="/developer/APIKey.html" class="podlinkpod"
+>APIKey</a></a></dt>
+
+<dd>
+<dt><a name="Address"
+><a href="/developer/Address.html" class="podlinkpod"
+>Address</a></a></dt>
+
+<dd>
+<dt><a name="Session"
+><a href="/developer/Session.html" class="podlinkpod"
+>Session</a></a></dt>
+
+<dd>
+<dt><a name="Status"
+><a href="/developer/Status.html" class="podlinkpod"
+>Status</a></a></dt>
+
+<dd>
+<dt><a name="TGC"
+><a href="/developer/TGC.html" class="podlinkpod"
+>TGC</a></a></dt>
+
+<dd>
+<dt><a name="User"
+><a href="/developer/User.html" class="podlinkpod"
+>User</a></a></dt>
+
+<dd>
+<dt><a name="WebHook"
+><a href="/developer/WebHook.html" class="podlinkpod"
+>WebHook</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Game_Publishing_APIs"
+>Game Publishing APIs</a></h4>
+
+<dl>
+<dt><a name="ActionShot"
+><a href="/developer/ActionShot.html" class="podlinkpod"
+>ActionShot</a></a></dt>
+
+<dd>
+<dt><a name="Designer"
+><a href="/developer/Designer.html" class="podlinkpod"
+>Designer</a></a></dt>
+
+<dd>
+<dt><a name="DesignerAssociate"
+><a href="/developer/DesignerAssociate.html" class="podlinkpod"
+>DesignerAssociate</a></a></dt>
+
+<dd>
+<dt><a name="File"
+><a href="/developer/File.html" class="podlinkpod"
+>File</a></a></dt>
+
+<dd>
+<dt><a name="Folder"
+><a href="/developer/Folder.html" class="podlinkpod"
+>Folder</a></a></dt>
+
+<dd>
+<dt><a name="Game"
+><a href="/developer/Game.html" class="podlinkpod"
+>Game</a></a></dt>
+
+<dd>
+<dt><a name="GameDownload"
+><a href="/developer/GameDownload.html" class="podlinkpod"
+>GameDownload</a></a></dt>
+
+<dd>
+<dt><a name="GamePart"
+><a href="/developer/GamePart.html" class="podlinkpod"
+>GamePart</a></a></dt>
+
+<dd>
+<dt><a name="Part"
+><a href="/developer/Part.html" class="podlinkpod"
+>Part</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Game_Component_APIs"
+>Game Component APIs</a></h4>
+
+<dl>
+<dt><a name="AcrylicShape"
+><a href="/developer/AcrylicShape.html" class="podlinkpod"
+>AcrylicShape</a></a></dt>
+
+<dd>
+<dt><a name="Booklet_&#38;_BookletPage"
+><a href="/developer/Booklet.html" class="podlinkpod"
+>Booklet</a> &#38; <a href="/developer/BookletPage.html" class="podlinkpod"
+>BookletPage</a></a></dt>
+
+<dd>
+<dt><a name="BoxFace"
+><a href="/developer/BoxFace.html" class="podlinkpod"
+>BoxFace</a></a></dt>
+
+<dd>
+<dt><a name="BoxTop"
+><a href="/developer/BoxTop.html" class="podlinkpod"
+>BoxTop</a></a></dt>
+
+<dd>
+<dt><a name="BoxTopGloss"
+><a href="/developer/BoxTopGloss.html" class="podlinkpod"
+>BoxTopGloss</a></a></dt>
+
+<dd>
+<dt><a name="CoilBook_&#38;_CoilBookPage"
+><a href="/developer/CoilBook.html" class="podlinkpod"
+>CoilBook</a> &#38; <a href="/developer/CoilBookPage.html" class="podlinkpod"
+>CoilBookPage</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD6"
+><a href="/developer/CustomColorD6.html" class="podlinkpod"
+>CustomColorD6</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD4"
+><a href="/developer/CustomColorD4.html" class="podlinkpod"
+>CustomColorD4</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD8"
+><a href="/developer/CustomColorD8.html" class="podlinkpod"
+>CustomColorD8</a></a></dt>
+
+<dd>
+<dt><a name="CustomCutOneSidedSlugged"
+><a href="/developer/CustomCutOneSidedSlugged.html" class="podlinkpod"
+>CustomCutOneSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="CustomCutTwoSidedSlugged"
+><a href="/developer/CustomCutTwoSidedSlugged.html" class="podlinkpod"
+>CustomCutTwoSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="CustomPrintedMeeple"
+><a href="/developer/CustomPrintedMeeple.html" class="podlinkpod"
+>CustomPrintedMeeple</a></a></dt>
+
+<dd>
+<dt><a name="CustomWoodD6"
+><a href="/developer/CustomWoodD6.html" class="podlinkpod"
+>CustomWoodD6</a></a></dt>
+
+<dd>
+<dt><a name="Deck_&#38;_Card"
+><a href="/developer/Deck.html" class="podlinkpod"
+>Deck</a> &#38; <a href="/developer/Card.html" class="podlinkpod"
+>Card</a></a></dt>
+
+<dd>
+<dt><a name="Dial"
+><a href="/developer/Dial.html" class="podlinkpod"
+>Dial</a></a></dt>
+
+<dd>
+<dt><a name="Document"
+><a href="/developer/Document.html" class="podlinkpod"
+>Document</a></a></dt>
+
+<dd>
+<dt><a name="HookBox"
+><a href="/developer/HookBox.html" class="podlinkpod"
+>HookBox</a></a></dt>
+
+<dd>
+<dt><a name="OneSided"
+><a href="/developer/OneSided.html" class="podlinkpod"
+>OneSided</a></a></dt>
+
+<dd>
+<dt><a name="OneSidedGloss"
+><a href="/developer/OneSidedGloss.html" class="podlinkpod"
+>OneSidedGloss</a></a></dt>
+
+<dd>
+<dt><a name="OneSidedSluggedSet_&#38;_OneSidedSlugged"
+><a href="/developer/OneSidedSluggedSet.html" class="podlinkpod"
+>OneSidedSluggedSet</a> &#38; <a href="/developer/OneSidedSlugged.html" class="podlinkpod"
+>OneSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="PerfectBoundBook_&#38;_PerfectBoundBookPage"
+><a href="/developer/PerfectBoundBook.html" class="podlinkpod"
+>PerfectBoundBook</a> &#38; <a href="/developer/PerfectBoundBookPage.html" class="podlinkpod"
+>PerfectBoundBookPage</a></a></dt>
+
+<dd>
+<dt><a name="ScorePad"
+><a href="/developer/ScorePad.html" class="podlinkpod"
+>ScorePad</a></a></dt>
+
+<dd>
+<dt><a name="TuckBox"
+><a href="/developer/TuckBox.html" class="podlinkpod"
+>TuckBox</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedSet_&#38;_TwoSided"
+><a href="/developer/TwoSidedSet.html" class="podlinkpod"
+>TwoSidedSet</a> &#38; <a href="/developer/TwoSided.html" class="podlinkpod"
+>TwoSided</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedBox"
+><a href="/developer/TwoSidedBox.html" class="podlinkpod"
+>TwoSidedBox</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedBoxGloss"
+><a href="/developer/TwoSidedBoxGloss.html" class="podlinkpod"
+>TwoSidedBoxGloss</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedSluggedSet_&#38;_TwoSidedSlugged"
+><a href="/developer/TwoSidedSluggedSet.html" class="podlinkpod"
+>TwoSidedSluggedSet</a> &#38; <a href="/developer/TwoSidedSlugged.html" class="podlinkpod"
+>TwoSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="ThreeSidedCustomCutSet_&#38;_ThreeSidedCustomCut"
+><a href="/developer/ThreeSidedCustomCutSet.html" class="podlinkpod"
+>ThreeSidedCustomCutSet</a> &#38; <a href="/developer/ThreeSidedCustomCut.html" class="podlinkpod"
+>ThreeSidedCustomCut</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Commerce_APIs"
+>Commerce APIs</a></h4>
+
+<dl>
+<dt><a name="Cart"
+><a href="/developer/Cart.html" class="podlinkpod"
+>Cart</a></a></dt>
+
+<dd>
+<dt><a name="CrafterPointCurrency"
+><a href="/developer/CrafterPointCurrency.html" class="podlinkpod"
+>CrafterPointCurrency</a></a></dt>
+
+<dd>
+<dt><a name="Receipt"
+><a href="/developer/Receipt.html" class="podlinkpod"
+>Receipt</a></a></dt>
+
+<dd>
+<dt><a name="Shipment"
+><a href="/developer/Shipment.html" class="podlinkpod"
+>Shipment</a></a></dt>
+
+<dd>
+<dt><a name="Sku"
+><a href="/developer/Sku.html" class="podlinkpod"
+>Sku</a></a></dt>
+
+<dd>
+<dt><a name="Wishlist"
+><a href="/developer/Wishlist.html" class="podlinkpod"
+>Wishlist</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Community_APIs"
+>Community APIs</a></h4>
+
+<dl>
+<dt><a name="Announcement"
+><a href="/developer/Announcement.html" class="podlinkpod"
+>Announcement</a></a></dt>
+
+<dd>
+<dt><a name="ArtTest"
+><a href="/developer/ArtTest.html" class="podlinkpod"
+>ArtTest</a></a></dt>
+
+<dd>
+<dt><a name="Idea"
+><a href="/developer/Idea.html" class="podlinkpod"
+>Idea</a></a></dt>
+
+<dd>
+<dt><a name="IdeaOpinion"
+><a href="/developer/IdeaOpinion.html" class="podlinkpod"
+>IdeaOpinion</a></a></dt>
+
+<dd>
+<dt><a name="Review"
+><a href="/developer/Review.html" class="podlinkpod"
+>Review</a></a></dt>
+</dl>
+ </div></div>&copy;2009-2026 <a href="https://www.thegamecrafter.com">The Game Crafter, LLC</a></div></div></div><div class="text-center" style="padding: 20px;"><a href="#top">^ Back to Top ^</a></div></body></html>

@@ -1,0 +1,968 @@
+<html><head><link type="text/css" rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><title>The Game Crafter API - Using a Cart</title>
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+     <link rel="stylesheet" type="text/css" href="/api.css">
+     <body id="top"><div class="container"><div class="row"><div class="col-sm-9 col-sm-push-3"><a name='___top' class='dummyTopAnchor' ></a>
+
+<div class='indexgroup'>
+<ul   class='indexList indexList1'>
+  <li class='indexItem indexItem1'><a href='#Using_a_Cart'>Using a Cart</a>
+  <li class='indexItem indexItem1'><a href='#Cart_Properties'>Cart Properties</a>
+  <li class='indexItem indexItem1'><a href='#Relationships'>Relationships</a>
+  <li class='indexItem indexItem1'><a href='#Related_Objects'>Related Objects</a>
+  <li class='indexItem indexItem1'><a href='#Cart_Methods'>Cart Methods</a>
+  <ul   class='indexList indexList2'>
+    <li class='indexItem indexItem2'><a href='#Cart_Options'>Cart Options</a>
+    <li class='indexItem indexItem2'><a href='#Create_Cart'>Create Cart</a>
+    <li class='indexItem indexItem2'><a href='#Update_Cart'>Update Cart</a>
+    <li class='indexItem indexItem2'><a href='#Delete_Cart'>Delete Cart</a>
+    <li class='indexItem indexItem2'><a href='#Fetch_Cart'>Fetch Cart</a>
+    <li class='indexItem indexItem2'><a href='#Add_Items_To_Cart'>Add Items To Cart</a>
+    <li class='indexItem indexItem2'><a href='#Adjust_Items_In_Cart'>Adjust Items In Cart</a>
+    <li class='indexItem indexItem2'><a href='#Attach_A_Shipping_Address'>Attach A Shipping Address</a>
+    <li class='indexItem indexItem2'><a href='#Get_Shipping_Method_Options'>Get Shipping Method Options</a>
+    <li class='indexItem indexItem2'><a href='#Attach_A_User'>Attach A User</a>
+    <li class='indexItem indexItem2'><a href='#Pay_With_Shop_Credit'>Pay With Shop Credit</a>
+    <li class='indexItem indexItem2'><a href='#Pay_With_Invoice'>Pay With Invoice</a>
+    <li class='indexItem indexItem2'><a href='#Pay_With_Credit_Card'>Pay With Credit Card</a>
+    <li class='indexItem indexItem2'><a href='#Convert_To_A_Wishlist'>Convert To A Wishlist</a>
+    <li class='indexItem indexItem2'><a href='#Fetch_List_of_Cart_Items'>Fetch List of Cart Items</a>
+  </ul>
+</ul>
+</div>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Using_a_Cart"
+>Using a Cart</a></h1>
+
+<p>Using a cart is a multi-step process.
+You&#39;ll need to do the following things in order:</p>
+
+<ul>
+<li>Create a Cart</li>
+
+<li>You can do the following in any order:
+<ul>
+<li>Add Items To Cart</li>
+
+<li>Attach A Shipping Address</li>
+
+<li>Attach A Shipping Method</li>
+
+<li>Attach A User</li>
+</ul>
+</li>
+
+<li>Checkout
+<p>When you successfully attach a payment method to a cart you&#39;ll convert it into a <a href="/developer/Receipt.html" class="podlinkpod"
+>Receipt</a>.
+It is at this point that shop credit will be deducted from the order before sending the request to the payment provider.</p>
+
+<ul>
+<li>Pay With Shop Credit</li>
+
+<li>Pay With Invoice</li>
+
+<li>Pay With A Credit Card</li>
+</ul>
+
+<p>Another way to checkout is to hand off the checkout process to our web interface.
+It is recommended that you skip attaching a user and addresses to this cart if you use this method.
+To do this redirect the user to:</p>
+
+<pre> https://www.thegamecrafter.com/cart/XXX</pre>
+
+<p>Or:</p>
+
+<pre> https://www.thegamecrafter.com/checkout/cart/XXX</pre>
+
+<p>Replace <code>XXX</code> with the <code>cart_id</code> of the cart you&#39;d like them to check out with. The first URI will bring them to the cart so they can view, modify, or continue shopping. The second URI will bring them directly to the checkout process.</p>
+</li>
+</ul>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Cart_Properties"
+>Cart Properties</a></h1>
+
+<p>Each cart has the following properties and is accessed via <code>/api/cart</code>. Complete details in <a href="/developer/OrderProperties.html" class="podlinkpod"
+>OrderProperties</a> and <a href="/developer/OrderItemProperties.html" class="podlinkpod"
+>OrderItemProperties</a>.</p>
+
+<dl>
+<dt><a name="id"
+>id</a></dt>
+
+<dd>
+<p>The unique id for this cart. It will never change.</p>
+
+<dt><a name="wing_object_type"
+>wing_object_type</a></dt>
+
+<dd>
+<p><code>cart</code>.</p>
+
+<dt><a name="name"
+>name</a></dt>
+
+<dd>
+<p>A label to identify an cart. This is useful if you&#39;re going to allow multiple carts open at the same time, or if you want to name wishlists.</p>
+
+<dt><a name="user_id"
+>user_id</a></dt>
+
+<dd>
+<p>A <a href="/developer/User.html" class="podlinkpod"
+>User</a> id. If specified, the unique id of the user that controls this cart. Once a user has been attached to an cart, it cannot be viewed or manipulated except by passing a working session id for that user. See Cart Options below for details. Defaults to <code>Cart</code>.</p>
+
+<dt><a name="items"
+>items</a></dt>
+
+<dd>
+<p>An array of items that are in the cart. See <a href="#Cart_Related_Objects" class="podlinkpod"
+>&#34;Cart Related Objects&#34;</a> below for details.</p>
+
+<dt><a name="shipping_address_id"
+>shipping_address_id</a></dt>
+
+<dd>
+<p>An <a href="/developer/Address.html" class="podlinkpod"
+>Address</a> id. The unique id of an address. See <a href="/developer/Address.html" class="podlinkpod"
+>Address</a> for details on creating an address.</p>
+
+<dt><a name="shipping_address"
+>shipping_address</a></dt>
+
+<dd>
+<p>A hash of address properties associated with the <code>shipping_address_id</code>. See <a href="#Cart_Related_Objects" class="podlinkpod"
+>&#34;Cart Related Objects&#34;</a> below for details.</p>
+
+<dt><a name="shipping_method"
+>shipping_method</a></dt>
+
+<dd>
+<p>The shipping mechanism that will be used to transport the cart to the purchaser. Defaults to <code>USPS Priority</code>. See Cart Options below for details.</p>
+
+<dt><a name="shipping_cost"
+>shipping_cost</a></dt>
+
+<dd>
+<p>The amount added to the cart to account for the cost of shipping. This will be added to the cart once both a shipping address and a shipping method are known.</p>
+
+<dt><a name="subtotal"
+>subtotal</a></dt>
+
+<dd>
+<p>The cost of all the items attached to the cart before taxes, shop credit, and shipping are applied.</p>
+
+<dt><a name="taxes"
+>taxes</a></dt>
+
+<dd>
+<p>The amount of taxes to be paid to purchase this cart. Will always be zero until a shipping address has been specified.</p>
+
+<dt><a name="insured"
+>insured</a></dt>
+
+<dd>
+<p>A boolean indicating whether this order is marked to be insured for damages. Defaults to 1.</p>
+
+<dt><a name="insurance_cost"
+>insurance_cost</a></dt>
+
+<dd>
+<p>The cost associated with flipping the <code>insured</code> bit.</p>
+
+<dt><a name="urgent"
+>urgent</a></dt>
+
+<dd>
+<p>A boolean indicating whether this order is marked for expedited production. Defaults to 0.</p>
+
+<dt><a name="urgent_fee"
+>urgent_fee</a></dt>
+
+<dd>
+<p>The cost associated with flipping the <code>urgent</code> bit.</p>
+
+<dt><a name="total"
+>total</a></dt>
+
+<dd>
+<p>The total cost of the cart including taxes and shipping. If this is a Receipt it will also include the discount as a result of shop credit used.</p>
+
+<dt><a name="payment_method"
+>payment_method</a></dt>
+
+<dd>
+<p>The method used to pay for the cart. Defaults to <code>Credit Card</code>. See <a href="#Cart_Options" class="podlinkpod"
+>&#34;Cart Options&#34;</a> below for details.</p>
+
+<dt><a name="payment_transaction_id"
+>payment_transaction_id</a></dt>
+
+<dd>
+<p>If an attempt has been made to pay for this cart then the id returned from the payment gateway will be logged here.</p>
+
+<dt><a name="payment_status"
+>payment_status</a></dt>
+
+<dd>
+<p>If an attempt has been made to pay for this cart then the status code returned from the payment gateway will be logged here.</p>
+
+<dt><a name="payment_message"
+>payment_message</a></dt>
+
+<dd>
+<p>If an attempt has been made to pay for this cart then the message returned from the payment gateway will be logged here.</p>
+
+<dt><a name="ip_address"
+>ip_address</a></dt>
+
+<dd>
+<p>The IP address of the user at the time of cart creation.</p>
+
+<dt><a name="date_created"
+>date_created</a></dt>
+
+<dd>
+<p>A date when the cart was created.</p>
+
+<dt><a name="date_updated"
+>date_updated</a></dt>
+
+<dd>
+<p>A date when the cart&#39;s account was last updated.</p>
+</dd>
+</dl>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Relationships"
+>Relationships</a></h1>
+
+<p>See <a href="/developer/Intro.html#Relationships" class="podlinkpod"
+>&#34;Relationships&#34; in Intro</a> for details.</p>
+
+<dl>
+<dt><a name="items"
+>items</a></dt>
+
+<dd>
+<p>An array of items that are currently placed in the cart</p>
+
+<pre>      &#34;items&#34; : [
+         {
+            &#34;quantity&#34; : &#34;1&#34;,
+            &#34;name&#34; : &#34;Prison Break&#34;,
+            &#34;price_each&#34; : &#34;0.8900&#34;,
+            &#34;id&#34; : &#34;563C57FE-47F0-11E2-836F-50F9C28E391D&#34;
+            ...
+         }
+         ...
+    ]</pre>
+
+<p>Please see <a href="/developer/Game.html" class="podlinkpod"
+>Game</a> and <a href="/developer/Part.html" class="podlinkpod"
+>Part</a> for more details about what items may contain.</p>
+</dd>
+</dl>
+
+<p>The user attached to this cart, if any.</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Related_Objects"
+>Related Objects</a></h1>
+
+<p>See <a href="/developer/Intro.html#Related_Objects" class="podlinkpod"
+>&#34;Related Objects&#34; in Intro</a> for details.</p>
+
+<dl>
+<dt><a name="user"
+>user</a></dt>
+
+<dd>
+<p>The user attached to this cart, if any. Will return:</p>
+
+<pre> {
+    &#34;shop_credit&#34; : &#34;0.00&#34;,
+    &#34;username&#34; : &#34;andy&#34;,
+    &#34;id&#34; : &#34;xxx&#34;,
+    ...
+ }</pre>
+
+<dt><a name="shipping_address"
+>shipping_address</a></dt>
+
+<dd>
+<p>The <a href="/developer/Address.html" class="podlinkpod"
+>Address</a> attached to the cart that the cart should be shipped to. Will return:</p>
+
+<pre> {
+    &#34;id&#34; : &#34;xxx&#34;,
+    &#34;user_id&#34; : &#34;xxx&#34;,
+    &#34;name&#34; : &#34;Andy Dufresne&#34;,
+    &#34;company&#34; : &#34;Shawshank Prison&#34;,
+    &#34;address1&#34; : &#34;123 Prison Lane&#34;,
+    &#34;address2&#34; : &#34;Shawshank Prison Library&#34;,
+    &#34;city&#34; : &#34;Portland&#34;,
+    &#34;state&#34; : &#34;Maine&#34;,
+    &#34;postal_code&#34; : &#34;04101&#34;,
+    &#34;country&#34; : &#34;US&#34;,
+    &#34;phone_number&#34; : &#34;207-874-8300&#34;
+ }</pre>
+</dd>
+</dl>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="Cart_Methods"
+>Cart Methods</a></h1>
+
+<p>The methods used to fetch and manipulate carts.</p>
+
+<p><b>NOTE:</b> Any methods that require the cart ID in the URI, can have the ID ommitted to use the current cart stored in the browser&#39;s cookie. For example:</p>
+
+<pre> POST /api/cart/xxx/sku/xxx</pre>
+
+<p>Can become:</p>
+
+<pre> POST /api/cart//sku/xxx</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Cart_Options"
+>Cart Options</a></h2>
+
+<p>Provides a list of the options that can be used to fill out various fields when creating or updating a cart.</p>
+
+<pre> GET /api/cart/_options</pre>
+
+<p>Returns:</p>
+
+<pre> {
+    &#34;identity&#34; : [...],
+    &#34;shipping_method&#34; : [...],
+    &#34;_shipping_method&#34; : {...},
+ }</pre>
+
+<p><b>NOTE:</b> You can also get this data by adding <code>_include_options=1</code> to the parameter list when fetching a cart.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Create_Cart"
+>Create Cart</a></h2>
+
+<pre> POST /api/cart</pre>
+
+<dl>
+<dt><a name="api_key_id"
+>api_key_id</a></dt>
+
+<dd>
+<p>See <a href="/developer/APIKey.html" class="podlinkpod"
+>APIKey</a>. Required.</p>
+
+<dt><a name="name"
+>name</a></dt>
+
+<dd>
+<p>Optional.</p>
+
+<dt><a name="shipping_address_id"
+>shipping_address_id</a></dt>
+
+<dd>
+<p>Optional. Will be required before checkout.</p>
+</dd>
+</dl>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;id&#34; : &#34;xxx&#34;,
+   &#34;cartname&#34; : &#34;andy&#34;,
+   ...
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Update_Cart"
+>Update Cart</a></h2>
+
+<p>PUT /api/cart/xxx</p>
+
+<p>See <b>Create Cart</b> for details. Can only be done by an admin or the cart owner itself.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Delete_Cart"
+>Delete Cart</a></h2>
+
+<p>DELETE /api/cart/xxx</p>
+
+<dl>
+<dt><a name="session_id"
+>session_id</a></dt>
+
+<dd>
+<p>Required. The unique session id provided by a <a href="/developer/Session.html" class="podlinkpod"
+>Session</a> method.</p>
+</dd>
+</dl>
+
+<p>Can only be done by an admin or the cart owner itself.</p>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;success&#34; : 1
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Fetch_Cart"
+>Fetch Cart</a></h2>
+
+<p>GET /api/cart/xxx</p>
+
+<dl>
+<dt><a name="session_id"
+>session_id</a></dt>
+
+<dd>
+<p>Optional. The unique session id provided by a <a href="/developer/Session.html" class="podlinkpod"
+>Session</a> method.</p>
+</dd>
+</dl>
+
+<p>Can by done by anybody.</p>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;id&#34; : &#34;xxx&#34;,
+   ...
+ }</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Add_Items_To_Cart"
+>Add Items To Cart</a></h2>
+
+<pre> POST /api/cart/xxx/sku/xxx</pre>
+
+<p>Allows you to add a <a href="/developer/Sku.html" class="podlinkpod"
+>Sku</a> to the cart.</p>
+
+<dl>
+<dt><a name="quantity"
+>quantity</a></dt>
+
+<dd>
+<p>Optional. Defaults to 0. Adds or subtracts items to or from the cart depending on whether this number is positive or negative.</p>
+</dd>
+</dl>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Adjust_Items_In_Cart"
+>Adjust Items In Cart</a></h2>
+
+<p>PUT /api/cart/xxx/sku/xxx</p>
+
+<p>Allows you to adjust the quantity of this <a href="/developer/Sku.html" class="podlinkpod"
+>Sku</a> in the cart.</p>
+
+<dl>
+<dt><a name="quantity"
+>quantity</a></dt>
+
+<dd>
+<p>Optional. Defaults to 0. Sets the number of this item contained in the cart. Setting to 0 will remove it from the cart. If you set a quantity and the item isn&#39;t already in the cart it will be added.</p>
+</dd>
+</dl>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Attach_A_Shipping_Address"
+>Attach A Shipping Address</a></h2>
+
+<p>Attaching a shipping address is easy using the Create Cart or Update Cart methods documented above as long as you already have an address. If you don&#39;t, then you&#39;ll need to create on using the <a href="/developer/Address.html" class="podlinkpod"
+>Address</a> service first.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Get_Shipping_Method_Options"
+>Get Shipping Method Options</a></h2>
+
+<p>Provides a list of shipping options the user can choose from. Every order will have a different set of options based upon the shipping destination, size, and weight of the order.</p>
+
+<p>GET /api/cart/xxx/shipping-method-options</p>
+
+<pre> {
+    &#34;Will Call&#34; : {
+        &#34;description&#34; : &#34;By selecting Will Call you agree to pick up your order at The Game Crafter facility in Madison, Wisconsin.&#34;,
+        &#34;cost&#34; : &#34;0.00&#34;,
+        &#34;handling_fee&#34; : &#34;0.00&#34;,
+        &#34;insurance_rate&#34; : &#34;0&#34;,
+        &#34;weight&#34; : 20,
+        &#34;number_of_parcels&#34; : 1,
+    },
+    ...
+ }</pre>
+
+<p>Description informs the user a little about this shipping option.</p>
+
+<p>Cost is the cost the shipping provider is charging The Game Crafter, and therefore is passed along to the customer.</p>
+
+<p>Handling Fee is the extra cost The Game Cafter applies. This covers the cost of the shipping box as well as any special paperwork that needs to be filled out to complete this shipping method.</p>
+
+<p>Insurance rate is a decimal percentage that can be multiplied against the order subtotal to determine the shipping insurance cost.</p>
+
+<p>Weight is the number of ounces the shipment will weigh.</p>
+
+<p>Number of parcels is the total number of packages that will be used to send this shipment.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Attach_A_User"
+>Attach A User</a></h2>
+
+<p>POST /api/cart/xxx/user</p>
+
+<p>Before checkout you need to attach a user to the cart. This can either be done by attaching an authenticated session, or by simply specifying an email address.</p>
+
+<pre> {
+    &#34;order&#34; : { ... },
+    &#34;session_id&#34; : &#34;xxx&#34;
+ }</pre>
+
+<p><b>NOTE:</b> The session_id returned here needs (or any session_id attached to the user_id attached to this cart) to be used on all subsequent interactions with the cart.</p>
+
+<dl>
+<dt><a name="session_id"
+>session_id</a></dt>
+
+<dd>
+<p>A session id as created by <a href="/developer/Session.html" class="podlinkpod"
+>Session</a>.</p>
+
+<dt><a name="email"
+>email</a></dt>
+
+<dd>
+<p>An email address of the user checking out. This only works if the user is not already in the system.</p>
+</dd>
+</dl>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Pay_With_Shop_Credit"
+>Pay With Shop Credit</a></h2>
+
+<p>POST /api/cart/xxx/payment/shopcredit</p>
+
+<p>A common way for people to use our API to private label their own processes is to use shop credit. Just keep your account stocked up with shop credit, and then when a customer checks out on your site, you can pay for it on ours using shop credit.</p>
+
+<p>Returns a <a href="/developer/Receipt.html" class="podlinkpod"
+>Receipt</a>.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Pay_With_Invoice"
+>Pay With Invoice</a></h2>
+
+<p>POST /api/cart/xxx/payment/invoice</p>
+
+<p>Attaches an invoice to this cart to pay for the items in it. The invoice will be emailed you using terms set during pre-approval.</p>
+
+<p><b>NOTE:</b> You must be pre-approved to use this method.</p>
+
+<p>Returns a <a href="/developer/Receipt.html" class="podlinkpod"
+>Receipt</a>.</p>
+
+<dl>
+<dt><a name="po_number"
+>po_number</a></dt>
+
+<dd>
+<p>Purchase order number. Any characters up to 30 digits. Required.</p>
+</dd>
+</dl>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Pay_With_Credit_Card"
+>Pay With Credit Card</a></h2>
+
+<p>POST /api/cart/xxx/payment/creditcard</p>
+
+<p>Attaches a credit card to this cart to pay for the items in it.</p>
+
+<p><b>NOTE:</b> You must be pre-approved to use this method.</p>
+
+<p>Returns a <a href="/developer/Receipt.html" class="podlinkpod"
+>Receipt</a>.</p>
+
+<dl>
+<dt><a name="card_number"
+>card_number</a></dt>
+
+<dd>
+<p>The credit card number.</p>
+
+<dt><a name="expiration_month"
+>expiration_month</a></dt>
+
+<dd>
+<p>The month that the card expires.</p>
+
+<dt><a name="expiration_year"
+>expiration_year</a></dt>
+
+<dd>
+<p>The year that the card expires.</p>
+
+<dt><a name="cvv2"
+>cvv2</a></dt>
+
+<dd>
+<p>The three digit code on the back of the card, or the 4 digit code on the front of an American Express card.</p>
+</dd>
+</dl>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Convert_To_A_Wishlist"
+>Convert To A Wishlist</a></h2>
+
+<p>POST /api/cart/xxx/wishlist</p>
+
+<p>Converts this cart to a <a href="/developer/Wishlist.html" class="podlinkpod"
+>Wishlist</a>.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="Fetch_List_of_Cart_Items"
+>Fetch List of Cart Items</a></h2>
+
+<pre> GET /api/cart/xxx/items</pre>
+
+<p>Returns:</p>
+
+<pre> {
+   &#34;items&#34; : [
+         {
+            &#34;quantity&#34; : &#34;1&#34;,
+            &#34;name&#34; : &#34;Prison Break&#34;,
+            &#34;price_each&#34; : &#34;0.8900&#34;,
+            &#34;id&#34; : &#34;563C57FE-47F0-11E2-836F-50F9C28E391D&#34;,
+            ...
+         }
+         ...
+    ],
+    &#34;paging&#34; : {}
+   }</pre>
+</div><div class="col-sm-3 col-sm-pull-9"><div class="panel panel-default"><div class="panel-heading">Developer Documentation</div><div class="panel-body"><!--  --><a name='___top' class='dummyTopAnchor' ></a>
+
+<dl>
+<dt><a name="Intro"
+><a href="/developer/Intro.html" class="podlinkpod"
+>Intro</a></a></dt>
+
+<dd>
+<dt><a name="Changes"
+><a href="/developer/Changes.html" class="podlinkpod"
+>Changes</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="General_APIs"
+>General APIs</a></h4>
+
+<dl>
+<dt><a name="APIKey"
+><a href="/developer/APIKey.html" class="podlinkpod"
+>APIKey</a></a></dt>
+
+<dd>
+<dt><a name="Address"
+><a href="/developer/Address.html" class="podlinkpod"
+>Address</a></a></dt>
+
+<dd>
+<dt><a name="Session"
+><a href="/developer/Session.html" class="podlinkpod"
+>Session</a></a></dt>
+
+<dd>
+<dt><a name="Status"
+><a href="/developer/Status.html" class="podlinkpod"
+>Status</a></a></dt>
+
+<dd>
+<dt><a name="TGC"
+><a href="/developer/TGC.html" class="podlinkpod"
+>TGC</a></a></dt>
+
+<dd>
+<dt><a name="User"
+><a href="/developer/User.html" class="podlinkpod"
+>User</a></a></dt>
+
+<dd>
+<dt><a name="WebHook"
+><a href="/developer/WebHook.html" class="podlinkpod"
+>WebHook</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Game_Publishing_APIs"
+>Game Publishing APIs</a></h4>
+
+<dl>
+<dt><a name="ActionShot"
+><a href="/developer/ActionShot.html" class="podlinkpod"
+>ActionShot</a></a></dt>
+
+<dd>
+<dt><a name="Designer"
+><a href="/developer/Designer.html" class="podlinkpod"
+>Designer</a></a></dt>
+
+<dd>
+<dt><a name="DesignerAssociate"
+><a href="/developer/DesignerAssociate.html" class="podlinkpod"
+>DesignerAssociate</a></a></dt>
+
+<dd>
+<dt><a name="File"
+><a href="/developer/File.html" class="podlinkpod"
+>File</a></a></dt>
+
+<dd>
+<dt><a name="Folder"
+><a href="/developer/Folder.html" class="podlinkpod"
+>Folder</a></a></dt>
+
+<dd>
+<dt><a name="Game"
+><a href="/developer/Game.html" class="podlinkpod"
+>Game</a></a></dt>
+
+<dd>
+<dt><a name="GameDownload"
+><a href="/developer/GameDownload.html" class="podlinkpod"
+>GameDownload</a></a></dt>
+
+<dd>
+<dt><a name="GamePart"
+><a href="/developer/GamePart.html" class="podlinkpod"
+>GamePart</a></a></dt>
+
+<dd>
+<dt><a name="Part"
+><a href="/developer/Part.html" class="podlinkpod"
+>Part</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Game_Component_APIs"
+>Game Component APIs</a></h4>
+
+<dl>
+<dt><a name="AcrylicShape"
+><a href="/developer/AcrylicShape.html" class="podlinkpod"
+>AcrylicShape</a></a></dt>
+
+<dd>
+<dt><a name="Booklet_&#38;_BookletPage"
+><a href="/developer/Booklet.html" class="podlinkpod"
+>Booklet</a> &#38; <a href="/developer/BookletPage.html" class="podlinkpod"
+>BookletPage</a></a></dt>
+
+<dd>
+<dt><a name="BoxFace"
+><a href="/developer/BoxFace.html" class="podlinkpod"
+>BoxFace</a></a></dt>
+
+<dd>
+<dt><a name="BoxTop"
+><a href="/developer/BoxTop.html" class="podlinkpod"
+>BoxTop</a></a></dt>
+
+<dd>
+<dt><a name="BoxTopGloss"
+><a href="/developer/BoxTopGloss.html" class="podlinkpod"
+>BoxTopGloss</a></a></dt>
+
+<dd>
+<dt><a name="CoilBook_&#38;_CoilBookPage"
+><a href="/developer/CoilBook.html" class="podlinkpod"
+>CoilBook</a> &#38; <a href="/developer/CoilBookPage.html" class="podlinkpod"
+>CoilBookPage</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD6"
+><a href="/developer/CustomColorD6.html" class="podlinkpod"
+>CustomColorD6</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD4"
+><a href="/developer/CustomColorD4.html" class="podlinkpod"
+>CustomColorD4</a></a></dt>
+
+<dd>
+<dt><a name="CustomColorD8"
+><a href="/developer/CustomColorD8.html" class="podlinkpod"
+>CustomColorD8</a></a></dt>
+
+<dd>
+<dt><a name="CustomCutOneSidedSlugged"
+><a href="/developer/CustomCutOneSidedSlugged.html" class="podlinkpod"
+>CustomCutOneSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="CustomCutTwoSidedSlugged"
+><a href="/developer/CustomCutTwoSidedSlugged.html" class="podlinkpod"
+>CustomCutTwoSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="CustomPrintedMeeple"
+><a href="/developer/CustomPrintedMeeple.html" class="podlinkpod"
+>CustomPrintedMeeple</a></a></dt>
+
+<dd>
+<dt><a name="CustomWoodD6"
+><a href="/developer/CustomWoodD6.html" class="podlinkpod"
+>CustomWoodD6</a></a></dt>
+
+<dd>
+<dt><a name="Deck_&#38;_Card"
+><a href="/developer/Deck.html" class="podlinkpod"
+>Deck</a> &#38; <a href="/developer/Card.html" class="podlinkpod"
+>Card</a></a></dt>
+
+<dd>
+<dt><a name="Dial"
+><a href="/developer/Dial.html" class="podlinkpod"
+>Dial</a></a></dt>
+
+<dd>
+<dt><a name="Document"
+><a href="/developer/Document.html" class="podlinkpod"
+>Document</a></a></dt>
+
+<dd>
+<dt><a name="HookBox"
+><a href="/developer/HookBox.html" class="podlinkpod"
+>HookBox</a></a></dt>
+
+<dd>
+<dt><a name="OneSided"
+><a href="/developer/OneSided.html" class="podlinkpod"
+>OneSided</a></a></dt>
+
+<dd>
+<dt><a name="OneSidedGloss"
+><a href="/developer/OneSidedGloss.html" class="podlinkpod"
+>OneSidedGloss</a></a></dt>
+
+<dd>
+<dt><a name="OneSidedSluggedSet_&#38;_OneSidedSlugged"
+><a href="/developer/OneSidedSluggedSet.html" class="podlinkpod"
+>OneSidedSluggedSet</a> &#38; <a href="/developer/OneSidedSlugged.html" class="podlinkpod"
+>OneSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="PerfectBoundBook_&#38;_PerfectBoundBookPage"
+><a href="/developer/PerfectBoundBook.html" class="podlinkpod"
+>PerfectBoundBook</a> &#38; <a href="/developer/PerfectBoundBookPage.html" class="podlinkpod"
+>PerfectBoundBookPage</a></a></dt>
+
+<dd>
+<dt><a name="ScorePad"
+><a href="/developer/ScorePad.html" class="podlinkpod"
+>ScorePad</a></a></dt>
+
+<dd>
+<dt><a name="TuckBox"
+><a href="/developer/TuckBox.html" class="podlinkpod"
+>TuckBox</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedSet_&#38;_TwoSided"
+><a href="/developer/TwoSidedSet.html" class="podlinkpod"
+>TwoSidedSet</a> &#38; <a href="/developer/TwoSided.html" class="podlinkpod"
+>TwoSided</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedBox"
+><a href="/developer/TwoSidedBox.html" class="podlinkpod"
+>TwoSidedBox</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedBoxGloss"
+><a href="/developer/TwoSidedBoxGloss.html" class="podlinkpod"
+>TwoSidedBoxGloss</a></a></dt>
+
+<dd>
+<dt><a name="TwoSidedSluggedSet_&#38;_TwoSidedSlugged"
+><a href="/developer/TwoSidedSluggedSet.html" class="podlinkpod"
+>TwoSidedSluggedSet</a> &#38; <a href="/developer/TwoSidedSlugged.html" class="podlinkpod"
+>TwoSidedSlugged</a></a></dt>
+
+<dd>
+<dt><a name="ThreeSidedCustomCutSet_&#38;_ThreeSidedCustomCut"
+><a href="/developer/ThreeSidedCustomCutSet.html" class="podlinkpod"
+>ThreeSidedCustomCutSet</a> &#38; <a href="/developer/ThreeSidedCustomCut.html" class="podlinkpod"
+>ThreeSidedCustomCut</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Commerce_APIs"
+>Commerce APIs</a></h4>
+
+<dl>
+<dt><a name="Cart"
+><a href="/developer/Cart.html" class="podlinkpod"
+>Cart</a></a></dt>
+
+<dd>
+<dt><a name="CrafterPointCurrency"
+><a href="/developer/CrafterPointCurrency.html" class="podlinkpod"
+>CrafterPointCurrency</a></a></dt>
+
+<dd>
+<dt><a name="Receipt"
+><a href="/developer/Receipt.html" class="podlinkpod"
+>Receipt</a></a></dt>
+
+<dd>
+<dt><a name="Shipment"
+><a href="/developer/Shipment.html" class="podlinkpod"
+>Shipment</a></a></dt>
+
+<dd>
+<dt><a name="Sku"
+><a href="/developer/Sku.html" class="podlinkpod"
+>Sku</a></a></dt>
+
+<dd>
+<dt><a name="Wishlist"
+><a href="/developer/Wishlist.html" class="podlinkpod"
+>Wishlist</a></a></dt>
+</dl>
+
+<h4><a class='u'
+name="Community_APIs"
+>Community APIs</a></h4>
+
+<dl>
+<dt><a name="Announcement"
+><a href="/developer/Announcement.html" class="podlinkpod"
+>Announcement</a></a></dt>
+
+<dd>
+<dt><a name="ArtTest"
+><a href="/developer/ArtTest.html" class="podlinkpod"
+>ArtTest</a></a></dt>
+
+<dd>
+<dt><a name="Idea"
+><a href="/developer/Idea.html" class="podlinkpod"
+>Idea</a></a></dt>
+
+<dd>
+<dt><a name="IdeaOpinion"
+><a href="/developer/IdeaOpinion.html" class="podlinkpod"
+>IdeaOpinion</a></a></dt>
+
+<dd>
+<dt><a name="Review"
+><a href="/developer/Review.html" class="podlinkpod"
+>Review</a></a></dt>
+</dl>
+ </div></div>&copy;2009-2026 <a href="https://www.thegamecrafter.com">The Game Crafter, LLC</a></div></div></div><div class="text-center" style="padding: 20px;"><a href="#top">^ Back to Top ^</a></div></body></html>
