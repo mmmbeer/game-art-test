@@ -110,6 +110,41 @@
             </div>
             <div class="asset-status text-muted" id="assetStatus"></div>
             <div class="section-divider"></div>
+            <section class="test-builder" id="testBuilder">
+              <div class="test-builder-header">
+                <div>
+                  <p class="app-eyebrow mb-1">Art Test Builder</p>
+                  <h3 class="card-title mb-1">Select asset types to test</h3>
+                  <p class="card-subtitle">Decks automatically expand into their card pool.</p>
+                </div>
+                <div class="test-builder-metrics" id="testBuilderMetrics"></div>
+              </div>
+              <div class="test-types" id="testTypeSelection"></div>
+              <div class="test-actions">
+                <button class="btn btn-outline-light" id="previewTest" type="button">
+                  Preview randomization
+                </button>
+                <button class="btn btn-primary" id="startTest" type="button">
+                  Start art test
+                </button>
+              </div>
+              <div class="loading-row d-none" id="testPreviewLoading" aria-live="polite">
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span>Building preview...</span>
+              </div>
+              <div class="test-preview" id="testPreview">
+                <p class="text-muted mb-0">Select asset types to preview a randomized 10-asset test.</p>
+              </div>
+              <div class="test-link d-none" id="testLinkPanel">
+                <p class="test-link-label">Public test link</p>
+                <div class="test-link-row">
+                  <input class="form-control" id="testLinkInput" type="text" readonly>
+                  <button class="btn btn-outline-light" id="copyTestLink" type="button">Copy</button>
+                </div>
+                <p class="text-muted mb-0">Share this link with testers to start voting.</p>
+              </div>
+            </section>
+            <div class="section-divider"></div>
             <div class="accordion" id="assetGroups"></div>
           </div>
         </section>

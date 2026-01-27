@@ -1,5 +1,6 @@
 import { fetchJson } from "../api.js";
 import { showToast } from "../toast.js";
+import { initTestBuilder } from "./testBuilder.js";
 
 const backToGames = document.getElementById("backToGames");
 const assetGameTitle = document.getElementById("assetGameTitle");
@@ -18,10 +19,14 @@ let activeGame = null;
 let groupedAssets = [];
 let assetsByType = {};
 let lazyObserver = null;
+let testBuilderApi = null;
 
 const PAGE_SIZE = 24;
 
 export function initAssetsView({ onBack, onAuthLost }) {
+  if (!testBuilderApi) {
+    testBuilderApi = initTestBuilder({ onAuthLost });
+  }
   backToGames.addEventListener("click", () => {
     onBack();
   });
@@ -94,6 +99,11 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
     assetMetrics.textContent = `${assetCount} assets across ${groupedAssets.length} types`;
     assetStatus.textContent = "Tap a group to browse.";
     renderGroups();
+    testBuilderApi?.setAssets({
+      game,
+      assetTypes: groupedAssets,
+      assetsByType,
+    });
     if (showToastOnSuccess) {
       showToast("Assets refreshed.", "success");
     }

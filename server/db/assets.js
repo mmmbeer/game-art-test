@@ -12,6 +12,35 @@ export async function getAssetsByGameId(gameId) {
   }));
 }
 
+export async function getAssetsByGameIdWithIds(gameId) {
+  const [rows] = await pool.query(
+    "SELECT id, uuid, tgc_asset_id, asset_type, image_url, dpi, metadata FROM assets WHERE game_id = ? ORDER BY asset_type, id",
+    [gameId]
+  );
+  return rows.map((row) => ({
+    ...row,
+    metadata: parseJson(row.metadata),
+  }));
+}
+
+export async function getAssetsByUuidsForGameId(gameId, uuids) {
+  if (!Array.isArray(uuids) || uuids.length === 0) {
+    return [];
+  }
+  const placeholders = uuids.map(() => "?").join(", ");
+  const [rows] = await pool.query(
+    `SELECT id, uuid, tgc_asset_id, asset_type, image_url, dpi, metadata
+     FROM assets
+     WHERE game_id = ? AND uuid IN (${placeholders})
+     ORDER BY asset_type, id`,
+    [gameId, ...uuids]
+  );
+  return rows.map((row) => ({
+    ...row,
+    metadata: parseJson(row.metadata),
+  }));
+}
+
 export async function upsertAssetsForGame(gameId, assets) {
   const [existingRows] = await pool.query(
     "SELECT id, tgc_asset_id, asset_type FROM assets WHERE game_id = ?",

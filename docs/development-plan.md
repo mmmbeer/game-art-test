@@ -340,10 +340,19 @@ No login required for testers. Public art test links must allow anonymous voting
 * Create test
 * Generate public link
 
+**Implemented**
+
+* Asset-type selection UI on the game assets page with deck-to-card expansion guidance
+* Test preview endpoint and UI to re-roll randomized 10-asset selections
+* Test creation endpoint storing tests and test_assets with UUID-based public links
+* Optional "start from preview" flow to preserve the last randomized selection
+
 **Testing**
 
 * Repeated randomization
 * Edge cases (few assets)
+* Deck selections expand into card pools
+* Public test links generated and displayed
 
 ---
 
