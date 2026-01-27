@@ -1,8 +1,6 @@
 const themeToggle = document.getElementById("themeToggle");
-const loginView = document.getElementById("loginView");
+const landingView = document.getElementById("landingView");
 const gamesView = document.getElementById("gamesView");
-const loginForm = document.getElementById("loginForm");
-const loginButton = document.getElementById("loginButton");
 const gamesList = document.getElementById("gamesList");
 const confirmGame = document.getElementById("confirmGame");
 const userDisplay = document.getElementById("userDisplay");
@@ -40,13 +38,13 @@ function initTheme() {
 
 function setView(view) {
   if (view === "games") {
-    loginView.classList.add("d-none");
+    landingView.classList.add("d-none");
     gamesView.classList.remove("d-none");
     appTitle.textContent = "Select a Game";
   } else {
-    loginView.classList.remove("d-none");
+    landingView.classList.remove("d-none");
     gamesView.classList.add("d-none");
-    appTitle.textContent = "Creator Login";
+    appTitle.textContent = "TGC Art Test Platform";
   }
 }
 
@@ -84,13 +82,13 @@ function renderGames(games) {
 async function loadGames() {
   const response = await fetch("games", { credentials: "include" });
   if (response.status === 401) {
-    setView("login");
+    setView("landing");
     return;
   }
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     showToast(data.error || "Unable to load games", "danger");
-    setView("login");
+    setView("landing");
     return;
   }
   const data = await response.json();
@@ -100,37 +98,6 @@ async function loadGames() {
   renderGames(data.games || []);
   setView("games");
 }
-
-loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  loginButton.disabled = true;
-
-  const formData = new FormData(loginForm);
-  const payload = {
-    username: formData.get("username"),
-    password: formData.get("password"),
-  };
-
-  try {
-    const response = await fetch("auth/tgc/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || "Login failed");
-    }
-
-    await loadGames();
-  } catch (error) {
-    showToast(error.message, "danger");
-  } finally {
-    loginButton.disabled = false;
-  }
-});
 
 confirmGame.addEventListener("click", () => {
   const selected = localStorage.getItem(GAME_KEY);

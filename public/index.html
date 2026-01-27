@@ -17,7 +17,7 @@
       <header class="app-header">
         <div>
           <p class="app-eyebrow">TGC Art Test Platform</p>
-          <h1 class="app-title">Creator Login</h1>
+          <h1 class="app-title">TGC Art Test Platform</h1>
         </div>
         <button class="btn btn-outline-light btn-sm" id="themeToggle" type="button">
           Switch Theme
@@ -25,23 +25,17 @@
       </header>
 
       <main class="app-main">
-        <section id="loginView" class="card app-card">
+        <section id="landingView" class="card app-card">
           <div class="card-body">
-            <h2 class="card-title">Sign in to The Game Crafter</h2>
-            <p class="card-subtitle">Use your TGC username and password.</p>
-            <form id="loginForm" class="mt-4" method="post" action="auth/tgc/login" novalidate>
-              <div class="mb-3">
-                <label class="form-label" for="username">Username</label>
-                <input class="form-control" id="username" name="username" type="text" autocomplete="username" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label" for="password">Password</label>
-                <input class="form-control" id="password" name="password" type="password" autocomplete="current-password" required>
-              </div>
-              <button class="btn btn-primary w-100" type="submit" id="loginButton">
-                Sign In
-              </button>
-            </form>
+            <h2 class="card-title">Welcome to the art test platform</h2>
+            <p class="card-subtitle">Authenticate with The Game Crafter to manage your art tests.</p>
+            <div class="mt-4">
+              <a class="btn btn-primary w-100" href="auth/tgc/sso/start">Sign in with TGC</a>
+            </div>
+            <div class="mt-3 text-muted">
+              <p class="mb-2">Public art tests do not require a TGC account.</p>
+              <p class="mb-0">Follow the link you were given to vote.</p>
+            </div>
           </div>
         </section>
 

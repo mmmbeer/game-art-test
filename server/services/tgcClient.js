@@ -51,6 +51,21 @@ export async function createSession({ username, password }) {
   });
 }
 
+export async function createSessionFromSso({ ssoId, privateKey }) {
+  if (!ssoId) {
+    throw new Error("Missing SSO id");
+  }
+  if (!privateKey) {
+    throw new Error("Missing TGC private key");
+  }
+  return request(`/session/sso/${ssoId}`, {
+    method: "POST",
+    params: {
+      private_key: privateKey,
+    },
+  });
+}
+
 export async function fetchUser({ tgcUserId, sessionId, includeRelationships = false }) {
   return request(`/user/${tgcUserId}`, {
     method: "GET",
