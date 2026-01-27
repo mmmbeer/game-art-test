@@ -32,20 +32,27 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
   const fileCache = new Map();
 
   for (const relationship of relationshipEntries) {
+    if (!relationship.key) {
+      continue;
+    }
+    let items = relationship.items || [];
     let response;
     try {
-      response = relationship.href
-        ? await listRelationshipByUrl({
-            url: relationship.href,
-            sessionId,
-            includeRelationships: true,
-          })
-        : await listGameRelationship({
-            gameId: tgcGameId,
-            relationship: relationship.key,
-            sessionId,
-            includeRelationships: true,
-          });
+      if (!items.length) {
+        response = relationship.href
+          ? await listRelationshipByUrl({
+              url: relationship.href,
+              sessionId,
+              includeRelationships: true,
+            })
+          : await listGameRelationship({
+              gameId: tgcGameId,
+              relationship: relationship.key,
+              sessionId,
+              includeRelationships: true,
+            });
+        items = extractItems(response);
+      }
     } catch (error) {
       const message = String(error?.message || "");
       if (message.toLowerCase().includes("resource not found")) {
@@ -53,7 +60,6 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
       }
       throw error;
     }
-    const items = extractItems(response);
 
     for (const item of items) {
       const normalized = await normalizeAsset({
@@ -91,7 +97,11 @@ function extractRelationshipEntries(gameResult) {
       }
       return false;
     })
-    .map(({ key, value }) => ({ key, href: typeof value === "string" ? value : "" }));
+    .map(({ key, value }) => ({
+      key,
+      href: typeof value === "string" ? value : "",
+      items: Array.isArray(value?.items) ? value.items : Array.isArray(value) ? value : [],
+    }));
 }
 
 async function normalizeAsset({ relationship, item, sessionId, fileCache }) {
