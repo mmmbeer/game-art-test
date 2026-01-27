@@ -48,6 +48,33 @@ export async function upsertAssetsForGame(gameId, assets) {
   }
 }
 
+export async function getAssetSummaryByUserId(userId) {
+  const [totalRows] = await pool.query(
+    "SELECT g.id AS game_id, COUNT(a.id) AS asset_count FROM games g LEFT JOIN assets a ON a.game_id = g.id WHERE g.user_id = ? GROUP BY g.id",
+    [userId]
+  );
+  const [typeRows] = await pool.query(
+    "SELECT g.id AS game_id, a.asset_type, COUNT(*) AS asset_count FROM games g JOIN assets a ON a.game_id = g.id WHERE g.user_id = ? GROUP BY g.id, a.asset_type",
+    [userId]
+  );
+
+  const summary = new Map();
+  for (const row of totalRows) {
+    summary.set(row.game_id, {
+      assetCount: Number(row.asset_count) || 0,
+      typeCounts: {},
+    });
+  }
+  for (const row of typeRows) {
+    if (!summary.has(row.game_id)) {
+      summary.set(row.game_id, { assetCount: 0, typeCounts: {} });
+    }
+    const entry = summary.get(row.game_id);
+    entry.typeCounts[row.asset_type] = Number(row.asset_count) || 0;
+  }
+  return summary;
+}
+
 function parseJson(value) {
   if (!value) {
     return {};

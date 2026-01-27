@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import {
   extractItems,
+  fetchFile,
   fetchDesigner,
   fetchGame,
   fetchUser,
@@ -10,7 +11,7 @@ import {
 } from "../services/tgcClient.js";
 import { getGameByUuidForUser, getGamesByUserId, syncGamesForUser } from "../db/games.js";
 import { discoverGameAssets } from "../services/tgcAssets.js";
-import { getAssetsByGameId, upsertAssetsForGame } from "../db/assets.js";
+import { getAssetSummaryByUserId, getAssetsByGameId, upsertAssetsForGame } from "../db/assets.js";
 import { createDeterministicUuid } from "../utils/uuid.js";
 
 const router = Router();
@@ -181,12 +182,14 @@ router.get("/", requireAuth, async (req, res) => {
     await syncGamesForUser(user.id, normalized);
 
     const storedGames = await getGamesByUserId(user.id);
+    const assetSummary = await getAssetSummaryByUserId(user.id);
     const gameDesignerMap = new Map(
       Array.from(combinedMap.values()).map((game) => [game.id, game.designer_id || null])
     );
     const designersPayload = Array.from(designerMap.values()).sort((a, b) =>
       a.name.localeCompare(b.name)
     );
+    const gameImageMap = await buildGameImageMap(combinedMap, tgcSessionId);
 
     return res.status(200).json({
       user: {
@@ -200,6 +203,9 @@ router.get("/", requireAuth, async (req, res) => {
       games: storedGames.map((game) => ({
         uuid: game.uuid,
         name: game.name,
+        asset_count: assetSummary.get(game.id)?.assetCount || 0,
+        asset_type_counts: assetSummary.get(game.id)?.typeCounts || {},
+        shop_image_url: gameImageMap.get(game.tgc_game_id) || null,
         designer_uuid: resolveDesignerUuid(gameDesignerMap.get(game.tgc_game_id), designerMap),
       })),
     });
@@ -248,6 +254,72 @@ function resolveDesignerUuid(tgcDesignerId, designerMap) {
     return null;
   }
   return designerMap.get(tgcDesignerId)?.uuid || createDeterministicUuid(`designer:${tgcDesignerId}`);
+}
+
+function getFilePreviewUrl(file) {
+  if (!file || typeof file !== "object") {
+    return "";
+  }
+  return (
+    file.preview_uri ||
+    file.file_uri ||
+    file.thumb_uri ||
+    file.image_uri ||
+    file.url ||
+    ""
+  );
+}
+
+async function resolveGameImage(game, sessionId) {
+  if (!game) {
+    return "";
+  }
+  const candidates = [
+    { object: game.advertisement, id: game.advertisement_id },
+    { object: game.logo, id: game.logo_id },
+    { object: game.backdrop, id: game.backdrop_id },
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate.object) {
+      const url = getFilePreviewUrl(candidate.object);
+      if (url) {
+        return url;
+      }
+    }
+    if (candidate.id) {
+      try {
+        const file = await fetchFile({ fileId: candidate.id, sessionId });
+        const url = getFilePreviewUrl(file);
+        if (url) {
+          return url;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+  }
+  return "";
+}
+
+async function buildGameImageMap(gameMap, sessionId) {
+  const entries = Array.from(gameMap.values());
+  const resolved = await Promise.all(
+    entries.map(async (game) => ({
+      id: game.id,
+      url: await resolveGameImage(game, sessionId),
+    }))
+  );
+  const map = new Map();
+  resolved.forEach((item) => {
+    if (!item?.id) {
+      return;
+    }
+    if (item.url) {
+      map.set(item.id, item.url);
+    }
+  });
+  return map;
 }
 
 function groupAssetsByType(assets) {

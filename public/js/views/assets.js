@@ -68,7 +68,9 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
   assetGameDesigner.textContent = game.designer_name
     ? `Designer: ${game.designer_name}`
     : "Designer unavailable";
-  assetMetrics.textContent = "";
+  assetMetrics.textContent = Number.isFinite(Number(game.asset_count))
+    ? `Known assets: ${game.asset_count}`
+    : "";
   assetStatus.textContent = "Loading assets...";
   assetGroups.innerHTML = "";
   assetsLoading.classList.remove("d-none");
@@ -159,6 +161,7 @@ function renderGroupItems(type, append) {
   nextItems.forEach((asset) => {
     const card = document.createElement("button");
     const preview = asset.metadata?.preview_urls?.[0] || asset.image_url;
+    const cardCount = resolveCardCount(asset);
     card.type = "button";
     card.className = "asset-card";
     card.dataset.assetId = asset.uuid;
@@ -169,7 +172,9 @@ function renderGroupItems(type, append) {
       </div>
       <div class="asset-info">
         <p class="asset-title">${asset.asset_type}</p>
-        <p class="asset-meta">DPI: ${asset.dpi || "n/a"}</p>
+        <p class="asset-meta">
+          DPI: ${asset.dpi || "n/a"}${cardCount ? ` • Cards: ${cardCount}` : ""}
+        </p>
       </div>
     `;
     container.appendChild(card);
@@ -222,13 +227,40 @@ function applyLazyLoading(container) {
 
 function openPreview(asset) {
   const preview = asset.metadata?.image_urls?.[0] || asset.image_url;
+  const cardCount = resolveCardCount(asset);
   assetPreviewTitle.textContent = asset.asset_type;
   assetPreviewImage.src = preview;
   assetPreviewImage.alt = asset.asset_type;
   assetPreviewMeta.innerHTML = `
     <p><strong>Asset ID:</strong> ${asset.tgc_asset_id}</p>
     <p><strong>DPI:</strong> ${asset.dpi || "n/a"}</p>
+    ${cardCount ? `<p><strong>Cards:</strong> ${cardCount}</p>` : ""}
   `;
   const modal = bootstrap.Modal.getOrCreateInstance(assetPreviewModal);
   modal.show();
+}
+
+function resolveCardCount(asset) {
+  if (!asset || typeof asset !== "object") {
+    return 0;
+  }
+  const source = asset.metadata?.source || {};
+  const direct =
+    Number(source.card_count) ||
+    Number(source.cards_count) ||
+    Number(source.card_total) ||
+    0;
+  if (direct) {
+    return direct;
+  }
+  if (Array.isArray(source.cards)) {
+    return source.cards.length;
+  }
+  if (Array.isArray(source.card_ids)) {
+    return source.card_ids.length;
+  }
+  if (Array.isArray(source.fronts)) {
+    return source.fronts.length;
+  }
+  return 0;
 }

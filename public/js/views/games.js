@@ -7,10 +7,6 @@ const gamesList = document.getElementById("gamesList");
 const gameSearch = document.getElementById("gameSearch");
 const designerFilter = document.getElementById("designerFilter");
 const clearFilters = document.getElementById("clearFilters");
-const confirmGame = document.getElementById("confirmGame");
-const selectedGamePanel = document.getElementById("selectedGamePanel");
-const selectedGameName = document.getElementById("selectedGameName");
-const selectedGameMeta = document.getElementById("selectedGameMeta");
 const gamesLoading = document.getElementById("gamesLoading");
 
 let games = [];
@@ -21,29 +17,20 @@ let currentFilter = {
 };
 
 export function initGamesView({ onBrowseAssets, onAuthLost }) {
-  confirmGame.addEventListener("click", () => {
-    const selected = getSelectedGameUuid();
-    if (!selected) {
-      showToast("Select a game to continue.", "warning");
-      return;
-    }
-    const game = games.find((item) => item.uuid === selected);
-    if (!game) {
-      showToast("Selected game not found.", "danger");
-      return;
-    }
-    onBrowseAssets({ ...game, designer_name: resolveDesignerName(game.designer_uuid) });
-  });
-
   gamesList.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-game-uuid]");
     if (!button) {
       return;
     }
     const uuid = button.dataset.gameUuid;
+    const game = games.find((item) => item.uuid === uuid);
+    if (!game) {
+      showToast("Selected game not found.", "danger");
+      return;
+    }
     setSelectedGameUuid(uuid);
-    renderSelectedGame();
     renderGames();
+    onBrowseAssets({ ...game, designer_name: resolveDesignerName(game.designer_uuid) });
   });
 
   gameSearch.addEventListener("input", debounce((event) => {
@@ -67,7 +54,6 @@ export function initGamesView({ onBrowseAssets, onAuthLost }) {
     loadGames: async () => {
       gamesLoading.classList.remove("d-none");
       gamesList.innerHTML = "";
-      selectedGamePanel.classList.add("d-none");
       try {
         const { response, data } = await fetchJson("games");
         if (response.status === 401) {
@@ -86,7 +72,6 @@ export function initGamesView({ onBrowseAssets, onAuthLost }) {
           ? `Signed in as ${data.user.display_name}`
           : "Signed in";
         renderDesignerFilter();
-        renderSelectedGame();
         renderGames();
         return true;
       } finally {
@@ -109,21 +94,6 @@ function renderDesignerFilter() {
     });
 }
 
-function renderSelectedGame() {
-  const selected = getSelectedGameUuid();
-  const game = games.find((item) => item.uuid === selected);
-  if (!game) {
-    selectedGamePanel.classList.add("d-none");
-    selectedGameName.textContent = "";
-    selectedGameMeta.textContent = "";
-    return;
-  }
-  const designerName = resolveDesignerName(game.designer_uuid);
-  selectedGamePanel.classList.remove("d-none");
-  selectedGameName.textContent = game.name;
-  selectedGameMeta.textContent = designerName ? `Designer: ${designerName}` : "Designer unavailable";
-}
-
 function renderGames() {
   gamesList.innerHTML = "";
   const selected = getSelectedGameUuid();
@@ -136,6 +106,15 @@ function renderGames() {
       : true;
     return matchesQuery && matchesDesigner;
   });
+  filtered.sort((a, b) => {
+    if (a.uuid === selected && b.uuid !== selected) {
+      return -1;
+    }
+    if (b.uuid === selected && a.uuid !== selected) {
+      return 1;
+    }
+    return a.name.localeCompare(b.name);
+  });
 
   if (!filtered.length) {
     gamesList.innerHTML = "<p class=\"text-muted\">No games match your filters.</p>";
@@ -143,19 +122,30 @@ function renderGames() {
   }
 
   filtered.forEach((game) => {
-    const button = document.createElement("button");
+    const card = document.createElement("div");
     const isSelected = selected === game.uuid;
-    button.type = "button";
-    button.className = `game-item ${isSelected ? "is-selected" : ""}`;
-    button.dataset.gameUuid = game.uuid;
-    button.innerHTML = `
-      <div>
-        <p class="game-name">${game.name}</p>
-        <p class="game-meta">${resolveDesignerName(game.designer_uuid) || "Designer unavailable"}</p>
+    const imageUrl = game.shop_image_url;
+    card.className = `game-item ${isSelected ? "is-selected" : ""}`;
+    card.innerHTML = `
+      <div class="game-thumb">
+        ${imageUrl ? `<img src="${imageUrl}" alt="${game.name}">` : "<span>IMG</span>"}
       </div>
-      <span class="game-select">${isSelected ? "Selected" : "Select"}</span>
+      <div class="game-body">
+        <div class="game-top">
+          <div class="game-title">
+            <p class="game-name">${game.name}</p>
+          </div>
+          <button class="btn btn-primary btn-sm" type="button" data-game-uuid="${game.uuid}">
+            Select
+          </button>
+        </div>
+        <p class="game-meta">${resolveDesignerName(game.designer_uuid) || "Designer unavailable"}</p>
+        <div class="game-pills">
+          ${renderPills(game)}
+        </div>
+      </div>
     `;
-    gamesList.appendChild(button);
+    gamesList.appendChild(card);
   });
 }
 
@@ -165,6 +155,26 @@ function resolveDesignerName(designerUuid) {
   }
   const match = designers.find((designer) => designer.uuid === designerUuid);
   return match?.name || "";
+}
+
+function renderPills(game) {
+  const pills = [];
+  const totalCount = Number(game.asset_count) || 0;
+  pills.push(`<span class="pill">${totalCount} assets</span>`);
+
+  const counts = game.asset_type_counts || {};
+  const entries = Object.entries(counts)
+    .filter(([, count]) => Number(count) > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  const maxShown = 5;
+  entries.slice(0, maxShown).forEach(([type, count]) => {
+    pills.push(`<span class="pill pill-muted">${type}: ${count}</span>`);
+  });
+  if (entries.length > maxShown) {
+    pills.push(`<span class="pill pill-muted">+${entries.length - maxShown} more</span>`);
+  }
+  return pills.join("");
 }
 
 function debounce(fn, delay) {

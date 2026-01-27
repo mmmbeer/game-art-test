@@ -3,7 +3,7 @@ import pool from "./pool.js";
 
 export async function getGamesByUserId(userId) {
   const [rows] = await pool.query(
-    "SELECT uuid, tgc_game_id, name FROM games WHERE user_id = ? ORDER BY name",
+    "SELECT id, uuid, tgc_game_id, name FROM games WHERE user_id = ? ORDER BY name",
     [userId]
   );
   return rows;
