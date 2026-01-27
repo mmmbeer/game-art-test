@@ -102,8 +102,33 @@ export async function fetchGame({ gameId, sessionId, includeRelationships = fals
   });
 }
 
+export async function fetchDeck({ deckId, sessionId, includeRelationships = false }) {
+  return request(`/deck/${deckId}`, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+      _include_relationships: includeRelationships ? 1 : undefined,
+    },
+  });
+}
+
 export async function listGameRelationship({ gameId, relationship, sessionId, includeRelationships = false }) {
   return request(`/game/${gameId}/${relationship}`, {
+    method: "GET",
+    params: {
+      session_id: sessionId,
+      _include_relationships: includeRelationships ? 1 : undefined,
+    },
+  });
+}
+
+export async function listDeckRelationship({
+  deckId,
+  relationship,
+  sessionId,
+  includeRelationships = false,
+}) {
+  return request(`/deck/${deckId}/${relationship}`, {
     method: "GET",
     params: {
       session_id: sessionId,

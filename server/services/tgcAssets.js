@@ -1,8 +1,10 @@
 import {
   extractItems,
+  fetchDeck,
   fetchFile,
   fetchGame,
   listGameRelationship,
+  listDeckRelationship,
   listRelationshipByUrl,
 } from "./tgcClient.js";
 
@@ -71,6 +73,21 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
       if (normalized) {
         assets.push(normalized);
       }
+
+      if (isDeckItem(item, relationship.key)) {
+        const deckCards = await fetchDeckCards({ deckId: item.id, sessionId });
+        for (const card of deckCards) {
+          const normalizedCard = await normalizeAsset({
+            relationship: "card",
+            item: card,
+            sessionId,
+            fileCache,
+          });
+          if (normalizedCard) {
+            assets.push(normalizedCard);
+          }
+        }
+      }
     }
   }
 
@@ -102,6 +119,48 @@ function extractRelationshipEntries(gameResult) {
       href: typeof value === "string" ? value : "",
       items: Array.isArray(value?.items) ? value.items : Array.isArray(value) ? value : [],
     }));
+}
+
+function isDeckItem(item, relationshipKey) {
+  const type = String(item?.object_type || relationshipKey || "");
+  return type.toLowerCase().includes("deck");
+}
+
+async function fetchDeckCards({ deckId, sessionId }) {
+  let deckResult = null;
+  try {
+    deckResult = await fetchDeck({ deckId, sessionId, includeRelationships: true });
+  } catch (error) {
+    deckResult = null;
+  }
+
+  const relationshipEntries = extractRelationshipEntries(deckResult || {});
+  const cardsRel = relationshipEntries.find((entry) => entry.key === "cards");
+  let items = cardsRel?.items || [];
+  if (!items.length) {
+    try {
+      if (cardsRel?.href) {
+        const response = await listRelationshipByUrl({
+          url: cardsRel.href,
+          sessionId,
+          includeRelationships: true,
+        });
+        items = extractItems(response);
+      } else {
+        const response = await listDeckRelationship({
+          deckId,
+          relationship: "cards",
+          sessionId,
+          includeRelationships: true,
+        });
+        items = extractItems(response);
+      }
+    } catch (error) {
+      items = [];
+    }
+  }
+
+  return items;
 }
 
 async function normalizeAsset({ relationship, item, sessionId, fileCache }) {
