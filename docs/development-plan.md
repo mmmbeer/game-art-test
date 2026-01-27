@@ -351,6 +351,7 @@ No login required for testers. Public art test links must allow anonymous voting
 * Deck asset discovery now pulls deck card relationships for card inclusion
 * Card assets are hidden from asset groups and only flow into tests via their parent decks
 * Card assets are split into face/back entries so deck selection includes both sides
+* Asset type rows now include a preview strip with expandable selection lists and tri-state checkmarks
 
 **Testing**
 

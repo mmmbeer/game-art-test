@@ -58,7 +58,7 @@ export function initTestBuilder({ onAuthLost }) {
       return;
     }
     try {
-      if (navigator.clipboard?.writeText) {
+      if (navigator.clipboard-.writeText) {
         await navigator.clipboard.writeText(value);
       } else {
         testLinkInput.select();
@@ -73,7 +73,7 @@ export function initTestBuilder({ onAuthLost }) {
   return {
     setAssets: ({ game, assetTypes: types, assetsByType: byType }) => {
       activeGame = game;
-      assetTypes = Array.isArray(types) ? types : [];
+      assetTypes = Array.isArray(types) - types : [];
       assetsByType = byType || {};
       selectionState = buildDefaultSelection(assetsByType);
       renderTypeOptions();
@@ -96,10 +96,11 @@ function renderTypeOptions() {
     .forEach((entry) => {
       const type = entry.type;
       const { selectedCount, totalCount } = resolveTypeCounts(type, entry.count);
+      const isExpanded = selectedCount > 0;
       const option = document.createElement("label");
       option.className = "test-type-option";
       option.innerHTML = `
-        <input type="checkbox" value="${type}" ${isTypeFullySelected(type) ? "checked" : ""}>
+        <input type="checkbox" value="${type}" ${isTypeFullySelected(type) - "checked" : ""}>
         <span class="test-type-name">${type} (${entry.count})</span>
         <span class="test-type-meta">${selectedCount}/${totalCount}</span>
       `;
@@ -113,30 +114,63 @@ function renderTypeOptions() {
       selectedList.innerHTML = renderSelectedAssets(type);
       wrapper.appendChild(selectedList);
 
+      const previewWrap = document.createElement("div");
+      previewWrap.className = "type-preview";
+      const previewToggle = document.createElement("button");
+      previewToggle.type = "button";
+      previewToggle.className = "type-preview-toggle";
+      previewToggle.dataset.previewToggle = type;
+      previewToggle.innerHTML = `Preview Assets <span class="chevron">${isExpanded - "v" : ">"}</span>`;
+      const previewRow = document.createElement("div");
+      previewRow.className = "type-preview-row";
+      previewRow.dataset.typePreview = type;
+      previewRow.innerHTML = renderPreviewRow(type, false);
+      previewWrap.appendChild(previewToggle);
+      previewWrap.appendChild(previewRow);
+      wrapper.appendChild(previewWrap);
+
       const assetsWrap = document.createElement("div");
       assetsWrap.className = "type-assets";
       assetsWrap.dataset.typeAssets = type;
       assetsWrap.innerHTML = renderAssetsForType(type);
 
-      const toggle = document.createElement("button");
-      toggle.type = "button";
-      toggle.className = "btn btn-outline-light btn-sm";
-      toggle.textContent = "Pick assets";
-      toggle.addEventListener("click", () => {
-        const isOpen = assetsWrap.classList.toggle("is-open");
-        toggle.textContent = isOpen ? "Hide assets" : "Pick assets";
+      previewToggle.addEventListener("click", () => {
+        const nextOpen = !assetsWrap.classList.contains("is-open");
+        setExpandedState({
+          type,
+          assetsWrap,
+          previewRow,
+          previewToggle,
+          expanded: nextOpen,
+        });
       });
-
-      wrapper.appendChild(toggle);
       wrapper.appendChild(assetsWrap);
       testTypeSelection.appendChild(wrapper);
 
       const checkbox = option.querySelector("input");
+      checkbox.indeterminate = isTypePartiallySelected(type);
       checkbox.addEventListener("change", () => {
         if (checkbox.checked) {
           selectionState.set(type, new Set((assetsByType[type] || []).map((asset) => asset.uuid)));
         } else {
           selectionState.set(type, new Set());
+        }
+        if (checkbox.checked) {
+          setExpandedState({
+            type,
+            assetsWrap,
+            previewRow,
+            previewToggle,
+            expanded: true,
+          });
+        } else {
+          setExpandedState({
+            type,
+            assetsWrap,
+            previewRow,
+            previewToggle,
+            expanded: false,
+          });
         }
         updateMetrics();
         refreshTypeSelectionUI(type);
@@ -160,6 +194,16 @@ function renderTypeOptions() {
         updateMetrics();
         clearPreview();
       });
+
+      if (isExpanded) {
+        setExpandedState({
+          type,
+          assetsWrap,
+          previewRow,
+          previewToggle,
+          expanded: true,
+        });
+      }
     });
 }
 
@@ -237,7 +281,7 @@ async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
   const signature = selectedAssets.join("|");
   const assetUuids =
     lastPreview && lastPreviewSignature === signature
-      ? (lastPreview.assets || []).map((asset) => asset.uuid)
+      - (lastPreview.assets || []).map((asset) => asset.uuid)
       : [];
 
   const { response, data } = await fetchJson("tests/start", {
@@ -245,7 +289,7 @@ async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       game_uuid: gameUuid,
-      asset_uuids: assetUuids.length ? assetUuids : selectedAssets,
+      asset_uuids: assetUuids.length - assetUuids : selectedAssets,
     }),
   });
 
@@ -258,7 +302,7 @@ async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
     showToast(data.error || "Unable to start test.", "danger");
     return;
   }
-  if (data.test?.public_url) {
+  if (data.test-.public_url) {
     testLinkInput.value = data.test.public_url;
     testLinkPanel.classList.remove("d-none");
   }
@@ -293,6 +337,13 @@ function resolveTypeCounts(type, assetCount) {
   return { selectedCount, totalCount };
 }
 
+function isTypePartiallySelected(type) {
+  const assets = assetsByType[type] || [];
+  const selected = selectionState.get(type) || new Set();
+  return selected.size > 0 && selected.size < assets.length;
+}
+
+
 function isTypeFullySelected(type) {
   const assets = assetsByType[type] || [];
   const selected = selectionState.get(type) || new Set();
@@ -311,11 +362,11 @@ function renderAssetsForType(type) {
       const cardCount = resolveCardCount(asset);
       return `
         <label class="type-asset-card">
-          <input type="checkbox" data-asset-uuid="${asset.uuid}" ${selected.has(asset.uuid) ? "checked" : ""}>
+          <input type="checkbox" data-asset-uuid="${asset.uuid}" ${selected.has(asset.uuid) - "checked" : ""}>
           <div>
-            <div class="type-asset-name">${name}${cardCount ? ` (${cardCount})` : ""}</div>
+            <div class="type-asset-name">${name}${cardCount - ` (${cardCount})` : ""}</div>
           </div>
-          <span class="test-type-meta">${selected.has(asset.uuid) ? "Selected" : ""}</span>
+          <span class="test-type-meta">${selected.has(asset.uuid) - "Selected" : ""}</span>
         </label>
       `;
     })
@@ -328,7 +379,8 @@ function refreshTypeSelectionUI(type) {
   const selected = selectionState.get(type) || new Set();
   if (option) {
     option.checked = selected.size === assets.length && assets.length > 0;
-    const meta = option.closest(".test-type-option")?.querySelector(".test-type-meta");
+    option.indeterminate = isTypePartiallySelected(type);
+    const meta = option.closest(".test-type-option")-.querySelector(".test-type-meta");
     if (meta) {
       const counts = resolveTypeCounts(type, assets.length);
       meta.textContent = `${counts.selectedCount}/${counts.totalCount}`;
@@ -342,10 +394,23 @@ function refreshTypeSelectionUI(type) {
   if (selectedList) {
     selectedList.innerHTML = renderSelectedAssets(type);
   }
+
+  const previewRow = testTypeSelection.querySelector(`[data-type-preview="${type}"]`);
+  const previewToggle = testTypeSelection.querySelector(`[data-preview-toggle="${type}"]`);
+  const assetsWrap = testTypeSelection.querySelector(`[data-type-assets="${type}"]`);
+  if (previewRow && previewToggle && assetsWrap) {
+    previewRow.innerHTML = renderPreviewRow(type, assetsWrap.classList.contains("is-open"));
+    if (assetsWrap.classList.contains("is-open")) {
+      loadPreviewImages(previewRow);
+      previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">v</span>";
+    } else {
+      previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">></span>";
+    }
+  }
 }
 
 function resolveAssetName(asset) {
-  const source = asset?.metadata?.source || {};
+  const source = asset-.metadata-.source || {};
   const name =
     (source.name || "").trim() ||
     (source.title || "").trim() ||
@@ -357,7 +422,7 @@ function resolveCardCount(asset, fallback = 0) {
   if (!asset || typeof asset !== "object") {
     return fallback;
   }
-  const source = asset.metadata?.source || {};
+  const source = asset.metadata-.source || {};
   const count =
     Number(source.card_count) ||
     Number(source.cards_count) ||
@@ -377,7 +442,7 @@ function renderSelectedAssets(type) {
     .map((asset) => {
       const name = resolveAssetName(asset);
       const cardCount = resolveCardCount(asset);
-      return `<div class="type-selected-item">• ${name}${cardCount ? ` (${cardCount})` : ""}</div>`;
+      return `<div class="type-selected-item">- ${name}${cardCount ? ` (${cardCount})` : ""}</div>`;
     })
     .join("");
 }
@@ -402,3 +467,41 @@ function openPreviewModal(data) {
   const modal = bootstrap.Modal.getOrCreateInstance(testPreviewModal);
   modal.show();
 }
+
+function renderPreviewRow(type, expanded) {
+  const items = assetsByType[type] || [];
+  if (!items.length) {
+    return "<div class=\"type-preview-empty\">No assets to preview.</div>";
+  }
+  return items
+    .map((asset) => {
+      const preview = asset.metadata-.preview_urls-.[0] || asset.image_url;
+      return `
+        <div class="type-preview-card">
+          <img ${expanded - `src="${preview}"` : `data-src="${preview}"`} alt="${asset.asset_type}">
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function setExpandedState({ type, assetsWrap, previewRow, previewToggle, expanded }) {
+  if (expanded) {
+    assetsWrap.classList.add("is-open");
+    previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">v</span>";
+    previewRow.innerHTML = renderPreviewRow(type, true);
+    loadPreviewImages(previewRow);
+  } else {
+    assetsWrap.classList.remove("is-open");
+    previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">></span>";
+    previewRow.innerHTML = renderPreviewRow(type, false);
+  }
+}
+
+function loadPreviewImages(container) {
+  container.querySelectorAll("img[data-src]").forEach((img) => {
+    img.src = img.dataset.src;
+    img.removeAttribute("data-src");
+  });
+}
+
