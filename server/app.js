@@ -15,6 +15,7 @@ const publicDir = path.resolve(__dirname, "..", "public");
 const basePath = normalizeBasePath(env.app.basePath);
 
 app.use(express.json({ limit: "100kb" }));
+app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 app.use(cookieParser());
 app.use(basePath, express.static(publicDir));
 app.use(`${basePath}/auth/tgc`, authRoutes);

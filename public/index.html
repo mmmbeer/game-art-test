@@ -29,7 +29,7 @@
           <div class="card-body">
             <h2 class="card-title">Sign in to The Game Crafter</h2>
             <p class="card-subtitle">Use your TGC username and password.</p>
-            <form id="loginForm" class="mt-4" novalidate>
+            <form id="loginForm" class="mt-4" method="post" action="auth/tgc/login" novalidate>
               <div class="mb-3">
                 <label class="form-label" for="username">Username</label>
                 <input class="form-control" id="username" name="username" type="text" autocomplete="username" required>
