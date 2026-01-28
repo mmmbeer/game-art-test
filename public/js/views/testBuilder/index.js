@@ -16,6 +16,9 @@ const previewTest = document.getElementById("previewTest");
 const startTest = document.getElementById("startTest");
 const testPreviewLoading = document.getElementById("testPreviewLoading");
 const testPreview = document.getElementById("testPreview");
+const testPreviewModal = document.getElementById("testPreviewModal");
+const testPreviewSummary = document.getElementById("testPreviewSummary");
+const testPreviewScroll = document.getElementById("testPreviewScroll");
 const testLinkPanel = document.getElementById("testLinkPanel");
 const testLinkInput = document.getElementById("testLinkInput");
 const copyTestLink = document.getElementById("copyTestLink");
@@ -43,7 +46,10 @@ export function initTestBuilder({ onAuthLost }) {
       showToast("Select at least one asset to preview.", "warning");
       return;
     }
-    await loadPreview({ gameUuid: activeGame.uuid, selectedAssets, onAuthLost });
+    const preview = await loadPreview({ gameUuid: activeGame.uuid, selectedAssets, onAuthLost });
+    if (preview) {
+      openPreviewModal(preview);
+    }
   });
 
   startTest.addEventListener("click", async () => {
@@ -243,11 +249,12 @@ async function loadPreview({ gameUuid, selectedAssets, onAuthLost }) {
     }
     if (!response.ok) {
       showToast(data.error || "Unable to build preview.", "danger");
-      return;
+      return null;
     }
     lastPreview = data;
     lastPreviewSignature = selectedAssets.join("|");
     renderPreview(data);
+    return data;
   } finally {
     testPreviewLoading.classList.add("d-none");
   }
@@ -264,6 +271,27 @@ function renderPreview(data) {
     <p class=\"mb-2\">${metaLine}</p>
     <p class=\"text-muted mb-0\">Open preview modal to view the randomized set.</p>
   `;
+}
+
+function openPreviewModal(data) {
+  if (!testPreviewModal || !testPreviewSummary || !testPreviewScroll) {
+    return;
+  }
+  const assets = Array.isArray(data.assets) ? data.assets : [];
+  testPreviewSummary.textContent = `Previewing ${data.sample_size} of ${data.pool_count} eligible assets.`;
+  testPreviewScroll.innerHTML = assets
+    .map((asset) => {
+      const image = asset.image_url || "";
+      return `
+        <div class="test-preview-scroll-card">
+          <img src="${image}" alt="${asset.asset_type || "Asset"}">
+          <div class="test-preview-meta">${asset.asset_type || "Asset"}${asset.dpi ? ` • ${asset.dpi} DPI` : ""}</div>
+        </div>
+      `;
+    })
+    .join("");
+  const modal = bootstrap.Modal.getOrCreateInstance(testPreviewModal);
+  modal.show();
 }
 
 async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
