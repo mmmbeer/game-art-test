@@ -195,7 +195,7 @@ function displayAsset(asset) {
   assetImage.alt = asset.asset_type || "Art asset";
   assetImage.onload = () => {
     assetImage.classList.add("loaded");
-    resetZoom();
+    resetZoom({ showIndicator: false });
   };
   assetImage.onerror = () => showToast("Unable to load image.", "error");
 }
@@ -314,14 +314,14 @@ function bindZoomEvents() {
 }
 
 function setZoom(nextScale) {
-  zoomState.scale = Math.min(4, Math.max(1, nextScale));
+  zoomState.scale = Math.min(4, Math.max(0.1, nextScale));
   assetImage.style.transform = `scale(${zoomState.scale})`;
   showZoomIndicator(1800);
 }
 
 function resetZoom({ showIndicator = true } = {}) {
-  zoomState.scale = 1;
-  assetImage.style.transform = "scale(1)";
+  zoomState.scale = getFitScale();
+  assetImage.style.transform = `scale(${zoomState.scale})`;
   if (showIndicator) {
     showZoomIndicator(1800);
   }
@@ -356,6 +356,20 @@ function scheduleZoomIndicatorHide(delayMs) {
   zoomState.hideTimer = setTimeout(() => {
     zoomIndicator.classList.remove("is-visible");
   }, delayMs);
+}
+
+function getFitScale() {
+  if (!assetImage?.naturalWidth || !assetImage?.naturalHeight || !assetFrame) {
+    return 1;
+  }
+  const frameWidth = assetFrame.clientWidth || 1;
+  const frameHeight = assetFrame.clientHeight || 1;
+  const scale = Math.min(
+    frameWidth / assetImage.naturalWidth,
+    frameHeight / assetImage.naturalHeight,
+    1
+  );
+  return Number.isFinite(scale) && scale > 0 ? scale : 1;
 }
 
 function applyStarPreview(group, value) {
