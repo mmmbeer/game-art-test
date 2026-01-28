@@ -267,7 +267,7 @@ function displayAsset(asset) {
   assetType.textContent = asset.asset_type || "Art asset";
   assetImage.classList.remove("loaded");
   updateOverlaySource(asset);
-  resetViewState({ preserveOverlay: true, preserveBackground: true, preserveZoomMode: true });
+  resetViewState({ preserveOverlay: true, preserveBackground: true, preserveZoomMode: false });
   assetImage.src = asset.image_url || "";
   assetImage.alt = asset.asset_type || "Art asset";
   assetImage.onload = () => {
@@ -595,18 +595,20 @@ function updateZoomToolState() {
 
 function applyRandomDrift() {
   const drift = 80;
-  const x = Math.round((Math.random() * 2 - 1) * drift);
-  const y = Math.round((Math.random() * 2 - 1) * drift);
+  const scale = Math.max(0.1, zoomState.scale || 1);
+  const adjusted = drift / scale;
+  const x = Math.round((Math.random() * 2 - 1) * adjusted);
+  const y = Math.round((Math.random() * 2 - 1) * adjusted);
   viewState.driftOffset = { x, y };
   updateTransforms();
 }
 
 function resolveOverlayTemplate(asset) {
   const meta = asset?.metadata || {};
-  const source = meta?.source || meta || {};
-  const templates = findTemplates(source);
+  const templates = findTemplates(meta) || findTemplates(meta?.source || {});
   if (!templates) {
-    return "";
+    const fallback = findTemplateFile(meta);
+    return fallback ? normalizeTemplateUrl(fallback) : "";
   }
   const file =
     templates.PNG ||
@@ -614,14 +616,7 @@ function resolveOverlayTemplate(asset) {
     templates.SVG ||
     templates.png ||
     firstTemplateValue(templates);
-  if (typeof file !== "string" || !file.trim()) {
-    return "";
-  }
-  const trimmed = file.trim();
-  if (trimmed.startsWith("http")) {
-    return trimmed;
-  }
-  return `${TEMPLATE_BASE}${trimmed.replace(/^\/+/, "")}`;
+  return normalizeTemplateUrl(file);
 }
 
 function findTemplates(value, depth = 0, visited = new Set()) {
@@ -647,6 +642,52 @@ function findTemplates(value, depth = 0, visited = new Set()) {
     }
   }
   return null;
+}
+
+function findTemplateFile(value, depth = 0, visited = new Set()) {
+  if (!value || typeof value !== "object" || depth > 5) {
+    return "";
+  }
+  if (visited.has(value)) {
+    return "";
+  }
+  visited.add(value);
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === "string") {
+      const lowerKey = key.toLowerCase();
+      if (lowerKey.includes("template") && isTemplateFile(entry)) {
+        return entry;
+      }
+      if (isTemplateFile(entry) && lowerKey.includes("png")) {
+        return entry;
+      }
+    } else if (entry && typeof entry === "object") {
+      const found = findTemplateFile(entry, depth + 1, visited);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return "";
+}
+
+function isTemplateFile(value) {
+  if (typeof value !== "string") {
+    return false;
+  }
+  const trimmed = value.trim().toLowerCase();
+  return trimmed.endsWith(".png") || trimmed.endsWith(".svg");
+}
+
+function normalizeTemplateUrl(file) {
+  if (typeof file !== "string" || !file.trim()) {
+    return "";
+  }
+  const trimmed = file.trim();
+  if (trimmed.startsWith("http")) {
+    return trimmed;
+  }
+  return `${TEMPLATE_BASE}${trimmed.replace(/^\/+/, "")}`;
 }
 
 function firstTemplateValue(templates) {
