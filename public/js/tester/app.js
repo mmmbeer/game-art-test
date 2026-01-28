@@ -123,9 +123,8 @@ async function loadNextAsset() {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      assetStatus.textContent = data.error || "Unable to load the next asset.";
       setLoading(false);
-      showToast("Unable to load the next asset.", "error");
+      showToast(data.error || "Unable to load the next asset.", "error");
       return;
     }
 
@@ -138,7 +137,6 @@ async function loadNextAsset() {
     updateTestMeta(data);
     displayAsset(data.asset);
   } catch (error) {
-    assetStatus.textContent = "Network error loading asset.";
     showToast("Network error loading asset.", "error");
   } finally {
     setLoading(false);
