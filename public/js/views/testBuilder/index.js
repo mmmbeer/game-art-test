@@ -1,5 +1,5 @@
-import { fetchJson } from "../api.js";
-import { showToast } from "../toast.js";
+import { fetchJson } from "../../api.js";
+import { showToast } from "../../toast.js";
 import {
   buildDefaultSelection,
   getSelectedAssets,
