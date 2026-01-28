@@ -3,6 +3,7 @@ const assetName = document.getElementById("assetName");
 const assetType = document.getElementById("assetType");
 const assetImage = document.getElementById("assetImage");
 const assetFrame = document.getElementById("assetFrame");
+const zoomIndicator = document.getElementById("zoomIndicator");
 const assetLoading = document.getElementById("assetLoading");
 const ratingPanel = document.getElementById("ratingPanel");
 const submitVote = document.getElementById("submitVote");
@@ -27,6 +28,7 @@ let votedAssets = loadVoteHistory();
 const zoomState = {
   scale: 1,
   lastTouchDistance: null,
+  hideTimer: null,
 };
 
 if (!testUuid) {
@@ -54,6 +56,31 @@ function bindRatingEvents() {
     ratingState[metric] = value;
     updateRatingUI(group, value);
     updateSubmitState();
+  });
+
+  ratingPanel.addEventListener("mouseover", (event) => {
+    const button = event.target.closest(".star-button");
+    if (!button) {
+      return;
+    }
+    const group = event.target.closest(".rating-row");
+    const value = Number.parseInt(button.dataset.value || "0", 10);
+    if (!group || !value) {
+      return;
+    }
+    applyStarPreview(group, value);
+  });
+
+  ratingPanel.addEventListener("mouseout", (event) => {
+    const button = event.target.closest(".star-button");
+    if (!button) {
+      return;
+    }
+    const group = event.target.closest(".rating-row");
+    if (!group) {
+      return;
+    }
+    restoreStars(group);
   });
 
   commentInput.addEventListener("input", () => {
@@ -194,6 +221,7 @@ function updateRatingUI(group, value) {
   group.querySelectorAll(".star-button").forEach((star) => {
     const starValue = Number.parseInt(star.dataset.value || "0", 10);
     star.classList.toggle("is-on", starValue <= value);
+    star.classList.remove("preview");
   });
 }
 
@@ -267,16 +295,70 @@ function bindZoomEvents() {
   assetFrame.addEventListener("touchend", () => {
     zoomState.lastTouchDistance = null;
   });
+
+  assetFrame.addEventListener("mouseenter", () => {
+    showZoomIndicator();
+  });
+
+  assetFrame.addEventListener("mouseleave", () => {
+    hideZoomIndicatorSoon();
+  });
 }
 
 function setZoom(nextScale) {
   zoomState.scale = Math.min(4, Math.max(1, nextScale));
   assetImage.style.transform = `scale(${zoomState.scale})`;
+  showZoomIndicator();
 }
 
 function resetZoom() {
   zoomState.scale = 1;
   assetImage.style.transform = "scale(1)";
+  showZoomIndicator();
+}
+
+function showZoomIndicator() {
+  if (!zoomIndicator) {
+    return;
+  }
+  zoomIndicator.textContent = `${Math.round(zoomState.scale * 100)}%`;
+  zoomIndicator.classList.add("is-visible");
+  if (zoomState.hideTimer) {
+    clearTimeout(zoomState.hideTimer);
+  }
+  zoomState.hideTimer = setTimeout(() => {
+    zoomIndicator.classList.remove("is-visible");
+  }, 1200);
+}
+
+function hideZoomIndicatorSoon() {
+  if (!zoomIndicator) {
+    return;
+  }
+  if (zoomState.hideTimer) {
+    clearTimeout(zoomState.hideTimer);
+  }
+  zoomState.hideTimer = setTimeout(() => {
+    zoomIndicator.classList.remove("is-visible");
+  }, 300);
+}
+
+function applyStarPreview(group, value) {
+  group.querySelectorAll(".star-button").forEach((star) => {
+    const starValue = Number.parseInt(star.dataset.value || "0", 10);
+    star.classList.toggle("preview", starValue <= value);
+  });
+}
+
+function restoreStars(group) {
+  group.querySelectorAll(".star-button").forEach((star) => {
+    star.classList.remove("preview");
+  });
+  const metric = group.dataset.metric;
+  const value = ratingState[metric] || 0;
+  if (value) {
+    updateRatingUI(group, value);
+  }
 }
 
 function showToast(message, variant) {

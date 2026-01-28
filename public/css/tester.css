@@ -14,14 +14,18 @@ body.tester-body {
   font-family: "Space Grotesk", "Segoe UI", sans-serif;
   background: linear-gradient(160deg, #0b1016 0%, #0f1722 60%, #0a0f16 100%);
   color: var(--tester-text);
+  min-height: 100vh;
+  overflow: hidden;
 }
 
 .tester-shell {
   max-width: 640px;
   margin: 0 auto;
-  padding: 10px 12px 24px;
+  padding: 10px 12px 12px;
   display: grid;
   gap: 8px;
+  height: 100vh;
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
 }
 
 .tester-header {
@@ -47,20 +51,18 @@ body.tester-body {
 }
 
 .asset-sticky {
-  position: sticky;
-  top: 0;
   z-index: 2;
   background: var(--tester-bg);
   display: grid;
   gap: 6px;
   padding-bottom: 6px;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
 }
 
 .asset-frame {
   background: var(--tester-panel);
   border: 1px solid var(--tester-border);
-  min-height: 260px;
-  max-height: 360px;
+  min-height: 0;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -89,6 +91,23 @@ body.tester-body {
   align-items: center;
 }
 
+.zoom-indicator {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 2px 6px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--tester-text);
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.zoom-indicator.is-visible {
+  opacity: 0.85;
+}
+
 .pulse-dot {
   width: 8px;
   height: 8px;
@@ -108,6 +127,7 @@ body.tester-body {
 .ratings-panel {
   display: grid;
   gap: 6px;
+  overflow: auto;
 }
 
 .rating-row {
@@ -133,17 +153,43 @@ body.tester-body {
   height: 24px;
   border: none;
   background: transparent;
-  color: var(--tester-muted);
+  color: rgba(255, 255, 255, 0.45);
   background-image: url("../assets/icons/star-outline.svg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 20px 20px;
   cursor: pointer;
   padding: 0;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
 }
 
 .star-button.is-on {
-  color: var(--tester-accent);
+  color: #ffd54a;
+  background-image: url("../assets/icons/star-solid.svg");
+}
+
+.star-button.is-on[data-value="1"] {
+  color: #ffd54a;
+}
+
+.star-button.is-on[data-value="2"] {
+  color: #ffcf4a;
+}
+
+.star-button.is-on[data-value="3"] {
+  color: #ffc04a;
+}
+
+.star-button.is-on[data-value="4"] {
+  color: #ffb14a;
+}
+
+.star-button.is-on[data-value="5"] {
+  color: #ffa64a;
+}
+
+.star-button.preview:not(.is-on) {
+  color: rgba(255, 212, 74, 0.45);
   background-image: url("../assets/icons/star-solid.svg");
 }
 
@@ -255,6 +301,6 @@ body.tester-body {
 
 @media (min-width: 768px) {
   .asset-frame {
-    max-height: 420px;
+    max-height: none;
   }
 }
