@@ -29,6 +29,7 @@ const zoomState = {
   scale: 1,
   lastTouchDistance: null,
   hideTimer: null,
+  isHovering: false,
 };
 
 if (!testUuid) {
@@ -177,7 +178,7 @@ function updateTestMeta(data) {
     testTitle.textContent = "Art test (Designer unavailable)";
   }
   if (data.progress) {
-    remainingAssets.textContent = `${data.progress.remaining_assets} / ${data.progress.total_assets}`;
+    remainingAssets.textContent = `${data.progress.remaining_assets}/${data.progress.total_assets}`;
     minVotes.textContent = data.progress.min_votes;
   }
   sessionVotes.textContent = votedAssets.length.toString();
@@ -189,11 +190,14 @@ function displayAsset(asset) {
   assetName.textContent = resolveAssetName(asset);
   assetType.textContent = asset.asset_type || "Art asset";
   assetImage.classList.remove("loaded");
+  resetZoom({ showIndicator: false });
   assetImage.src = asset.image_url || "";
   assetImage.alt = asset.asset_type || "Art asset";
-  assetImage.onload = () => assetImage.classList.add("loaded");
+  assetImage.onload = () => {
+    assetImage.classList.add("loaded");
+    resetZoom();
+  };
   assetImage.onerror = () => showToast("Unable to load image.", "error");
-  resetZoom();
 }
 
 function setLoading(isLoading) {
@@ -277,6 +281,7 @@ function bindZoomEvents() {
     if (event.touches.length === 2) {
       zoomState.lastTouchDistance = getTouchDistance(event.touches);
     }
+    showZoomIndicator(2000);
   }, { passive: false });
 
   assetFrame.addEventListener("touchmove", (event) => {
@@ -294,13 +299,16 @@ function bindZoomEvents() {
 
   assetFrame.addEventListener("touchend", () => {
     zoomState.lastTouchDistance = null;
+    hideZoomIndicatorSoon();
   });
 
   assetFrame.addEventListener("mouseenter", () => {
-    showZoomIndicator();
+    zoomState.isHovering = true;
+    showZoomIndicator(null);
   });
 
   assetFrame.addEventListener("mouseleave", () => {
+    zoomState.isHovering = false;
     hideZoomIndicatorSoon();
   });
 }
@@ -308,30 +316,37 @@ function bindZoomEvents() {
 function setZoom(nextScale) {
   zoomState.scale = Math.min(4, Math.max(1, nextScale));
   assetImage.style.transform = `scale(${zoomState.scale})`;
-  showZoomIndicator();
+  showZoomIndicator(1800);
 }
 
-function resetZoom() {
+function resetZoom({ showIndicator = true } = {}) {
   zoomState.scale = 1;
   assetImage.style.transform = "scale(1)";
-  showZoomIndicator();
+  if (showIndicator) {
+    showZoomIndicator(1800);
+  }
 }
 
-function showZoomIndicator() {
+function showZoomIndicator(lingerMs = 1800) {
   if (!zoomIndicator) {
     return;
   }
   zoomIndicator.textContent = `${Math.round(zoomState.scale * 100)}%`;
   zoomIndicator.classList.add("is-visible");
-  if (zoomState.hideTimer) {
-    clearTimeout(zoomState.hideTimer);
+  if (lingerMs === null) {
+    if (zoomState.hideTimer) {
+      clearTimeout(zoomState.hideTimer);
+    }
+    return;
   }
-  zoomState.hideTimer = setTimeout(() => {
-    zoomIndicator.classList.remove("is-visible");
-  }, 1200);
+  scheduleZoomIndicatorHide(lingerMs);
 }
 
 function hideZoomIndicatorSoon() {
+  scheduleZoomIndicatorHide(600);
+}
+
+function scheduleZoomIndicatorHide(delayMs) {
   if (!zoomIndicator) {
     return;
   }
@@ -340,7 +355,7 @@ function hideZoomIndicatorSoon() {
   }
   zoomState.hideTimer = setTimeout(() => {
     zoomIndicator.classList.remove("is-visible");
-  }, 300);
+  }, delayMs);
 }
 
 function applyStarPreview(group, value) {

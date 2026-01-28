@@ -29,20 +29,6 @@
       </section>
 
       <section class="ratings-panel" id="ratingPanel">
-        <div class="rating-row" data-metric="professionalism">
-          <div
-            class="rating-label"
-            title="Polish, technical quality, and print readiness."
-          >Professionalism</div>
-          <div class="rating-stars" role="group" aria-label="Professionalism rating">
-            <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
-            <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
-            <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
-            <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
-            <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
-          </div>
-        </div>
-
         <div class="rating-row" data-metric="appeal">
           <div
             class="rating-label"
@@ -71,11 +57,25 @@
           </div>
         </div>
 
+        <div class="rating-row" data-metric="professionalism">
+          <div
+            class="rating-label"
+            title="Polish, technical quality, and print readiness."
+          >Professionalism</div>
+          <div class="rating-stars" role="group" aria-label="Professionalism rating">
+            <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
+            <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
+            <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
+            <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
+            <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
+          </div>
+        </div>
+
         <div class="comment-row">
           <label for="commentInput">Comments</label>
           <textarea
             id="commentInput"
-            rows="2"
+            rows="1"
             placeholder="Comments..."
           ></textarea>
           <div class="comment-hint" id="commentHint">0 / 500</div>
@@ -86,7 +86,7 @@
         <button class="primary-btn" id="submitVote" type="button" disabled>next ></button>
         <div class="progress-mini">
           <span id="remainingAssets">-</span>
-          <span>assets left</span>
+          <span>assets</span>
           <span class="dot">|</span>
           <span id="minVotes">-</span>
           <span>votes per asset</span>
