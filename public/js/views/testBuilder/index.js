@@ -19,9 +19,16 @@ const testPreview = document.getElementById("testPreview");
 const testPreviewModal = document.getElementById("testPreviewModal");
 const testPreviewSummary = document.getElementById("testPreviewSummary");
 const testPreviewScroll = document.getElementById("testPreviewScroll");
-const testLinkPanel = document.getElementById("testLinkPanel");
-const testLinkInput = document.getElementById("testLinkInput");
-const copyTestLink = document.getElementById("copyTestLink");
+const testStartModal = document.getElementById("testStartModal");
+const testStartForm = document.getElementById("testStartForm");
+const testStartTitle = document.getElementById("testStartTitle");
+const testStartSampleSize = document.getElementById("testStartSampleSize");
+const testStartMinVotes = document.getElementById("testStartMinVotes");
+const testStartEndDate = document.getElementById("testStartEndDate");
+const testStartConfirm = document.getElementById("testStartConfirm");
+const testStartLinkPanel = document.getElementById("testStartLinkPanel");
+const testStartLinkInput = document.getElementById("testStartLinkInput");
+const testStartCopyLink = document.getElementById("testStartCopyLink");
 
 let activeGame = null;
 let assetTypes = [];
@@ -29,7 +36,9 @@ let assetsByType = {};
 let deckCardsByAssetUuid = {};
 let lastPreview = null;
 let lastPreviewSignature = "";
+let lastPreviewSampleSize = null;
 let selectionState = new Map();
+let testDefaults = { sample_size: 10, min_votes_per_asset: 10 };
 
 export function initTestBuilder({ onAuthLost }) {
   testTypeSelection.addEventListener("change", () => {
@@ -61,11 +70,41 @@ export function initTestBuilder({ onAuthLost }) {
       showToast("Select at least one asset to start a test.", "warning");
       return;
     }
-    await startArtTest({ gameUuid: activeGame.uuid, selectedAssets, onAuthLost });
+    openStartModal();
   });
 
-  copyTestLink.addEventListener("click", async () => {
-    const value = testLinkInput.value.trim();
+  testStartForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!activeGame) {
+      return;
+    }
+    const selectedAssets = getSelectedAssets(selectionState);
+    if (!selectedAssets.length) {
+      showToast("Select at least one asset to start a test.", "warning");
+      return;
+    }
+    const sampleSize = Number.parseInt(testStartSampleSize?.value, 10);
+    const minVotes = Number.parseInt(testStartMinVotes?.value, 10);
+    const title = testStartTitle?.value?.trim() || "";
+    const endDate = testStartEndDate?.value || "";
+    testStartConfirm?.setAttribute("disabled", "disabled");
+    try {
+      await startArtTest({
+        gameUuid: activeGame.uuid,
+        selectedAssets,
+        sampleSize,
+        minVotes,
+        title,
+        endDate,
+        onAuthLost,
+      });
+    } finally {
+      testStartConfirm?.removeAttribute("disabled");
+    }
+  });
+
+  testStartCopyLink?.addEventListener("click", async () => {
+    const value = testStartLinkInput.value.trim();
     if (!value) {
       return;
     }
@@ -73,7 +112,7 @@ export function initTestBuilder({ onAuthLost }) {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(value);
       } else {
-        testLinkInput.select();
+        testStartLinkInput.select();
         document.execCommand("copy");
       }
       showToast("Link copied to clipboard.", "success");
@@ -83,11 +122,18 @@ export function initTestBuilder({ onAuthLost }) {
   });
 
   return {
-    setAssets: ({ game, assetTypes: types, assetsByType: byType, deckCardsByAssetUuid: deckMap }) => {
+    setAssets: ({
+      game,
+      assetTypes: types,
+      assetsByType: byType,
+      deckCardsByAssetUuid: deckMap,
+      testDefaults: defaults,
+    }) => {
       activeGame = game;
       assetTypes = Array.isArray(types) ? types : [];
       assetsByType = byType || {};
       deckCardsByAssetUuid = deckMap || {};
+      testDefaults = { ...testDefaults, ...(defaults || {}) };
       selectionState = buildDefaultSelection(assetsByType);
       renderTypeOptions();
       updateMetrics();
@@ -225,14 +271,14 @@ function updateMetrics() {
 function clearPreview() {
   lastPreview = null;
   lastPreviewSignature = "";
+  lastPreviewSampleSize = null;
+  const sampleSize = Number(testDefaults.sample_size || 10);
   testPreview.innerHTML =
-    "<p class=\"text-muted mb-0\">Select asset types to preview a randomized 10-asset test.</p>";
-  testLinkPanel.classList.add("d-none");
+    `<p class="text-muted mb-0">Select asset types to preview a randomized ${sampleSize}-asset test.</p>`;
 }
 
 async function loadPreview({ gameUuid, selectedAssets, onAuthLost }) {
   testPreviewLoading.classList.remove("d-none");
-  testLinkPanel.classList.add("d-none");
   try {
     const { response, data } = await fetchJson("tests/preview", {
       method: "POST",
@@ -253,6 +299,7 @@ async function loadPreview({ gameUuid, selectedAssets, onAuthLost }) {
     }
     lastPreview = data;
     lastPreviewSignature = selectedAssets.join("|");
+    lastPreviewSampleSize = data.sample_size;
     renderPreview(data);
     return data;
   } finally {
@@ -294,21 +341,42 @@ function openPreviewModal(data) {
   modal.show();
 }
 
-async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
+async function startArtTest({
+  gameUuid,
+  selectedAssets,
+  sampleSize,
+  minVotes,
+  title,
+  endDate,
+  onAuthLost,
+}) {
   const signature = selectedAssets.join("|");
   const assetUuids =
-    lastPreview && lastPreviewSignature === signature
+    lastPreview &&
+    lastPreviewSignature === signature &&
+    Number(sampleSize) === Number(lastPreviewSampleSize)
       ? (lastPreview.assets || []).map((asset) => asset.uuid)
       : [];
 
-  const { response, data } = await fetchJson("tests/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      game_uuid: gameUuid,
-      asset_uuids: assetUuids.length ? assetUuids : selectedAssets,
-    }),
-  });
+  let response;
+  let data;
+  try {
+    ({ response, data } = await fetchJson("tests/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        game_uuid: gameUuid,
+        asset_uuids: assetUuids.length ? assetUuids : selectedAssets,
+        sample_size: sampleSize,
+        min_votes_per_asset: minVotes,
+        title,
+        end_date: endDate,
+      }),
+    }));
+  } catch (error) {
+    showToast("Network error starting test.", "danger");
+    return;
+  }
 
   if (response.status === 401) {
     showToast("Session expired. Please sign in again.", "warning");
@@ -320,8 +388,8 @@ async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
     return;
   }
   if (data.test?.public_url) {
-    testLinkInput.value = data.test.public_url;
-    testLinkPanel.classList.remove("d-none");
+    testStartLinkInput.value = data.test.public_url;
+    testStartLinkPanel.classList.remove("d-none");
   }
   if (Array.isArray(data.assets)) {
     renderPreview({
@@ -331,5 +399,31 @@ async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
     });
   }
   showToast("Art test started.", "success");
+}
+
+function openStartModal() {
+  if (!testStartModal) {
+    return;
+  }
+  if (testStartSampleSize) {
+    testStartSampleSize.value = String(testDefaults.sample_size || 10);
+  }
+  if (testStartMinVotes) {
+    testStartMinVotes.value = String(testDefaults.min_votes_per_asset || 10);
+  }
+  if (testStartTitle) {
+    testStartTitle.value = "";
+  }
+  if (testStartEndDate) {
+    testStartEndDate.value = "";
+  }
+  if (testStartLinkPanel) {
+    testStartLinkPanel.classList.add("d-none");
+  }
+  if (testStartLinkInput) {
+    testStartLinkInput.value = "";
+  }
+  const modal = bootstrap.Modal.getOrCreateInstance(testStartModal);
+  modal.show();
 }
 

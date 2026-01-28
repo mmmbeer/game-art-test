@@ -12,8 +12,10 @@ import {
 import { getGameByUuidForUser, getGamesByUserId, syncGamesForUser } from "../db/games.js";
 import { discoverGameAssets } from "../services/tgcAssets.js";
 import { getAssetSummaryByUserId, getAssetsByGameId, upsertAssetsForGame } from "../db/assets.js";
-import { getTestSummaryByUserId } from "../db/tests.js";
+import env from "../config/env.js";
+import { getActiveTestsByUserId, getTestSummaryByUserId, getTestsWithProgressForGame } from "../db/tests.js";
 import { createDeterministicUuid } from "../utils/uuid.js";
+import { buildPublicTestUrl } from "../utils/publicUrls.js";
 
 const router = Router();
 
@@ -185,6 +187,7 @@ router.get("/", requireAuth, async (req, res) => {
     const storedGames = await getGamesByUserId(user.id);
     const assetSummary = await getAssetSummaryByUserId(user.id);
     const testSummary = await getTestSummaryByUserId(user.id);
+    const activeTestsByGame = await getActiveTestsByUserId(user.id);
     const gameDesignerMap = new Map(
       Array.from(combinedMap.values()).map((game) => [game.id, game.designer_id || null])
     );
@@ -204,6 +207,7 @@ router.get("/", requireAuth, async (req, res) => {
       })),
       games: storedGames.map((game) => {
         const testInfo = testSummary.get(game.id) || { testCount: 0, activeCount: 0 };
+        const activeTests = activeTestsByGame.get(game.id) || [];
         return {
           uuid: game.uuid,
           name: game.name,
@@ -213,6 +217,11 @@ router.get("/", requireAuth, async (req, res) => {
           designer_uuid: resolveDesignerUuid(gameGameDesignerId(game, gameDesignerMap), designerMap),
           test_count: testInfo.testCount,
           active_test_count: testInfo.activeCount,
+          active_tests: activeTests.map((test) => ({
+            uuid: test.uuid,
+            created_at: test.created_at,
+            public_url: buildPublicTestUrl(req, test.uuid),
+          })),
         };
       }),
     });
@@ -240,12 +249,41 @@ router.get("/:uuid/assets", requireAuth, async (req, res) => {
     const storedAssets = await getAssetsByGameId(game.id);
     const grouped = groupAssetsByType(storedAssets);
     const deckCardsByAssetUuid = getDeckCardsByAssetUuid(storedAssets);
+    const tests = await getTestsWithProgressForGame({
+      userId: user.id,
+      gameId: game.id,
+      minVotes: env.tester.minVotesPerAsset,
+    });
 
     return res.status(200).json({
       game: {
         uuid: game.uuid,
         name: game.name,
       },
+      test_defaults: {
+        sample_size: env.tests.defaultSampleSize,
+        min_votes_per_asset: env.tester.minVotesPerAsset,
+      },
+      tests: tests.map((test) => {
+        const remaining = Math.max(test.total_assets - test.completed_assets, 0);
+        const progress =
+          test.total_assets > 0
+            ? Math.round((test.completed_assets / test.total_assets) * 100)
+            : 0;
+        return {
+          uuid: test.uuid,
+          status: test.status,
+          created_at: test.created_at,
+          stopped_at: test.stopped_at,
+          total_assets: test.total_assets,
+          completed_assets: test.completed_assets,
+          remaining_assets: remaining,
+          total_votes: test.total_votes,
+          min_votes_per_asset: env.tester.minVotesPerAsset,
+          progress_percent: progress,
+          public_url: buildPublicTestUrl(req, test.uuid),
+        };
+      }),
       asset_types: grouped.types,
       assets: grouped.assets,
       assets_by_type: grouped.assetsByType,

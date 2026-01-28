@@ -110,6 +110,18 @@
             </div>
             <div class="asset-status text-muted" id="assetStatus"></div>
             <div class="section-divider"></div>
+            <section class="game-tests" id="gameTests">
+              <div class="game-tests-header">
+                <div>
+                  <p class="app-eyebrow mb-1">Art Tests</p>
+                  <h3 class="card-title mb-0">Shareable links &amp; progress</h3>
+                </div>
+              </div>
+              <div class="game-tests-list" id="gameTestsList">
+                <p class="text-muted mb-0">No tests created for this game yet.</p>
+              </div>
+            </section>
+            <div class="section-divider"></div>
             <section class="test-builder" id="testBuilder">
               <div class="test-builder-header">
                 <div>
@@ -136,14 +148,6 @@
               </div>
               <div class="test-preview" id="testPreview">
                 <p class="text-muted mb-0">Select asset types to preview a randomized 10-asset test.</p>
-              </div>
-              <div class="test-link d-none" id="testLinkPanel">
-                <p class="test-link-label">Public test link</p>
-                <div class="test-link-row">
-                  <input class="form-control" id="testLinkInput" type="text" readonly>
-                  <button class="btn btn-outline-light" id="copyTestLink" type="button">Copy</button>
-                </div>
-                <p class="text-muted mb-0">Share this link with testers to start voting.</p>
               </div>
             </section>
           </div>
@@ -178,6 +182,58 @@
           <div class="modal-body">
             <p class="text-muted" id="testPreviewSummary"></p>
             <div class="test-preview-scroll" id="testPreviewScroll"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="testStartModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content app-card">
+          <div class="modal-header">
+            <h5 class="modal-title">Start an Art Test</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="testStartForm">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label" for="testStartTitle">Test title (optional)</label>
+                  <input class="form-control" id="testStartTitle" type="text" maxlength="80">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="testStartSampleSize">Assets to include</label>
+                  <input class="form-control" id="testStartSampleSize" type="number" min="1" max="50">
+                  <p class="text-muted mb-0">Randomly pulled from your selected assets.</p>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="testStartMinVotes">Votes per asset</label>
+                  <input class="form-control" id="testStartMinVotes" type="number" min="1" max="50">
+                  <p class="text-muted mb-0">Default from server settings.</p>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="testStartEndDate">End date (optional)</label>
+                  <input class="form-control" id="testStartEndDate" type="date">
+                </div>
+              </div>
+              <div class="modal-divider"></div>
+              <div class="test-start-actions">
+                <button class="btn btn-outline-light" type="button" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+                <button class="btn btn-primary" id="testStartConfirm" type="submit">
+                  Create test
+                </button>
+              </div>
+            </form>
+            <div class="test-start-link d-none" id="testStartLinkPanel">
+              <p class="test-link-label">Public test link</p>
+              <div class="test-link-row">
+                <input class="form-control" id="testStartLinkInput" type="text" readonly>
+                <button class="btn btn-outline-light" id="testStartCopyLink" type="button">Copy</button>
+              </div>
+              <p class="text-muted mb-0">Share this link with testers to start voting.</p>
+            </div>
           </div>
         </div>
       </div>

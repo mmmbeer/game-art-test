@@ -1,5 +1,4 @@
 import { Router } from "express";
-import env from "../config/env.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getGameByUuidForUser } from "../db/games.js";
 import { getAssetsByGameIdWithIds, getAssetsByUuidsForGameId } from "../db/assets.js";
@@ -9,6 +8,7 @@ import {
   resolveSampleSize,
   sampleAssets,
 } from "../services/testSelection.js";
+import { buildPublicTestUrl } from "../utils/publicUrls.js";
 
 const router = Router();
 
@@ -92,7 +92,7 @@ router.post("/start", requireAuth, async (req, res) => {
         uuid: test.uuid,
         status: test.status,
         created_at: test.created_at,
-        public_url: buildPublicUrl(req, test.uuid),
+        public_url: buildPublicTestUrl(req, test.uuid),
       },
       assets: selection.map((asset) => serializeAsset(asset)),
     });
@@ -110,26 +110,4 @@ function serializeAsset(asset) {
     image_url: asset.image_url,
     dpi: asset.dpi,
   };
-}
-
-function buildPublicUrl(req, testUuid) {
-  const base = env.app.server
-    ? env.app.server.replace(/\/$/, "")
-    : `${req.protocol}://${req.get("host")}`;
-  const basePath = env.app.basePath ? normalizeBasePath(env.app.basePath) : "";
-  return `${base}${basePath}/t/${testUuid}`;
-}
-
-function normalizeBasePath(input) {
-  if (!input) {
-    return "";
-  }
-  let base = input.trim();
-  if (!base.startsWith("/")) {
-    base = `/${base}`;
-  }
-  if (base.length > 1 && base.endsWith("/")) {
-    base = base.slice(0, -1);
-  }
-  return base;
 }

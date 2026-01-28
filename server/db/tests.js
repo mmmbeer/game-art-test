@@ -46,3 +46,63 @@ export async function getTestSummaryByUserId(userId) {
   });
   return map;
 }
+
+export async function getActiveTestsByUserId(userId) {
+  const [rows] = await pool.query(
+    `SELECT id, uuid, game_id, status, created_at
+     FROM tests
+     WHERE user_id = ? AND status = 'active'
+     ORDER BY created_at DESC`,
+    [userId]
+  );
+  const map = new Map();
+  rows.forEach((row) => {
+    if (!map.has(row.game_id)) {
+      map.set(row.game_id, []);
+    }
+    map.get(row.game_id).push({
+      id: row.id,
+      uuid: row.uuid,
+      status: row.status,
+      created_at: row.created_at,
+    });
+  });
+  return map;
+}
+
+export async function getTestsWithProgressForGame({ userId, gameId, minVotes }) {
+  const [rows] = await pool.query(
+    `SELECT
+        tests.id,
+        tests.uuid,
+        tests.status,
+        tests.created_at,
+        tests.stopped_at,
+        COUNT(test_assets.id) AS total_assets,
+        SUM(CASE WHEN COALESCE(vote_counts.vote_count, 0) >= ? THEN 1 ELSE 0 END) AS completed_assets,
+        SUM(COALESCE(vote_counts.vote_count, 0)) AS total_votes
+     FROM tests
+     LEFT JOIN test_assets ON test_assets.test_id = tests.id
+     LEFT JOIN (
+        SELECT test_assets.id AS test_asset_id, COUNT(votes.id) AS vote_count
+        FROM test_assets
+        LEFT JOIN votes ON votes.test_asset_id = test_assets.id
+        GROUP BY test_assets.id
+     ) vote_counts ON vote_counts.test_asset_id = test_assets.id
+     WHERE tests.user_id = ? AND tests.game_id = ?
+     GROUP BY tests.id
+     ORDER BY tests.created_at DESC`,
+    [minVotes, userId, gameId]
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    uuid: row.uuid,
+    status: row.status,
+    created_at: row.created_at,
+    stopped_at: row.stopped_at,
+    total_assets: Number(row.total_assets || 0),
+    completed_assets: Number(row.completed_assets || 0),
+    total_votes: Number(row.total_votes || 0),
+  }));
+}

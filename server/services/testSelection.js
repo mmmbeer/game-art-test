@@ -1,4 +1,6 @@
-const DEFAULT_SAMPLE_SIZE = 10;
+import env from "../config/env.js";
+
+const DEFAULT_SAMPLE_SIZE = env.tests?.defaultSampleSize || 10;
 
 export function resolveSampleSize(input, fallback = DEFAULT_SAMPLE_SIZE) {
   const parsed = Number.parseInt(input, 10);

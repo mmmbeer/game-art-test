@@ -26,6 +26,9 @@ const env = {
   tester: {
     minVotesPerAsset: Number.parseInt(process.env.TEST_MIN_VOTES_PER_ASSET || "10", 10),
   },
+  tests: {
+    defaultSampleSize: Number.parseInt(process.env.TEST_DEFAULT_SAMPLE_SIZE || "10", 10),
+  },
 };
 
 export default env;

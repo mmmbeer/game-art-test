@@ -150,6 +150,7 @@ function renderGames() {
         <div class="game-pills">
           ${renderPills(game)}
         </div>
+        ${renderActiveTestLinks(game)}
       </div>
     `;
     gamesList.appendChild(card);
@@ -190,6 +191,22 @@ function renderPills(game) {
     pills.push(`<span class="pill pill-muted">+${entries.length - maxShown} more</span>`);
   }
   return pills.join("");
+}
+
+function renderActiveTestLinks(game) {
+  const activeTests = Array.isArray(game.active_tests) ? game.active_tests : [];
+  if (!activeTests.length) {
+    return "";
+  }
+  const links = activeTests.slice(0, 2).map((test, index) => {
+    const label = activeTests.length > 1 ? `Public link ${index + 1}` : "Public link";
+    return `<a class="btn btn-outline-light btn-sm" href="${test.public_url}" target="_blank" rel="noopener">${label}</a>`;
+  });
+  const overflow =
+    activeTests.length > 2
+      ? `<span class="text-muted small">+${activeTests.length - 2} more</span>`
+      : "";
+  return `<div class="game-test-links">${links.join("")}${overflow}</div>`;
 }
 
 function debounce(fn, delay) {

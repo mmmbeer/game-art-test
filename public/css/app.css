@@ -243,6 +243,13 @@ body.app-body {
   gap: 6px;
 }
 
+.game-test-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -413,6 +420,56 @@ body.app-body {
   color: var(--color-muted);
 }
 
+.game-tests {
+  display: grid;
+  gap: 12px;
+}
+
+.game-tests-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-tests-list {
+  display: grid;
+  gap: 12px;
+}
+
+.game-test-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 12px 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.game-test-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-test-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.game-test-meta {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
+.game-test-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .test-link {
   display: grid;
   gap: 8px;
@@ -420,6 +477,16 @@ body.app-body {
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+}
+
+.test-start-link {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  margin-top: 16px;
 }
 
 .test-link-label {
@@ -434,6 +501,18 @@ body.app-body {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
+}
+
+.modal-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 18px 0;
+}
+
+.test-start-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .type-selected {
