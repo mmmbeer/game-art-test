@@ -375,6 +375,21 @@ No login required for testers. Public art test links must allow anonymous voting
 * Scoring UI
 * Comments
 
+**Implemented**
+
+* Public tester route at `/t/:uuid` serving a dedicated mobile-first voting UI
+* Tester API endpoints:
+
+  * `GET /t/:uuid/next` for initial asset selection
+  * `POST /t/:uuid/next` to fetch the next asset while excluding already-voted asset UUIDs
+  * `POST /t/:uuid/vote` to submit ratings and optional comment
+* Randomized asset selection limited to assets below the minimum vote threshold
+* Vote threshold configurable via `TEST_MIN_VOTES_PER_ASSET`
+* Local tester history stored in `localStorage` to avoid repeat votes on reload
+* Shareable test link controls (copy + native share when available)
+* Vote progress panel showing remaining assets and vote target per asset
+* Custom toast feedback for errors and vote confirmation
+
 **Testing**
 
 * Mobile browsers

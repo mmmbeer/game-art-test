@@ -7,6 +7,7 @@ import healthRoutes from "./routes/health.js";
 import authRoutes from "./routes/auth.js";
 import gamesRoutes from "./routes/games.js";
 import testsRoutes from "./routes/tests.js";
+import testerRoutes from "./routes/tester.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(basePath, express.static(publicDir));
 app.use(`${basePath}/auth/tgc`, authRoutes);
 app.use(`${basePath}/games`, gamesRoutes);
 app.use(`${basePath}/tests`, testsRoutes);
+app.use(`${basePath}/t`, testerRoutes);
 app.use(basePath, healthRoutes);
 
 export default app;

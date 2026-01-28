@@ -23,6 +23,9 @@ const env = {
     basePath: process.env.APP_BASE_PATH || "",
     server: process.env.APP_SERVER || "",
   },
+  tester: {
+    minVotesPerAsset: Number.parseInt(process.env.TEST_MIN_VOTES_PER_ASSET || "10", 10),
+  },
 };
 
 export default env;

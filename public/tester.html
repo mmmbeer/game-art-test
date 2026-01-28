@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TGC Art Test - Vote</title>
+    <link rel="stylesheet" href="../../css/variables.css">
+    <link rel="stylesheet" href="../../css/themes.css">
+    <link rel="stylesheet" href="../../css/tester.css">
+  </head>
+  <body class="tester-body">
+    <div class="tester-shell">
+      <header class="tester-header">
+        <div class="tester-brand">
+          <p class="tester-eyebrow">TGC Art Test</p>
+          <h1 class="tester-title" id="testTitle">Art Test</h1>
+          <p class="tester-subtitle" id="testSubtitle">Loading test...</p>
+        </div>
+        <div class="tester-header-actions">
+          <button class="ghost-btn" id="shareButton" type="button">Share link</button>
+          <button class="ghost-btn" id="copyLink" type="button">Copy link</button>
+        </div>
+      </header>
+
+      <main class="tester-main">
+        <section class="asset-panel">
+          <div class="asset-meta">
+            <span class="asset-type" id="assetType">-</span>
+            <span class="asset-dpi" id="assetDpi"></span>
+          </div>
+          <div class="asset-frame">
+            <div class="asset-loading" id="assetLoading">
+              <div class="pulse-dot"></div>
+              <span>Loading art...</span>
+            </div>
+            <img id="assetImage" alt="Art asset preview">
+          </div>
+          <div class="asset-status" id="assetStatus" aria-live="polite"></div>
+        </section>
+
+        <section class="rating-panel" id="ratingPanel">
+          <div class="rating-group" data-metric="professionalism">
+            <div class="rating-header">
+              <h2>Professionalism</h2>
+              <span class="rating-value" data-value-label>-</span>
+            </div>
+            <div class="rating-scale" role="group" aria-label="Professionalism rating">
+              <button type="button" class="rating-pill" data-value="1">1</button>
+              <button type="button" class="rating-pill" data-value="2">2</button>
+              <button type="button" class="rating-pill" data-value="3">3</button>
+              <button type="button" class="rating-pill" data-value="4">4</button>
+              <button type="button" class="rating-pill" data-value="5">5</button>
+            </div>
+          </div>
+
+          <div class="rating-group" data-metric="appeal">
+            <div class="rating-header">
+              <h2>Appeal</h2>
+              <span class="rating-value" data-value-label>-</span>
+            </div>
+            <div class="rating-scale" role="group" aria-label="Appeal rating">
+              <button type="button" class="rating-pill" data-value="1">1</button>
+              <button type="button" class="rating-pill" data-value="2">2</button>
+              <button type="button" class="rating-pill" data-value="3">3</button>
+              <button type="button" class="rating-pill" data-value="4">4</button>
+              <button type="button" class="rating-pill" data-value="5">5</button>
+            </div>
+          </div>
+
+          <div class="rating-group" data-metric="understandability">
+            <div class="rating-header">
+              <h2>Understandability</h2>
+              <span class="rating-value" data-value-label>-</span>
+            </div>
+            <div class="rating-scale" role="group" aria-label="Understandability rating">
+              <button type="button" class="rating-pill" data-value="1">1</button>
+              <button type="button" class="rating-pill" data-value="2">2</button>
+              <button type="button" class="rating-pill" data-value="3">3</button>
+              <button type="button" class="rating-pill" data-value="4">4</button>
+              <button type="button" class="rating-pill" data-value="5">5</button>
+            </div>
+          </div>
+
+          <div class="comment-block">
+            <label for="commentInput">Optional comment</label>
+            <textarea
+              id="commentInput"
+              rows="3"
+              placeholder="Short notes, critiques, or confusion you noticed..."
+            ></textarea>
+            <div class="comment-hint" id="commentHint">0 / 500</div>
+          </div>
+        </section>
+
+        <section class="action-panel" id="actionPanel">
+          <button class="primary-btn" id="submitVote" type="button" disabled>
+            Submit ratings
+          </button>
+          <div class="progress-panel">
+            <div class="progress-row">
+              <span>Assets left in test</span>
+              <strong id="remainingAssets">-</strong>
+            </div>
+            <div class="progress-row">
+              <span>Votes needed per asset</span>
+              <strong id="minVotes">-</strong>
+            </div>
+            <div class="progress-row">
+              <span>Your votes in this session</span>
+              <strong id="sessionVotes">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="share-panel">
+          <div>
+            <h2>Share this test</h2>
+            <p>Invite testers with this public link.</p>
+          </div>
+          <div class="share-row">
+            <input id="shareLink" type="text" readonly>
+            <button class="ghost-btn" id="copyLinkSecondary" type="button">Copy</button>
+          </div>
+        </section>
+
+        <section class="complete-panel hidden" id="completePanel">
+          <h2>All caught up!</h2>
+          <p>
+            There are no more assets to review right now. Thanks for helping with this art test.
+          </p>
+          <button class="primary-btn" id="reloadButton" type="button">Check again</button>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast-host" id="toastHost" aria-live="polite"></div>
+    <script type="module" src="../../js/tester/app.js"></script>
+  </body>
+</html>
