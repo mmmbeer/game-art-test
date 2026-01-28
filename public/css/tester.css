@@ -70,8 +70,9 @@ body.tester-body {
 }
 
 .asset-frame img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   transform-origin: center center;
   transition: opacity 0.2s ease;
   opacity: 0;
