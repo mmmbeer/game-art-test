@@ -3,8 +3,17 @@ const assetName = document.getElementById("assetName");
 const assetType = document.getElementById("assetType");
 const assetImage = document.getElementById("assetImage");
 const assetFrame = document.getElementById("assetFrame");
+const assetStage = document.getElementById("assetStage");
+const assetTransform = document.getElementById("assetTransform");
+const overlayImage = document.getElementById("overlayImage");
 const zoomIndicator = document.getElementById("zoomIndicator");
 const assetLoading = document.getElementById("assetLoading");
+const toggleOverlay = document.getElementById("toggleOverlay");
+const toggleBackground = document.getElementById("toggleBackground");
+const rotateButton = document.getElementById("rotateButton");
+const driftButton = document.getElementById("driftButton");
+const viewerTools = document.getElementById("viewerTools");
+const resetView = document.getElementById("resetView");
 const ratingPanel = document.getElementById("ratingPanel");
 const submitVote = document.getElementById("submitVote");
 const commentInput = document.getElementById("commentInput");
@@ -25,11 +34,21 @@ const testUuid = getTestUuidFromPath();
 const storageKey = `tgc_tester_votes_${testUuid}`;
 let currentAsset = null;
 let votedAssets = loadVoteHistory();
+const TEMPLATE_BASE = "https://s3.amazonaws.com/www.thegamecrafter.com/templates/";
 const zoomState = {
   scale: 1,
+  mode: "fit",
   lastTouchDistance: null,
   hideTimer: null,
   isHovering: false,
+};
+const viewState = {
+  overlayEnabled: false,
+  overlayUrl: "",
+  backgroundMode: "dark",
+  rotation: 0,
+  driftEnabled: false,
+  driftOffset: { x: 0, y: 0 },
 };
 
 if (!testUuid) {
@@ -39,6 +58,9 @@ if (!testUuid) {
   bindRatingEvents();
   bindActionEvents();
   bindZoomEvents();
+  bindViewerControls();
+  updateBackgroundMode();
+  updateControlStates();
   loadNextAsset();
 }
 
@@ -132,6 +154,60 @@ function bindActionEvents() {
   reloadButton.addEventListener("click", () => loadNextAsset());
 }
 
+function bindViewerControls() {
+  if (toggleOverlay) {
+    toggleOverlay.addEventListener("click", () => {
+      viewState.overlayEnabled = !viewState.overlayEnabled;
+      updateOverlayState({ showToastOnMissing: viewState.overlayEnabled });
+      updateControlStates();
+    });
+  }
+
+  if (toggleBackground) {
+    toggleBackground.addEventListener("click", () => {
+      viewState.backgroundMode = viewState.backgroundMode === "light" ? "dark" : "light";
+      updateBackgroundMode();
+      updateControlStates();
+    });
+  }
+
+  if (rotateButton) {
+    rotateButton.addEventListener("click", () => {
+      viewState.rotation = (viewState.rotation + 90) % 360;
+      updateTransforms();
+      updateControlStates();
+    });
+  }
+
+  if (driftButton) {
+    driftButton.addEventListener("click", () => {
+      viewState.driftEnabled = !viewState.driftEnabled;
+      if (viewState.driftEnabled) {
+        applyRandomDrift();
+      } else {
+        viewState.driftOffset = { x: 0, y: 0 };
+        updateTransforms();
+      }
+      updateControlStates();
+    });
+  }
+
+  if (viewerTools) {
+    viewerTools.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-zoom]");
+      if (!button) {
+        return;
+      }
+      const mode = button.dataset.zoom;
+      setZoomMode(mode);
+    });
+  }
+
+  if (resetView) {
+    resetView.addEventListener("click", () => resetViewState());
+  }
+}
+
 async function loadNextAsset() {
   setLoading(true);
   completePanel.classList.add("hidden");
@@ -173,9 +249,9 @@ async function loadNextAsset() {
 function updateTestMeta(data) {
   if (data.test?.game_name) {
     const designer = data.test?.designer_name || "Designer unavailable";
-    testTitle.textContent = `${data.test.game_name} (${designer})`;
+    testTitle.textContent = `ART TEST: ${data.test.game_name} (${designer})`;
   } else {
-    testTitle.textContent = "Art test (Designer unavailable)";
+    testTitle.textContent = "ART TEST: (Designer unavailable)";
   }
   if (data.progress) {
     remainingAssets.textContent = `${data.progress.remaining_assets}/${data.progress.total_assets}`;
@@ -190,12 +266,14 @@ function displayAsset(asset) {
   assetName.textContent = resolveAssetName(asset);
   assetType.textContent = asset.asset_type || "Art asset";
   assetImage.classList.remove("loaded");
-  resetZoom({ showIndicator: false });
+  updateOverlaySource(asset);
+  resetViewState({ preserveOverlay: true, preserveBackground: true, preserveZoomMode: true });
   assetImage.src = asset.image_url || "";
   assetImage.alt = asset.asset_type || "Art asset";
   assetImage.onload = () => {
     assetImage.classList.add("loaded");
-    resetZoom({ showIndicator: false });
+    syncOverlaySize();
+    applyZoomForMode({ showIndicator: false });
   };
   assetImage.onerror = () => showToast("Unable to load image.", "error");
 }
@@ -241,6 +319,10 @@ function updateSubmitState() {
 function showCompletion(data) {
   currentAsset = null;
   assetImage.src = "";
+  if (overlayImage) {
+    overlayImage.src = "";
+    overlayImage.classList.add("hidden");
+  }
   assetName.textContent = "No more assets";
   assetType.textContent = "";
   updateTestMeta(data);
@@ -274,7 +356,7 @@ function bindZoomEvents() {
   assetFrame.addEventListener("wheel", (event) => {
     event.preventDefault();
     const delta = event.deltaY > 0 ? -0.1 : 0.1;
-    setZoom(zoomState.scale + delta);
+    setZoomScale(zoomState.scale + delta, { mode: "manual" });
   }, { passive: false });
 
   assetFrame.addEventListener("touchstart", (event) => {
@@ -282,6 +364,7 @@ function bindZoomEvents() {
       zoomState.lastTouchDistance = getTouchDistance(event.touches);
     }
     showZoomIndicator(2000);
+    showViewerTools();
   }, { passive: false });
 
   assetFrame.addEventListener("touchmove", (event) => {
@@ -292,7 +375,7 @@ function bindZoomEvents() {
     const distance = getTouchDistance(event.touches);
     if (zoomState.lastTouchDistance) {
       const delta = (distance - zoomState.lastTouchDistance) / 200;
-      setZoom(zoomState.scale + delta);
+      setZoomScale(zoomState.scale + delta, { mode: "manual" });
     }
     zoomState.lastTouchDistance = distance;
   }, { passive: false });
@@ -300,31 +383,44 @@ function bindZoomEvents() {
   assetFrame.addEventListener("touchend", () => {
     zoomState.lastTouchDistance = null;
     hideZoomIndicatorSoon();
+    hideViewerToolsSoon();
   });
 
   assetFrame.addEventListener("mouseenter", () => {
     zoomState.isHovering = true;
     showZoomIndicator(null);
+    showViewerTools();
   });
 
   assetFrame.addEventListener("mouseleave", () => {
     zoomState.isHovering = false;
     hideZoomIndicatorSoon();
+    hideViewerToolsSoon();
   });
 }
 
-function setZoom(nextScale) {
-  zoomState.scale = Math.min(4, Math.max(0.1, nextScale));
-  assetImage.style.transform = `scale(${zoomState.scale})`;
-  showZoomIndicator(1800);
-}
-
-function resetZoom({ showIndicator = true } = {}) {
-  zoomState.scale = getFitScale();
-  assetImage.style.transform = `scale(${zoomState.scale})`;
+function setZoomScale(nextScale, { mode = "manual", showIndicator = true } = {}) {
+  zoomState.scale = clamp(nextScale, 0.1, 6);
+  zoomState.mode = mode;
+  updateTransforms();
+  updateZoomToolState();
   if (showIndicator) {
     showZoomIndicator(1800);
   }
+}
+
+function setZoomMode(mode) {
+  if (mode !== "fit" && mode !== "actual") {
+    return;
+  }
+  zoomState.mode = mode;
+  applyZoomForMode({ showIndicator: true });
+  updateZoomToolState();
+}
+
+function applyZoomForMode({ showIndicator = true } = {}) {
+  const scale = zoomState.mode === "actual" ? getActualScale() : getFitScale();
+  setZoomScale(scale, { mode: zoomState.mode, showIndicator });
 }
 
 function showZoomIndicator(lingerMs = 1800) {
@@ -370,6 +466,228 @@ function getFitScale() {
     1
   );
   return Number.isFinite(scale) && scale > 0 ? scale : 1;
+}
+
+function getActualScale() {
+  const dpi = resolveAssetDpi(currentAsset);
+  const scale = 96 / dpi;
+  return clamp(scale, 0.1, 6);
+}
+
+function resolveAssetDpi(asset) {
+  const direct = Number(asset?.dpi);
+  if (Number.isFinite(direct) && direct > 0) {
+    return direct;
+  }
+  const meta = asset?.metadata || {};
+  const metaDpi = Number(meta?.dpi);
+  if (Number.isFinite(metaDpi) && metaDpi > 0) {
+    return metaDpi;
+  }
+  return 300;
+}
+
+function updateTransforms() {
+  if (assetStage) {
+    assetStage.style.transform = `translate(${viewState.driftOffset.x}px, ${viewState.driftOffset.y}px)`;
+  }
+  if (assetTransform) {
+    assetTransform.style.transform = `rotate(${viewState.rotation}deg) scale(${zoomState.scale})`;
+  }
+}
+
+function resetViewState({
+  preserveOverlay = false,
+  preserveBackground = false,
+  preserveZoomMode = false,
+} = {}) {
+  if (!preserveZoomMode) {
+    zoomState.mode = "fit";
+  }
+  viewState.rotation = 0;
+  if (viewState.driftEnabled) {
+    applyRandomDrift();
+  } else {
+    viewState.driftOffset = { x: 0, y: 0 };
+  }
+  if (!preserveOverlay) {
+    viewState.overlayEnabled = false;
+  }
+  if (!preserveBackground) {
+    viewState.backgroundMode = "dark";
+  }
+  updateBackgroundMode();
+  updateOverlayState();
+  applyZoomForMode({ showIndicator: false });
+  updateControlStates();
+}
+
+function updateBackgroundMode() {
+  if (!assetFrame) {
+    return;
+  }
+  assetFrame.classList.toggle("is-light", viewState.backgroundMode === "light");
+}
+
+function updateOverlaySource(asset) {
+  viewState.overlayUrl = resolveOverlayTemplate(asset);
+  if (overlayImage) {
+    overlayImage.onload = () => syncOverlaySize();
+    overlayImage.onerror = () => overlayImage.classList.add("hidden");
+    overlayImage.src = viewState.overlayUrl || "";
+    if (!viewState.overlayUrl) {
+      overlayImage.classList.add("hidden");
+    }
+  }
+  updateOverlayState();
+}
+
+function updateOverlayState({ showToastOnMissing = false } = {}) {
+  const hasOverlay = Boolean(viewState.overlayUrl);
+  if (overlayImage) {
+    overlayImage.classList.toggle("hidden", !viewState.overlayEnabled || !hasOverlay);
+  }
+  if (showToastOnMissing && !hasOverlay) {
+    showToast("No template overlay available for this asset.", "error");
+  }
+}
+
+function syncOverlaySize() {
+  if (!overlayImage || !assetImage?.naturalWidth || !assetImage?.naturalHeight) {
+    return;
+  }
+  overlayImage.style.width = `${assetImage.naturalWidth}px`;
+  overlayImage.style.height = `${assetImage.naturalHeight}px`;
+}
+
+function updateControlStates() {
+  updateZoomToolState();
+  if (toggleOverlay) {
+    toggleOverlay.classList.toggle("is-on", viewState.overlayEnabled);
+    toggleOverlay.setAttribute("aria-pressed", String(viewState.overlayEnabled));
+  }
+  if (toggleBackground) {
+    const isLight = viewState.backgroundMode === "light";
+    toggleBackground.classList.toggle("is-on", isLight);
+    toggleBackground.setAttribute("aria-pressed", String(isLight));
+    toggleBackground.textContent = isLight ? "BG Light" : "BG Dark";
+  }
+  if (rotateButton) {
+    rotateButton.setAttribute("aria-pressed", String(viewState.rotation !== 0));
+  }
+  if (driftButton) {
+    driftButton.classList.toggle("is-on", viewState.driftEnabled);
+    driftButton.setAttribute("aria-pressed", String(viewState.driftEnabled));
+  }
+}
+
+function updateZoomToolState() {
+  if (!viewerTools) {
+    return;
+  }
+  viewerTools.querySelectorAll("[data-zoom]").forEach((button) => {
+    const mode = button.dataset.zoom;
+    const isOn = zoomState.mode === mode;
+    button.classList.toggle("is-on", isOn);
+    button.setAttribute("aria-pressed", String(isOn));
+  });
+}
+
+function applyRandomDrift() {
+  const drift = 80;
+  const x = Math.round((Math.random() * 2 - 1) * drift);
+  const y = Math.round((Math.random() * 2 - 1) * drift);
+  viewState.driftOffset = { x, y };
+  updateTransforms();
+}
+
+function resolveOverlayTemplate(asset) {
+  const meta = asset?.metadata || {};
+  const source = meta?.source || meta || {};
+  const templates = findTemplates(source);
+  if (!templates) {
+    return "";
+  }
+  const file =
+    templates.PNG ||
+    templates.svg ||
+    templates.SVG ||
+    templates.png ||
+    firstTemplateValue(templates);
+  if (typeof file !== "string" || !file.trim()) {
+    return "";
+  }
+  const trimmed = file.trim();
+  if (trimmed.startsWith("http")) {
+    return trimmed;
+  }
+  return `${TEMPLATE_BASE}${trimmed.replace(/^\/+/, "")}`;
+}
+
+function findTemplates(value, depth = 0, visited = new Set()) {
+  if (!value || typeof value !== "object" || depth > 4) {
+    return null;
+  }
+  if (visited.has(value)) {
+    return null;
+  }
+  visited.add(value);
+  if (value.templates && typeof value.templates === "object") {
+    return value.templates;
+  }
+  if (value.template && typeof value.template === "object") {
+    return value.template;
+  }
+  for (const entry of Object.values(value)) {
+    if (entry && typeof entry === "object") {
+      const found = findTemplates(entry, depth + 1, visited);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+}
+
+function firstTemplateValue(templates) {
+  for (const value of Object.values(templates || {})) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return "";
+}
+
+function showViewerTools() {
+  if (!viewerTools) {
+    return;
+  }
+  viewerTools.classList.add("is-visible");
+}
+
+function hideViewerToolsSoon() {
+  if (!viewerTools) {
+    return;
+  }
+  setTimeout(() => {
+    if (!zoomState.isHovering) {
+      viewerTools.classList.remove("is-visible");
+    }
+  }, 600);
+}
+
+function getTouchDistance(touches) {
+  if (touches.length < 2) {
+    return 0;
+  }
+  const [first, second] = touches;
+  const dx = second.clientX - first.clientX;
+  const dy = second.clientY - first.clientY;
+  return Math.hypot(dx, dy);
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function applyStarPreview(group, value) {

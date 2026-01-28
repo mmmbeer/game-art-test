@@ -40,6 +40,14 @@ body.tester-body {
   gap: 4px;
 }
 
+.tester-asset-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .tester-game {
   font-family: "Barlow Condensed", "Segoe UI", sans-serif;
   text-transform: uppercase;
@@ -50,6 +58,32 @@ body.tester-body {
 .tester-asset-name {
   font-size: 16px;
   font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 180px;
+}
+
+.tester-controls {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.control-btn {
+  border: 1px solid var(--tester-border);
+  background: var(--tester-panel);
+  color: var(--tester-text);
+  padding: 4px 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.control-btn.is-on {
+  border-color: var(--tester-accent);
+  color: #1a1405;
+  background: var(--tester-accent);
 }
 
 .divider-line {
@@ -74,13 +108,34 @@ body.tester-body {
   place-items: center;
   overflow: hidden;
   position: relative;
+  touch-action: none;
+}
+
+.asset-frame.is-light {
+  background: #f3efe8;
+}
+
+.asset-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.asset-transform {
+  position: relative;
+  display: inline-block;
+  transform-origin: center;
+  transition: transform 0.2s ease;
 }
 
 .asset-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transform-origin: top center;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  display: block;
   transition: opacity 0.2s ease, transform 0.2s ease;
   opacity: 0;
   pointer-events: none;
@@ -116,6 +171,50 @@ body.tester-body {
 .zoom-indicator.is-visible {
   opacity: 0.85;
   transform: translateY(0);
+}
+
+.viewer-tools {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.asset-frame:hover .viewer-tools,
+.viewer-tools.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.tool-btn {
+  border: 1px solid var(--tester-border);
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--tester-text);
+  font-size: 11px;
+  padding: 4px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.tool-btn.is-on {
+  border-color: var(--tester-accent);
+  background: var(--tester-accent);
+  color: #1a1405;
+}
+
+.overlay-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 .pulse-dot {
