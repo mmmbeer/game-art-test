@@ -26,3 +26,23 @@ export async function insertTestAssets({ testId, assetIds }) {
     [rows]
   );
 }
+
+export async function getTestSummaryByUserId(userId) {
+  const [rows] = await pool.query(
+    `SELECT game_id,
+        COUNT(*) AS test_count,
+        SUM(status = 'active') AS active_count
+     FROM tests
+     WHERE user_id = ?
+     GROUP BY game_id`,
+    [userId]
+  );
+  const map = new Map();
+  rows.forEach((row) => {
+    map.set(row.game_id, {
+      testCount: Number(row.test_count || 0),
+      activeCount: Number(row.active_count || 0),
+    });
+  });
+  return map;
+}

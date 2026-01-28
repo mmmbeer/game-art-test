@@ -1,10 +1,9 @@
 const testTitle = document.getElementById("testTitle");
-const testSubtitle = document.getElementById("testSubtitle");
+const assetName = document.getElementById("assetName");
 const assetType = document.getElementById("assetType");
-const assetDpi = document.getElementById("assetDpi");
 const assetImage = document.getElementById("assetImage");
+const assetFrame = document.getElementById("assetFrame");
 const assetLoading = document.getElementById("assetLoading");
-const assetStatus = document.getElementById("assetStatus");
 const ratingPanel = document.getElementById("ratingPanel");
 const submitVote = document.getElementById("submitVote");
 const commentInput = document.getElementById("commentInput");
@@ -12,10 +11,6 @@ const commentHint = document.getElementById("commentHint");
 const remainingAssets = document.getElementById("remainingAssets");
 const minVotes = document.getElementById("minVotes");
 const sessionVotes = document.getElementById("sessionVotes");
-const shareLink = document.getElementById("shareLink");
-const shareButton = document.getElementById("shareButton");
-const copyLink = document.getElementById("copyLink");
-const copyLinkSecondary = document.getElementById("copyLinkSecondary");
 const completePanel = document.getElementById("completePanel");
 const reloadButton = document.getElementById("reloadButton");
 
@@ -29,24 +24,28 @@ const testUuid = getTestUuidFromPath();
 const storageKey = `tgc_tester_votes_${testUuid}`;
 let currentAsset = null;
 let votedAssets = loadVoteHistory();
+const zoomState = {
+  scale: 1,
+  lastTouchDistance: null,
+};
 
 if (!testUuid) {
-  testSubtitle.textContent = "Invalid test link.";
+  testTitle.textContent = "Invalid test link.";
   showToast("Invalid test link.", "error");
 } else {
-  setShareLink();
   bindRatingEvents();
   bindActionEvents();
+  bindZoomEvents();
   loadNextAsset();
 }
 
 function bindRatingEvents() {
   ratingPanel.addEventListener("click", (event) => {
-    const button = event.target.closest(".rating-pill");
+    const button = event.target.closest(".star-button");
     if (!button) {
       return;
     }
-    const group = event.target.closest(".rating-group");
+    const group = event.target.closest(".rating-row");
     const metric = group?.dataset.metric;
     const value = Number.parseInt(button.dataset.value || "0", 10);
     if (!metric || !value) {
@@ -95,7 +94,6 @@ function bindActionEvents() {
       addVoteToHistory(currentAsset.uuid);
       sessionVotes.textContent = votedAssets.length.toString();
       showToast("Vote recorded. Loading next asset...", "success");
-      resetRatings();
       await loadNextAsset();
     } catch (error) {
       showToast("Network error. Try again.", "error");
@@ -103,9 +101,6 @@ function bindActionEvents() {
     }
   });
 
-  shareButton.addEventListener("click", () => shareTestLink());
-  copyLink.addEventListener("click", () => copyTestLink());
-  copyLinkSecondary.addEventListener("click", () => copyTestLink());
   reloadButton.addEventListener("click", () => loadNextAsset());
 }
 
@@ -152,10 +147,10 @@ async function loadNextAsset() {
 
 function updateTestMeta(data) {
   if (data.test?.game_name) {
-    testTitle.textContent = data.test.game_name;
-    testSubtitle.textContent = "Share quick ratings on each asset below.";
+    const designer = data.test?.designer_name || "Designer unavailable";
+    testTitle.textContent = `${data.test.game_name} (${designer})`;
   } else {
-    testSubtitle.textContent = "Share quick ratings on each asset below.";
+    testTitle.textContent = "Art test (Designer unavailable)";
   }
   if (data.progress) {
     remainingAssets.textContent = `${data.progress.remaining_assets} / ${data.progress.total_assets}`;
@@ -167,18 +162,14 @@ function updateTestMeta(data) {
 function displayAsset(asset) {
   currentAsset = asset;
   resetRatings();
+  assetName.textContent = resolveAssetName(asset);
   assetType.textContent = asset.asset_type || "Art asset";
-  assetDpi.textContent = asset.dpi ? `${asset.dpi} DPI` : "";
   assetImage.classList.remove("loaded");
   assetImage.src = asset.image_url || "";
   assetImage.alt = asset.asset_type || "Art asset";
   assetImage.onload = () => assetImage.classList.add("loaded");
-  assetImage.onerror = () => {
-    assetStatus.textContent = "Unable to load image.";
-  };
-  assetStatus.textContent = asset.vote_count
-    ? `This asset has ${asset.vote_count} of ${minVotes.textContent} votes.`
-    : "Be the first to vote on this asset.";
+  assetImage.onerror = () => showToast("Unable to load image.", "error");
+  resetZoom();
 }
 
 function setLoading(isLoading) {
@@ -195,27 +186,18 @@ function resetRatings() {
   ratingState.professionalism = 0;
   ratingState.appeal = 0;
   ratingState.understandability = 0;
-  ratingPanel.querySelectorAll(".rating-group").forEach((group) => {
-    group.classList.remove("active");
-    group.querySelectorAll(".rating-pill").forEach((pill) => pill.classList.remove("selected"));
-    const label = group.querySelector("[data-value-label]");
-    if (label) {
-      label.textContent = "-";
-    }
+  ratingPanel.querySelectorAll(".rating-row").forEach((group) => {
+    group.querySelectorAll(".star-button").forEach((star) => star.classList.remove("is-on"));
   });
   commentInput.value = "";
   commentHint.textContent = "0 / 500";
 }
 
 function updateRatingUI(group, value) {
-  group.classList.add("active");
-  group.querySelectorAll(".rating-pill").forEach((pill) => {
-    pill.classList.toggle("selected", pill.dataset.value === String(value));
+  group.querySelectorAll(".star-button").forEach((star) => {
+    const starValue = Number.parseInt(star.dataset.value || "0", 10);
+    star.classList.toggle("is-on", starValue <= value);
   });
-  const label = group.querySelector("[data-value-label]");
-  if (label) {
-    label.textContent = value;
-  }
 }
 
 function updateSubmitState() {
@@ -230,9 +212,8 @@ function updateSubmitState() {
 function showCompletion(data) {
   currentAsset = null;
   assetImage.src = "";
-  assetType.textContent = "No more assets";
-  assetDpi.textContent = "";
-  assetStatus.textContent = "All assets have reached the vote target.";
+  assetName.textContent = "No more assets";
+  assetType.textContent = "";
   updateTestMeta(data);
   completePanel.classList.remove("hidden");
 }
@@ -260,37 +241,45 @@ function addVoteToHistory(assetUuid) {
   }
 }
 
-function setShareLink() {
-  const url = `${window.location.origin}${window.location.pathname.replace(/\/$/, "")}`;
-  shareLink.value = url;
-}
+function bindZoomEvents() {
+  assetFrame.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const delta = event.deltaY > 0 ? -0.1 : 0.1;
+    setZoom(zoomState.scale + delta);
+  }, { passive: false });
 
-async function shareTestLink() {
-  const url = shareLink.value;
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: "TGC Art Test", url });
+  assetFrame.addEventListener("touchstart", (event) => {
+    if (event.touches.length === 2) {
+      zoomState.lastTouchDistance = getTouchDistance(event.touches);
+    }
+  }, { passive: false });
+
+  assetFrame.addEventListener("touchmove", (event) => {
+    if (event.touches.length !== 2) {
       return;
-    } catch (error) {
-      showToast("Share canceled.", "error");
     }
-  }
-  copyTestLink();
+    event.preventDefault();
+    const distance = getTouchDistance(event.touches);
+    if (zoomState.lastTouchDistance) {
+      const delta = (distance - zoomState.lastTouchDistance) / 200;
+      setZoom(zoomState.scale + delta);
+    }
+    zoomState.lastTouchDistance = distance;
+  }, { passive: false });
+
+  assetFrame.addEventListener("touchend", () => {
+    zoomState.lastTouchDistance = null;
+  });
 }
 
-async function copyTestLink() {
-  const url = shareLink.value;
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(url);
-    } else {
-      shareLink.select();
-      document.execCommand("copy");
-    }
-    showToast("Link copied.", "success");
-  } catch (error) {
-    showToast("Unable to copy link.", "error");
-  }
+function setZoom(nextScale) {
+  zoomState.scale = Math.min(4, Math.max(1, nextScale));
+  assetImage.style.transform = `scale(${zoomState.scale})`;
+}
+
+function resetZoom() {
+  zoomState.scale = 1;
+  assetImage.style.transform = "scale(1)";
 }
 
 function showToast(message, variant) {
@@ -300,6 +289,17 @@ function showToast(message, variant) {
   toast.textContent = message;
   host.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
+}
+
+function resolveAssetName(asset) {
+  const meta = asset?.metadata || {};
+  return (
+    meta?.source?.name ||
+    meta?.name ||
+    meta?.title ||
+    asset?.asset_type ||
+    "Art asset"
+  );
 }
 
 function getTestUuidFromPath() {

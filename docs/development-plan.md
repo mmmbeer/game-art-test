@@ -389,6 +389,8 @@ No login required for testers. Public art test links must allow anonymous voting
 * Shareable test link controls (copy + native share when available)
 * Vote progress panel showing remaining assets and vote target per asset
 * Custom toast feedback for errors and vote confirmation
+* Games dashboard now flags games with existing tests (active or past)
+* Tester UI redesigned to a compact, sticky-asset layout with star ratings and zoomable artwork
 
 **Testing**
 

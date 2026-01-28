@@ -12,6 +12,7 @@ import {
 import { getGameByUuidForUser, getGamesByUserId, syncGamesForUser } from "../db/games.js";
 import { discoverGameAssets } from "../services/tgcAssets.js";
 import { getAssetSummaryByUserId, getAssetsByGameId, upsertAssetsForGame } from "../db/assets.js";
+import { getTestSummaryByUserId } from "../db/tests.js";
 import { createDeterministicUuid } from "../utils/uuid.js";
 
 const router = Router();
@@ -183,6 +184,7 @@ router.get("/", requireAuth, async (req, res) => {
 
     const storedGames = await getGamesByUserId(user.id);
     const assetSummary = await getAssetSummaryByUserId(user.id);
+    const testSummary = await getTestSummaryByUserId(user.id);
     const gameDesignerMap = new Map(
       Array.from(combinedMap.values()).map((game) => [game.id, game.designer_id || null])
     );
@@ -200,14 +202,19 @@ router.get("/", requireAuth, async (req, res) => {
         uuid: designer.uuid,
         name: designer.name,
       })),
-      games: storedGames.map((game) => ({
-        uuid: game.uuid,
-        name: game.name,
-        asset_count: assetSummary.get(game.id)?.assetCount || 0,
-        asset_type_counts: assetSummary.get(game.id)?.typeCounts || {},
-        shop_image_url: gameImageMap.get(game.tgc_game_id) || null,
-        designer_uuid: resolveDesignerUuid(gameDesignerMap.get(game.tgc_game_id), designerMap),
-      })),
+      games: storedGames.map((game) => {
+        const testInfo = testSummary.get(game.id) || { testCount: 0, activeCount: 0 };
+        return {
+          uuid: game.uuid,
+          name: game.name,
+          asset_count: assetSummary.get(game.id)?.assetCount || 0,
+          asset_type_counts: assetSummary.get(game.id)?.typeCounts || {},
+          shop_image_url: gameImageMap.get(game.tgc_game_id) || null,
+          designer_uuid: resolveDesignerUuid(gameGameDesignerId(game, gameDesignerMap), designerMap),
+          test_count: testInfo.testCount,
+          active_test_count: testInfo.activeCount,
+        };
+      }),
     });
   } catch (error) {
     return res.status(502).json({ error: error.message || "Failed to fetch games" });
@@ -256,6 +263,10 @@ function resolveDesignerUuid(tgcDesignerId, designerMap) {
     return null;
   }
   return designerMap.get(tgcDesignerId)?.uuid || createDeterministicUuid(`designer:${tgcDesignerId}`);
+}
+
+function gameGameDesignerId(game, gameDesignerMap) {
+  return gameDesignerMap.get(game.tgc_game_id) || null;
 }
 
 function getFilePreviewUrl(file) {

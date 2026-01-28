@@ -169,6 +169,14 @@ function renderPills(game) {
   const totalCount = Number(game.asset_count) || 0;
   pills.push(`<span class="pill">${totalCount} assets</span>`);
 
+  const activeTests = Number(game.active_test_count) || 0;
+  const totalTests = Number(game.test_count) || 0;
+  if (activeTests > 0) {
+    pills.push(`<span class="pill pill-accent">${activeTests} active test</span>`);
+  } else if (totalTests > 0) {
+    pills.push(`<span class="pill pill-muted">Has past tests</span>`);
+  }
+
   const counts = game.asset_type_counts || {};
   const entries = Object.entries(counts)
     .filter(([, count]) => Number(count) > 0)

@@ -261,6 +261,12 @@ body.app-body {
   color: var(--color-muted);
 }
 
+.pill-accent {
+  background: rgba(111, 211, 192, 0.2);
+  color: var(--color-text);
+  border-color: rgba(111, 211, 192, 0.5);
+}
+
 .asset-header {
   display: flex;
   flex-direction: column;
