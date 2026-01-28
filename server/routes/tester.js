@@ -115,6 +115,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
           uuid: test.uuid,
           status: test.status,
           game_name: test.game_name,
+          designer_name: test.designer_name,
         },
         progress: {
           total_assets: totalAssets,
@@ -130,6 +131,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
         uuid: test.uuid,
         status: test.status,
         game_name: test.game_name,
+        designer_name: test.designer_name,
       },
       asset: {
         uuid: selection.asset_uuid,

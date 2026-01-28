@@ -2,9 +2,14 @@ import pool from "./pool.js";
 
 export async function getTestByUuid(testUuid) {
   const [rows] = await pool.query(
-    `SELECT tests.id, tests.uuid, tests.status, games.name AS game_name
+    `SELECT tests.id,
+        tests.uuid,
+        tests.status,
+        games.name AS game_name,
+        users.display_name AS designer_name
      FROM tests
      JOIN games ON games.id = tests.game_id
+     JOIN users ON users.id = tests.user_id
      WHERE tests.uuid = ?
      LIMIT 1`,
     [testUuid]
