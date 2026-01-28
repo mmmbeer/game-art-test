@@ -107,7 +107,6 @@ function bindActionEvents() {
 async function loadNextAsset() {
   setLoading(true);
   completePanel.classList.add("hidden");
-  assetStatus.textContent = "";
 
   try {
     const url = `${getBasePath()}/next`;
