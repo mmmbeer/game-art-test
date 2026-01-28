@@ -7,6 +7,13 @@
   --tester-muted: rgba(246, 241, 232, 0.6);
   --tester-accent: #f2c94c;
   --tester-border: rgba(246, 241, 232, 0.2);
+  --tester-star-off: rgba(246, 241, 232, 0.45);
+  --tester-star-preview: rgba(255, 212, 74, 0.45);
+  --tester-star-on-1: #ffd54a;
+  --tester-star-on-2: #ffcf4a;
+  --tester-star-on-3: #ffc04a;
+  --tester-star-on-4: #ffb14a;
+  --tester-star-on-5: #ffa64a;
 }
 
 body.tester-body {
@@ -73,7 +80,7 @@ body.tester-body {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transform-origin: center center;
+  transform-origin: top center;
   transition: opacity 0.2s ease, transform 0.2s ease;
   opacity: 0;
   pointer-events: none;
@@ -174,44 +181,50 @@ body.tester-body {
   height: 22px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.45);
-  background-image: url("../assets/icons/star-outline.svg");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 18px 18px;
+  background-color: var(--tester-star-off);
+  mask-image: url("../assets/icons/star-outline.svg");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 18px 18px;
+  -webkit-mask-image: url("../assets/icons/star-outline.svg");
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: 18px 18px;
   cursor: pointer;
   padding: 0;
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
 }
 
 .star-button.is-on {
-  color: #ffd54a;
-  background-image: url("../assets/icons/star-solid.svg");
+  background-color: var(--tester-star-on-1);
+  mask-image: url("../assets/icons/star-solid.svg");
+  -webkit-mask-image: url("../assets/icons/star-solid.svg");
 }
 
 .star-button.is-on[data-value="1"] {
-  color: #ffd54a;
+  background-color: var(--tester-star-on-1);
 }
 
 .star-button.is-on[data-value="2"] {
-  color: #ffcf4a;
+  background-color: var(--tester-star-on-2);
 }
 
 .star-button.is-on[data-value="3"] {
-  color: #ffc04a;
+  background-color: var(--tester-star-on-3);
 }
 
 .star-button.is-on[data-value="4"] {
-  color: #ffb14a;
+  background-color: var(--tester-star-on-4);
 }
 
 .star-button.is-on[data-value="5"] {
-  color: #ffa64a;
+  background-color: var(--tester-star-on-5);
 }
 
 .star-button.preview:not(.is-on) {
-  color: rgba(255, 212, 74, 0.45);
-  background-image: url("../assets/icons/star-solid.svg");
+  background-color: var(--tester-star-preview);
+  mask-image: url("../assets/icons/star-solid.svg");
+  -webkit-mask-image: url("../assets/icons/star-solid.svg");
 }
 
 .comment-row {
