@@ -232,6 +232,7 @@ router.get("/:uuid/assets", requireAuth, async (req, res) => {
 
     const storedAssets = await getAssetsByGameId(game.id);
     const grouped = groupAssetsByType(storedAssets);
+    const deckCardsByAssetUuid = getDeckCardsByAssetUuid(storedAssets);
 
     return res.status(200).json({
       game: {
@@ -241,6 +242,7 @@ router.get("/:uuid/assets", requireAuth, async (req, res) => {
       asset_types: grouped.types,
       assets: grouped.assets,
       assets_by_type: grouped.assetsByType,
+      deck_cards_by_asset_uuid: deckCardsByAssetUuid,
     });
   } catch (error) {
     return res.status(502).json({ error: error.message || "Failed to fetch assets" });
@@ -349,4 +351,38 @@ function isCardAsset(asset) {
   }
   const source = asset?.metadata?.source || {};
   return String(source.object_type || "").toLowerCase() === "card";
+}
+
+function getDeckCardsByAssetUuid(assets) {
+  const cards = assets.filter((asset) => isCardAsset(asset));
+  const cardsByDeckId = new Map();
+  for (const card of cards) {
+    const deckId = card?.metadata?.source?.deck_id;
+    if (!deckId) {
+      continue;
+    }
+    if (!cardsByDeckId.has(deckId)) {
+      cardsByDeckId.set(deckId, []);
+    }
+    cardsByDeckId.get(deckId).push(card);
+  }
+
+  const map = {};
+  for (const asset of assets) {
+    if (isCardAsset(asset)) {
+      continue;
+    }
+    const deckId = asset?.tgc_asset_id;
+    const cardsForDeck = cardsByDeckId.get(deckId) || [];
+    if (cardsForDeck.length) {
+      map[asset.uuid] = cardsForDeck.map((card) => ({
+        uuid: card.uuid,
+        asset_type: card.asset_type,
+        image_url: card.image_url,
+        dpi: card.dpi,
+        metadata: card.metadata,
+      }));
+    }
+  }
+  return map;
 }

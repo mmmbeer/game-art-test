@@ -103,6 +103,7 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
       game,
       assetTypes: groupedAssets,
       assetsByType,
+      deckCardsByAssetUuid: data.deck_cards_by_asset_uuid || {},
     });
     if (showToastOnSuccess) {
       showToast("Assets refreshed.", "success");

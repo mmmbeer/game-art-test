@@ -1,4 +1,4 @@
-import { resolveAssetName, resolveCardCount } from "./state.js";
+import { resolveAssetName, resolveCardCount, getPreviewAssetsForType } from "./state.js";
 
 export function renderSelectedAssets({ type, assetsByType, selectionState }) {
   const items = assetsByType[type] || [];
@@ -11,7 +11,7 @@ export function renderSelectedAssets({ type, assetsByType, selectionState }) {
     .map((asset) => {
       const name = resolveAssetName(asset);
       const cardCount = resolveCardCount(asset);
-      return `<div class=\"type-selected-item\">- ${name}${cardCount ? ` (${cardCount})` : ""}</div>`;
+      return `<div class="type-selected-item">- ${name}${cardCount ? ` (${cardCount})` : ""}</div>`;
     })
     .join("");
 }
@@ -27,32 +27,41 @@ export function renderAssetsForType({ type, assetsByType, selectionState }) {
       const name = resolveAssetName(asset);
       const cardCount = resolveCardCount(asset);
       return `
-        <label class=\"type-asset-card\">
-          <input type=\"checkbox\" data-asset-uuid=\"${asset.uuid}\" ${selected.has(asset.uuid) ? "checked" : ""}>
+        <label class="type-asset-card">
+          <input type="checkbox" data-asset-uuid="${asset.uuid}" ${selected.has(asset.uuid) ? "checked" : ""}>
           <div>
-            <div class=\"type-asset-name\">${name}${cardCount ? ` (${cardCount})` : ""}</div>
+            <div class="type-asset-name">${name}${cardCount ? ` (${cardCount})` : ""}</div>
           </div>
-          <span class=\"test-type-meta\">${selected.has(asset.uuid) ? "Selected" : ""}</span>
+          <span class="test-type-meta">${selected.has(asset.uuid) ? "Selected" : ""}</span>
         </label>
       `;
     })
     .join("");
 }
 
-export function renderPreviewRow({ type, assetsByType, expanded }) {
-  const items = assetsByType[type] || [];
+export function renderPreviewRow({ type, assetsByType, deckCardsByAssetUuid, expanded }) {
+  const items = getPreviewAssetsForType({ type, assetsByType, deckCardsByAssetUuid });
   if (!items.length) {
     return "<div class=\"type-preview-empty\">No assets to preview.</div>";
   }
   return items
     .map((asset) => {
       const preview = asset.metadata?.preview_urls?.[0] || asset.image_url;
+      if (!preview) {
+        return "";
+      }
+      if (!expanded) {
+        return `
+        <div class="type-preview-card"></div>
+      `;
+      }
       return `
-        <div class=\"type-preview-card\">
-          <img ${expanded ? `src=\"${preview}\"` : `data-src=\"${preview}\"`} alt=\"${asset.asset_type}\">
+        <div class="type-preview-card">
+          <img src="${preview}" alt="${asset.asset_type}">
         </div>
       `;
     })
+    .filter(Boolean)
     .join("");
 }
 
@@ -64,14 +73,15 @@ export function buildTypeRow({
   totalCount,
   isExpanded,
   isFullySelected,
+  deckCardsByAssetUuid,
 }) {
   const type = entry.type;
   const option = document.createElement("label");
   option.className = "test-type-option";
   option.innerHTML = `
-    <input type=\"checkbox\" value=\"${type}\" ${isFullySelected ? "checked" : ""}>
-    <span class=\"test-type-name\">${type} (${entry.count})</span>
-    <span class=\"test-type-meta\">${selectedCount}/${totalCount}</span>
+    <input type="checkbox" value="${type}" ${isFullySelected ? "checked" : ""}>
+    <span class="test-type-name">${type} (${entry.count})</span>
+    <span class="test-type-meta">${selectedCount}/${totalCount}</span>
   `;
 
   const wrapper = document.createElement("div");
@@ -90,11 +100,16 @@ export function buildTypeRow({
   previewToggle.type = "button";
   previewToggle.className = "type-preview-toggle";
   previewToggle.dataset.previewToggle = type;
-  previewToggle.innerHTML = `Preview Assets <span class=\"chevron\">${isExpanded ? "v" : ">"}</span>`;
+  previewToggle.innerHTML = `Preview Assets <span class="chevron">${isExpanded ? "v" : ">"}</span>`;
   const previewRow = document.createElement("div");
   previewRow.className = "type-preview-row";
   previewRow.dataset.typePreview = type;
-  previewRow.innerHTML = renderPreviewRow({ type, assetsByType, expanded: false });
+  previewRow.innerHTML = renderPreviewRow({
+    type,
+    assetsByType,
+    deckCardsByAssetUuid,
+    expanded: false,
+  });
   previewWrap.appendChild(previewToggle);
   previewWrap.appendChild(previewRow);
   wrapper.appendChild(previewWrap);

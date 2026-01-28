@@ -1,20 +1,44 @@
 import { renderAssetsForType, renderSelectedAssets, renderPreviewRow } from "./ui.js";
 import { isTypePartiallySelected, resolveTypeCounts } from "./state.js";
 
-export function setExpandedState({ type, assetsWrap, previewRow, previewToggle, expanded, assetsByType }) {
+export function setExpandedState({
+  type,
+  assetsWrap,
+  previewRow,
+  previewToggle,
+  expanded,
+  assetsByType,
+  deckCardsByAssetUuid,
+}) {
   if (expanded) {
     assetsWrap.classList.add("is-open");
     previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">v</span>";
-    previewRow.innerHTML = renderPreviewRow({ type, assetsByType, expanded: true });
+    previewRow.innerHTML = renderPreviewRow({
+      type,
+      assetsByType,
+      deckCardsByAssetUuid,
+      expanded: true,
+    });
     loadPreviewImages(previewRow);
   } else {
     assetsWrap.classList.remove("is-open");
     previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">></span>";
-    previewRow.innerHTML = renderPreviewRow({ type, assetsByType, expanded: false });
+    previewRow.innerHTML = renderPreviewRow({
+      type,
+      assetsByType,
+      deckCardsByAssetUuid,
+      expanded: false,
+    });
   }
 }
 
-export function refreshTypeSelectionUI({ type, assetsByType, selectionState, testTypeSelection }) {
+export function refreshTypeSelectionUI({
+  type,
+  assetsByType,
+  selectionState,
+  testTypeSelection,
+  deckCardsByAssetUuid,
+}) {
   const option = testTypeSelection.querySelector(`.test-type-option input[value=\"${type}\"]`);
   const assets = assetsByType[type] || [];
   const selected = selectionState.get(type) || new Set();
@@ -45,7 +69,12 @@ export function refreshTypeSelectionUI({ type, assetsByType, selectionState, tes
   const previewToggle = testTypeSelection.querySelector(`[data-preview-toggle=\"${type}\"]`);
   const assetsWrap = testTypeSelection.querySelector(`[data-type-assets=\"${type}\"]`);
   if (previewRow && previewToggle && assetsWrap) {
-    previewRow.innerHTML = renderPreviewRow({ type, assetsByType, expanded: assetsWrap.classList.contains("is-open") });
+    previewRow.innerHTML = renderPreviewRow({
+      type,
+      assetsByType,
+      deckCardsByAssetUuid,
+      expanded: assetsWrap.classList.contains("is-open"),
+    });
     if (assetsWrap.classList.contains("is-open")) {
       loadPreviewImages(previewRow);
       previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">v</span>";

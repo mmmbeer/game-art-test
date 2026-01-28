@@ -19,13 +19,11 @@ const testPreview = document.getElementById("testPreview");
 const testLinkPanel = document.getElementById("testLinkPanel");
 const testLinkInput = document.getElementById("testLinkInput");
 const copyTestLink = document.getElementById("copyTestLink");
-const testPreviewModal = document.getElementById("testPreviewModal");
-const testPreviewSummary = document.getElementById("testPreviewSummary");
-const testPreviewScroll = document.getElementById("testPreviewScroll");
 
 let activeGame = null;
 let assetTypes = [];
 let assetsByType = {};
+let deckCardsByAssetUuid = {};
 let lastPreview = null;
 let lastPreviewSignature = "";
 let selectionState = new Map();
@@ -79,10 +77,11 @@ export function initTestBuilder({ onAuthLost }) {
   });
 
   return {
-    setAssets: ({ game, assetTypes: types, assetsByType: byType }) => {
+    setAssets: ({ game, assetTypes: types, assetsByType: byType, deckCardsByAssetUuid: deckMap }) => {
       activeGame = game;
       assetTypes = Array.isArray(types) ? types : [];
       assetsByType = byType || {};
+      deckCardsByAssetUuid = deckMap || {};
       selectionState = buildDefaultSelection(assetsByType);
       renderTypeOptions();
       updateMetrics();
@@ -115,6 +114,7 @@ function renderTypeOptions() {
       const { wrapper, option, previewToggle, previewRow, assetsWrap } = buildTypeRow({
         entry,
         assetsByType,
+        deckCardsByAssetUuid,
         selectionState,
         selectedCount,
         totalCount,
@@ -131,6 +131,7 @@ function renderTypeOptions() {
           previewToggle,
           expanded: nextOpen,
           assetsByType,
+          deckCardsByAssetUuid,
         });
       });
 
@@ -151,9 +152,16 @@ function renderTypeOptions() {
           previewToggle,
           expanded: checkbox.checked,
           assetsByType,
+          deckCardsByAssetUuid,
         });
         updateMetrics();
-        refreshTypeSelectionUI({ type, assetsByType, selectionState, testTypeSelection });
+        refreshTypeSelectionUI({
+          type,
+          assetsByType,
+          selectionState,
+          testTypeSelection,
+          deckCardsByAssetUuid,
+        });
         clearPreview();
       });
 
@@ -170,7 +178,13 @@ function renderTypeOptions() {
           set.delete(uuid);
         }
         selectionState.set(type, set);
-        refreshTypeSelectionUI({ type, assetsByType, selectionState, testTypeSelection });
+        refreshTypeSelectionUI({
+          type,
+          assetsByType,
+          selectionState,
+          testTypeSelection,
+          deckCardsByAssetUuid,
+        });
         updateMetrics();
         clearPreview();
       });
@@ -183,6 +197,7 @@ function renderTypeOptions() {
           previewToggle,
           expanded: true,
           assetsByType,
+          deckCardsByAssetUuid,
         });
       }
     });
@@ -233,7 +248,6 @@ async function loadPreview({ gameUuid, selectedAssets, onAuthLost }) {
     lastPreview = data;
     lastPreviewSignature = selectedAssets.join("|");
     renderPreview(data);
-    openPreviewModal(data);
   } finally {
     testPreviewLoading.classList.add("d-none");
   }
@@ -291,19 +305,3 @@ async function startArtTest({ gameUuid, selectedAssets, onAuthLost }) {
   showToast("Art test started.", "success");
 }
 
-function openPreviewModal(data) {
-  const assets = Array.isArray(data.assets) ? data.assets : [];
-  testPreviewSummary.textContent = `Previewing ${data.sample_size} of ${data.pool_count} eligible assets.`;
-  testPreviewScroll.innerHTML = assets
-    .map(
-      (asset) => `
-      <div class=\"test-preview-scroll-card\">
-        <img src=\"${asset.image_url}\" alt=\"${asset.asset_type}\">
-        <div class=\"test-preview-meta\">${asset.asset_type}</div>
-      </div>
-    `
-    )
-    .join("");
-  const modal = bootstrap.Modal.getOrCreateInstance(testPreviewModal);
-  modal.show();
-}

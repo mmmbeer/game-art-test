@@ -62,3 +62,16 @@ export function resolveCardCount(asset, fallback = 0) {
 export function isDeckType(type) {
   return String(type || "").toLowerCase().includes("deck");
 }
+
+export function getPreviewAssetsForType({ type, assetsByType, deckCardsByAssetUuid }) {
+  const items = assetsByType[type] || [];
+  const previewItems = [];
+  items.forEach((asset) => {
+    previewItems.push(asset);
+    if (String(type || '').toLowerCase().includes('deck')) {
+      const cards = deckCardsByAssetUuid?.[asset.uuid] || [];
+      cards.forEach((card) => previewItems.push(card));
+    }
+  });
+  return previewItems;
+}
