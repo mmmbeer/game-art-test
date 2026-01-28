@@ -5,7 +5,7 @@ export function buildPublicTestUrl(req, testUuid) {
     ? env.app.server.replace(/\/$/, "")
     : `${req.protocol}://${req.get("host")}`;
   const basePath = env.app.basePath ? normalizeBasePath(env.app.basePath) : "";
-  return `${base}${basePath}/t/${testUuid}`;
+  return `${base}${basePath}/t/${testUuid}/`;
 }
 
 function normalizeBasePath(input) {

@@ -78,6 +78,9 @@ router.post("/:uuid/vote", async (req, res) => {
 });
 
 router.get("/:uuid", async (req, res) => {
+  if (!req.originalUrl.endsWith("/")) {
+    return res.redirect(308, `${req.originalUrl}/`);
+  }
   return res.sendFile(publicFile);
 });
 
