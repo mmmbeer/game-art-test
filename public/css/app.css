@@ -462,10 +462,14 @@ body.app-body {
 }
 
 .type-preview-row {
-  display: flex;
+  display: none;
   gap: 10px;
   overflow-x: auto;
   padding-bottom: 6px;
+}
+
+.type-preview-row.is-open {
+  display: flex;
 }
 
 .type-preview-card {

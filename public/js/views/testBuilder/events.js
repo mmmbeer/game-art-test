@@ -12,6 +12,7 @@ export function setExpandedState({
 }) {
   if (expanded) {
     assetsWrap.classList.add("is-open");
+    previewRow.classList.add("is-open");
     previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">v</span>";
     previewRow.innerHTML = renderPreviewRow({
       type,
@@ -22,6 +23,7 @@ export function setExpandedState({
     loadPreviewImages(previewRow);
   } else {
     assetsWrap.classList.remove("is-open");
+    previewRow.classList.remove("is-open");
     previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">></span>";
     previewRow.innerHTML = renderPreviewRow({
       type,
@@ -69,6 +71,11 @@ export function refreshTypeSelectionUI({
   const previewToggle = testTypeSelection.querySelector(`[data-preview-toggle=\"${type}\"]`);
   const assetsWrap = testTypeSelection.querySelector(`[data-type-assets=\"${type}\"]`);
   if (previewRow && previewToggle && assetsWrap) {
+    if (assetsWrap.classList.contains("is-open")) {
+      previewRow.classList.add("is-open");
+    } else {
+      previewRow.classList.remove("is-open");
+    }
     previewRow.innerHTML = renderPreviewRow({
       type,
       assetsByType,

@@ -102,7 +102,7 @@ export function buildTypeRow({
   previewToggle.dataset.previewToggle = type;
   previewToggle.innerHTML = `Preview Assets <span class="chevron">${isExpanded ? "v" : ">"}</span>`;
   const previewRow = document.createElement("div");
-  previewRow.className = "type-preview-row";
+  previewRow.className = `type-preview-row${isExpanded ? " is-open" : ""}`;
   previewRow.dataset.typePreview = type;
   previewRow.innerHTML = renderPreviewRow({
     type,

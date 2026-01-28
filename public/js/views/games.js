@@ -78,6 +78,13 @@ export function initGamesView({ onBrowseAssets, onAuthLost }) {
         gamesLoading.classList.add("d-none");
       }
     },
+    getGameByUuid: (uuid) => {
+      const game = games.find((item) => item.uuid === uuid);
+      if (!game) {
+        return null;
+      }
+      return { ...game, designer_name: resolveDesignerName(game.designer_uuid) };
+    },
   };
 }
 
