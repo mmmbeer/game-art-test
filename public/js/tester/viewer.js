@@ -243,6 +243,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
   }
 
   function updateTransforms() {
+    updateAssetBounds();
     if (assetTransform) {
       assetTransform.style.transform =
         `translate(${viewState.driftOffset.x}px, ${viewState.driftOffset.y}px) ` +
@@ -263,8 +264,12 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (!assetBounds || !assetImage?.naturalWidth || !assetImage?.naturalHeight) {
       return;
     }
-    const width = Math.max(1, Math.round(assetImage.naturalWidth * zoomState.scale));
-    const height = Math.max(1, Math.round(assetImage.naturalHeight * zoomState.scale));
+    const baseWidth = Math.max(1, Math.round(assetImage.naturalWidth * zoomState.scale));
+    const baseHeight = Math.max(1, Math.round(assetImage.naturalHeight * zoomState.scale));
+    const rotation = ((viewState.rotation % 360) + 360) % 360;
+    const swap = rotation === 90 || rotation === 270;
+    const width = swap ? baseHeight : baseWidth;
+    const height = swap ? baseWidth : baseHeight;
     assetBounds.style.width = `${width}px`;
     assetBounds.style.height = `${height}px`;
   }
