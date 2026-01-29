@@ -7,6 +7,7 @@ export function getElements() {
     assetImage: byId("assetImage"),
     assetFrame: byId("assetFrame"),
     assetStage: byId("assetStage"),
+    assetDriftCrop: byId("assetDriftCrop"),
     assetTransform: byId("assetTransform"),
     overlayImage: byId("overlayImage"),
     zoomIndicator: byId("zoomIndicator"),

@@ -109,6 +109,7 @@ body.tester-body {
   overflow: hidden;
   position: relative;
   touch-action: none;
+  --drift-crop: 0px;
 }
 
 .asset-frame.is-light {
@@ -121,6 +122,16 @@ body.tester-body {
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+}
+
+.asset-drift-crop {
+  position: absolute;
+  inset: var(--drift-crop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   pointer-events: none;
 }
 

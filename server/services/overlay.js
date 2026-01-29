@@ -1,0 +1,130 @@
+const OVERLAY_BASE = "https://www.thegamecrafter.com";
+
+export function resolveOverlayUrl(asset) {
+  if (!asset) {
+    return "";
+  }
+
+  const meta = asset.metadata || {};
+  const direct = meta.overlay_url || asset.overlay_url;
+  if (typeof direct === "string" && direct.trim()) {
+    return normalizeOverlayUrl(direct);
+  }
+
+  if (isPrintedComponentAsset(asset)) {
+    const overlay =
+      findOverlay(meta) ||
+      findOverlay(meta.source || {}) ||
+      buildPrintedOverlayFallback(asset);
+    return overlay ? normalizeOverlayUrl(overlay) : "";
+  }
+
+  return "";
+}
+
+function findOverlay(value, depth = 0, visited = new Set()) {
+  if (!value || depth > 6) {
+    return "";
+  }
+  if (visited.has(value)) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return isOverlayFile(value) ? value.trim() : "";
+  }
+  if (typeof value !== "object") {
+    return "";
+  }
+  visited.add(value);
+
+  if (typeof value.overlay === "string" && value.overlay.trim()) {
+    return value.overlay.trim();
+  }
+
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === "string") {
+      const lowerKey = key.toLowerCase();
+      if (lowerKey.includes("overlay") && entry.trim()) {
+        return entry.trim();
+      }
+      if (isOverlayFile(entry)) {
+        return entry.trim();
+      }
+    } else if (entry && typeof entry === "object") {
+      const found = findOverlay(entry, depth + 1, visited);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return "";
+}
+
+function isOverlayFile(value) {
+  if (typeof value !== "string") {
+    return false;
+  }
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed || !trimmed.includes("overlays/")) {
+    return false;
+  }
+  return trimmed.endsWith(".png") || trimmed.endsWith(".svg");
+}
+
+function normalizeOverlayUrl(file) {
+  if (typeof file !== "string" || !file.trim()) {
+    return "";
+  }
+  const trimmed = file.trim();
+  if (trimmed.startsWith("http")) {
+    return trimmed;
+  }
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
+  if (trimmed.startsWith("www.")) {
+    return `https://${trimmed}`;
+  }
+  if (trimmed.startsWith("/")) {
+    return `${OVERLAY_BASE}${trimmed}`;
+  }
+  if (trimmed.startsWith("overlays/")) {
+    return `${OVERLAY_BASE}/${trimmed}`;
+  }
+  return trimmed;
+}
+
+function buildPrintedOverlayFallback(asset) {
+  const meta = asset?.metadata || {};
+  const identityRaw =
+    String(meta?.source?.identity || "").trim() || String(asset?.asset_type || "").trim();
+  if (!identityRaw) {
+    return "";
+  }
+  const identity = identityRaw.toLowerCase();
+  return `${OVERLAY_BASE}/overlays/${identity}.png`;
+}
+
+function isPrintedComponentAsset(asset) {
+  const meta = asset?.metadata || {};
+  if (meta?.relationship === "card") {
+    return false;
+  }
+  const source = meta?.source || {};
+  if (Array.isArray(source?.sides)) {
+    return true;
+  }
+  if (typeof source?.overlay === "string") {
+    return true;
+  }
+  if (typeof source?.identity === "string") {
+    return true;
+  }
+  if (
+    typeof source?.object_type === "string" &&
+    source.object_type.toLowerCase().includes("printed")
+  ) {
+    return true;
+  }
+  return false;
+}

@@ -5,6 +5,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
   const {
     assetFrame,
     assetStage,
+    assetDriftCrop,
     assetTransform,
     assetImage,
     overlayImage,
@@ -111,6 +112,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
           viewState.driftOffset = { x: 0, y: 0 };
           updateTransforms();
         }
+        updateDriftCrop();
         updateControlStates();
       });
     }
@@ -135,6 +137,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     zoomState.scale = clamp(nextScale, 0.1, 6);
     zoomState.mode = mode;
     updateTransforms();
+    updateDriftCrop();
     updateZoomToolState();
     if (showIndicator) {
       showZoomIndicator(1800);
@@ -227,6 +230,14 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     }
   }
 
+  function updateDriftCrop() {
+    if (!assetDriftCrop) {
+      return;
+    }
+    const crop = viewState.driftEnabled ? Math.round(80 * zoomState.scale) : 0;
+    assetDriftCrop.style.inset = `${crop}px`;
+  }
+
   function resetViewState({
     preserveOverlay = false,
     preserveBackground = false,
@@ -241,6 +252,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     } else {
       viewState.driftOffset = { x: 0, y: 0 };
     }
+    updateDriftCrop();
     if (!preserveOverlay) {
       viewState.overlayEnabled = false;
     }
@@ -327,7 +339,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
   function applyRandomDrift() {
     const drift = 80;
     const scale = Math.max(0.1, zoomState.scale || 1);
-    const adjusted = drift / scale;
+    const adjusted = drift * scale;
     const x = Math.round((Math.random() * 2 - 1) * adjusted);
     const y = Math.round((Math.random() * 2 - 1) * adjusted);
     viewState.driftOffset = { x, y };
@@ -355,6 +367,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
   if (assetStage) {
     assetStage.style.transform = "";
   }
+  updateDriftCrop();
 
   return {
     bindZoomEvents,

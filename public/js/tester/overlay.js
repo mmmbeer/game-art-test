@@ -3,6 +3,10 @@ const OVERLAY_BASE = "https://www.thegamecrafter.com";
 
 export function resolveOverlayTemplate(asset) {
   const meta = asset?.metadata || {};
+  const direct = asset?.overlay_url || meta?.overlay_url;
+  if (typeof direct === "string" && direct.trim()) {
+    return normalizeOverlayUrl(direct);
+  }
   if (isPrintedComponentAsset(asset)) {
     const overlay = findOverlay(meta) || findOverlay(meta?.source || {});
     if (overlay) {

@@ -9,6 +9,7 @@ import {
   getVoteCountForTestAsset,
   insertVote,
 } from "../db/tester.js";
+import { resolveOverlayUrl } from "../services/overlay.js";
 
 const router = Router();
 const publicFile = path.resolve(process.cwd(), "public", "tester.html");
@@ -126,6 +127,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
     }
 
     const selection = filtered[Math.floor(Math.random() * filtered.length)];
+    const overlayUrl = resolveOverlayUrl(selection);
     return res.status(200).json({
       test: {
         uuid: test.uuid,
@@ -137,6 +139,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
         uuid: selection.asset_uuid,
         asset_type: selection.asset_type,
         image_url: selection.image_url,
+        overlay_url: overlayUrl,
         dpi: selection.dpi,
         metadata: selection.metadata,
         vote_count: selection.vote_count,
