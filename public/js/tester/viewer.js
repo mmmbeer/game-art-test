@@ -5,6 +5,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
   const {
     assetFrame,
     assetStage,
+    assetBounds,
     assetDriftCrop,
     assetTransform,
     assetImage,
@@ -152,6 +153,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     zoomState.scale = clamp(nextScale, 0.1, 6);
     zoomState.mode = mode;
     updateTransforms();
+    updateAssetBounds();
     updateDriftCrop();
     updateZoomToolState();
     if (showIndicator) {
@@ -241,7 +243,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (assetTransform) {
       assetTransform.style.transform =
         `translate(${viewState.driftOffset.x}px, ${viewState.driftOffset.y}px) ` +
-        `rotate(${viewState.rotation}deg) scale(${zoomState.scale})`;
+        `rotate(${viewState.rotation}deg)`;
     }
   }
 
@@ -252,6 +254,16 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     const shouldCrop = viewState.driftEnabled || viewState.cropEnabled;
     const crop = shouldCrop ? Math.round(80 * zoomState.scale) : 0;
     assetDriftCrop.style.inset = `${crop}px`;
+  }
+
+  function updateAssetBounds() {
+    if (!assetBounds || !assetImage?.naturalWidth || !assetImage?.naturalHeight) {
+      return;
+    }
+    const width = Math.max(1, Math.round(assetImage.naturalWidth * zoomState.scale));
+    const height = Math.max(1, Math.round(assetImage.naturalHeight * zoomState.scale));
+    assetBounds.style.width = `${width}px`;
+    assetBounds.style.height = `${height}px`;
   }
 
   function resetViewState({
@@ -325,8 +337,9 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (!overlayImage || !assetImage?.naturalWidth || !assetImage?.naturalHeight) {
       return;
     }
-    overlayImage.style.width = `${assetImage.naturalWidth}px`;
-    overlayImage.style.height = `${assetImage.naturalHeight}px`;
+    overlayImage.style.width = "100%";
+    overlayImage.style.height = "100%";
+    updateAssetBounds();
   }
 
   function updateControlStates() {

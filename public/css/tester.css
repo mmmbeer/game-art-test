@@ -125,6 +125,14 @@ body.tester-body {
   pointer-events: none;
 }
 
+.asset-bounds {
+  position: relative;
+  width: 1px;
+  height: 1px;
+  display: block;
+  pointer-events: none;
+}
+
 .asset-drift-crop {
   position: absolute;
   inset: var(--drift-crop);
@@ -137,13 +145,15 @@ body.tester-body {
 
 .asset-transform {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
+  height: 100%;
   transform-origin: center center;
   transition: transform 0.2s ease;
   will-change: transform;
 }
 
-.asset-frame img {
+.asset-bounds img {
   width: auto;
   height: auto;
   max-width: none;
@@ -152,6 +162,12 @@ body.tester-body {
   transition: opacity 0.2s ease, transform 0.2s ease;
   opacity: 0;
   pointer-events: none;
+}
+
+.asset-bounds #assetImage,
+.asset-bounds #overlayImage {
+  width: 100%;
+  height: 100%;
 }
 
 .asset-frame img.loaded {
