@@ -1,0 +1,30 @@
+export function getElements() {
+  const byId = (id) => document.getElementById(id);
+  return {
+    testTitle: byId("testTitle"),
+    assetName: byId("assetName"),
+    assetType: byId("assetType"),
+    assetImage: byId("assetImage"),
+    assetFrame: byId("assetFrame"),
+    assetStage: byId("assetStage"),
+    assetTransform: byId("assetTransform"),
+    overlayImage: byId("overlayImage"),
+    zoomIndicator: byId("zoomIndicator"),
+    assetLoading: byId("assetLoading"),
+    toggleOverlay: byId("toggleOverlay"),
+    toggleBackground: byId("toggleBackground"),
+    rotateButton: byId("rotateButton"),
+    driftButton: byId("driftButton"),
+    viewerTools: byId("viewerTools"),
+    resetView: byId("resetView"),
+    ratingPanel: byId("ratingPanel"),
+    submitVote: byId("submitVote"),
+    commentInput: byId("commentInput"),
+    commentHint: byId("commentHint"),
+    remainingAssets: byId("remainingAssets"),
+    minVotes: byId("minVotes"),
+    sessionVotes: byId("sessionVotes"),
+    completePanel: byId("completePanel"),
+    reloadButton: byId("reloadButton"),
+  };
+}
