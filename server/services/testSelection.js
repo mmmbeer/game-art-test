@@ -1,4 +1,5 @@
 import env from "../config/env.js";
+import { isDownloadableAsset } from "./assetRules.js";
 
 const DEFAULT_SAMPLE_SIZE = env.tests?.defaultSampleSize || 10;
 
@@ -12,18 +13,24 @@ export function resolveSampleSize(input, fallback = DEFAULT_SAMPLE_SIZE) {
 
 export function buildTestPool({ assets, selectedAssets }) {
   const poolMap = new Map();
-  const tgcAssetMap = new Map(assets.map((asset) => [asset.tgc_asset_id, asset]));
+  const filteredAssets = assets.filter((asset) => !isDownloadableAsset(asset));
+  const filteredSelectedAssets = selectedAssets.filter(
+    (asset) => !isDownloadableAsset(asset)
+  );
+  const tgcAssetMap = new Map(
+    filteredAssets.map((asset) => [asset.tgc_asset_id, asset])
+  );
   let deckSelections = 0;
   let deckCardAdds = 0;
 
-  for (const asset of selectedAssets) {
+  for (const asset of filteredSelectedAssets) {
     if (!asset) {
       continue;
     }
     if (isDeckAsset(asset)) {
       deckSelections += 1;
       poolMap.set(asset.id, asset);
-      const deckCards = resolveDeckCards(asset, assets, tgcAssetMap);
+      const deckCards = resolveDeckCards(asset, filteredAssets, tgcAssetMap);
       deckCards.forEach((card) => {
         if (!poolMap.has(card.id)) {
           poolMap.set(card.id, card);
@@ -36,7 +43,7 @@ export function buildTestPool({ assets, selectedAssets }) {
   }
 
   if (deckSelections > 0 && deckCardAdds === 0) {
-    const fallbackCards = assets.filter((asset) => isCardAsset(asset));
+    const fallbackCards = filteredAssets.filter((asset) => isCardAsset(asset));
     fallbackCards.forEach((card) => poolMap.set(card.id, card));
     deckCardAdds = fallbackCards.length;
   }
@@ -44,7 +51,7 @@ export function buildTestPool({ assets, selectedAssets }) {
   return {
     pool: Array.from(poolMap.values()),
     meta: {
-      selected_asset_count: selectedAssets.length,
+      selected_asset_count: filteredSelectedAssets.length,
       deck_selections: deckSelections,
       deck_card_adds: deckCardAdds,
     },

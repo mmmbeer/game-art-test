@@ -30,6 +30,7 @@ const state = {
     rotation: 0,
     driftEnabled: false,
     cropEnabled: false,
+    driftAllowed: true,
     driftOffset: { x: 0, y: 0 },
   },
 };
@@ -158,6 +159,7 @@ function displayAsset(asset) {
   elements.assetType.textContent = asset.asset_type || "Art asset";
   elements.assetImage.classList.remove("loaded");
   viewer.updateOverlaySource(asset);
+  viewer.updateDriftAvailability(asset);
   viewer.resetViewState({
     preserveOverlay: true,
     preserveBackground: true,

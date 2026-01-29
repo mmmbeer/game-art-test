@@ -87,6 +87,11 @@ body.tester-body {
   background: var(--tester-accent);
 }
 
+.control-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .divider-line {
   height: 2px;
   background: var(--tester-border);

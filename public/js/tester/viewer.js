@@ -107,6 +107,9 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
 
     if (driftButton) {
       driftButton.addEventListener("click", () => {
+        if (!viewState.driftAllowed) {
+          return;
+        }
         viewState.driftEnabled = !viewState.driftEnabled;
         if (viewState.driftEnabled) {
           viewState.cropEnabled = true;
@@ -283,6 +286,10 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (!viewState.cropEnabled) {
       viewState.driftEnabled = false;
     }
+    if (!viewState.driftAllowed) {
+      viewState.driftEnabled = false;
+      viewState.driftOffset = { x: 0, y: 0 };
+    }
     updateDriftCrop();
     if (!preserveOverlay) {
       viewState.overlayEnabled = false;
@@ -360,6 +367,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (driftButton) {
       driftButton.classList.toggle("is-on", viewState.driftEnabled);
       driftButton.setAttribute("aria-pressed", String(viewState.driftEnabled));
+      driftButton.disabled = !viewState.driftAllowed;
     }
     if (cropButton) {
       cropButton.classList.toggle("is-on", viewState.cropEnabled);
@@ -403,6 +411,27 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     updateTransforms();
   }
 
+  function updateDriftAvailability(asset) {
+    const type = String(asset?.asset_type || "").toLowerCase();
+    const meta = asset?.metadata || {};
+    const source = meta?.source || {};
+    const relationship = String(meta?.relationship || "").toLowerCase();
+    const sourceType = String(source?.object_type || source?.type || "").toLowerCase();
+    const isActionShot =
+      type.includes("actionshot") ||
+      type.includes("action_shot") ||
+      relationship.includes("actionshot") ||
+      sourceType.includes("actionshot");
+    viewState.driftAllowed = !isActionShot;
+    if (!viewState.driftAllowed) {
+      viewState.driftEnabled = false;
+      viewState.driftOffset = { x: 0, y: 0 };
+    }
+    updateTransforms();
+    updateDriftCrop();
+    updateControlStates();
+  }
+
   function showViewerTools() {
     if (!viewerTools) {
       return;
@@ -437,5 +466,6 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     updateControlStates,
     updateTransforms,
     applyZoomForMode,
+    updateDriftAvailability,
   };
 }

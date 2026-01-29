@@ -10,6 +10,7 @@ import {
   insertVote,
 } from "../db/tester.js";
 import { resolveOverlayUrl } from "../services/overlay.js";
+import { isDownloadableAsset } from "../services/assetRules.js";
 
 const router = Router();
 const publicFile = path.resolve(process.cwd(), "public", "tester.html");
@@ -104,8 +105,11 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
 
     const minVotes = env.tester.minVotesPerAsset;
     const candidates = await getTestAssetCandidates({ testUuid, minVotes });
+    const eligibleCandidates = candidates.filter(
+      (asset) => !isDownloadableAsset(asset)
+    );
     const totalAssets = await getTestAssetTotals(testUuid);
-    const filtered = candidates.filter(
+    const filtered = eligibleCandidates.filter(
       (asset) => !excludeAssetUuids.includes(asset.asset_uuid)
     );
 
@@ -120,7 +124,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
         },
         progress: {
           total_assets: totalAssets,
-          remaining_assets: candidates.length,
+          remaining_assets: eligibleCandidates.length,
           min_votes: minVotes,
         },
       });
@@ -146,7 +150,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
       },
       progress: {
         total_assets: totalAssets,
-        remaining_assets: candidates.length,
+        remaining_assets: eligibleCandidates.length,
         min_votes: minVotes,
       },
     });
