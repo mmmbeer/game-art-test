@@ -135,12 +135,14 @@ body.tester-body {
 
 .asset-drift-crop {
   position: absolute;
-  inset: var(--drift-crop);
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   pointer-events: none;
+  clip-path: inset(var(--drift-crop));
+  -webkit-clip-path: inset(var(--drift-crop));
 }
 
 .asset-transform {

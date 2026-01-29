@@ -253,7 +253,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     }
     const shouldCrop = viewState.driftEnabled || viewState.cropEnabled;
     const crop = shouldCrop ? Math.round(80 * zoomState.scale) : 0;
-    assetDriftCrop.style.inset = `${crop}px`;
+    assetDriftCrop.style.setProperty("--drift-crop", `${crop}px`);
   }
 
   function updateAssetBounds() {
