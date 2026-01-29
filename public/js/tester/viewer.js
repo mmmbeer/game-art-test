@@ -108,6 +108,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
       driftButton.addEventListener("click", () => {
         viewState.driftEnabled = !viewState.driftEnabled;
         if (viewState.driftEnabled) {
+          viewState.cropEnabled = true;
           applyRandomDrift();
         } else {
           viewState.driftOffset = { x: 0, y: 0 };
@@ -121,7 +122,8 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (cropButton) {
       cropButton.addEventListener("click", () => {
         viewState.cropEnabled = !viewState.cropEnabled;
-        if (!viewState.cropEnabled && !viewState.driftEnabled) {
+        if (!viewState.cropEnabled) {
+          viewState.driftEnabled = false;
           viewState.driftOffset = { x: 0, y: 0 };
           updateTransforms();
         }
@@ -265,6 +267,9 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
       applyRandomDrift();
     } else {
       viewState.driftOffset = { x: 0, y: 0 };
+    }
+    if (!viewState.cropEnabled) {
+      viewState.driftEnabled = false;
     }
     updateDriftCrop();
     if (!preserveOverlay) {
