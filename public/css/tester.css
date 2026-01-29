@@ -22,6 +22,7 @@ body.tester-body {
   background: linear-gradient(160deg, #0b1016 0%, #0f1722 60%, #0a0f16 100%);
   color: var(--tester-text);
   min-height: 100vh;
+  min-width: 420px;
   overflow: hidden;
 }
 
@@ -400,7 +401,7 @@ body.tester-body {
 }
 
 .primary-btn {
-  justify-self: start;
+  justify-self: end;
   background: var(--tester-accent);
   color: #1a1405;
   border: none;

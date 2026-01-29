@@ -383,8 +383,22 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     const drift = 80;
     const scale = Math.max(0.1, zoomState.scale || 1);
     const adjusted = drift * scale;
-    const x = Math.round((Math.random() * 2 - 1) * adjusted);
-    const y = Math.round((Math.random() * 2 - 1) * adjusted);
+    const mode = 20 * scale;
+    const pickBiased = (max, mostLikely) => {
+      const a = 0;
+      const b = Math.max(1, max);
+      const c = Math.min(Math.max(mostLikely, a), b);
+      const u = Math.random();
+      const f = (c - a) / (b - a);
+      const value =
+        u < f
+          ? a + Math.sqrt(u * (b - a) * (c - a))
+          : b - Math.sqrt((1 - u) * (b - a) * (b - c));
+      return value;
+    };
+    const sign = () => (Math.random() < 0.5 ? -1 : 1);
+    const x = Math.round(pickBiased(adjusted, mode) * sign());
+    const y = Math.round(pickBiased(adjusted, mode) * sign());
     viewState.driftOffset = { x, y };
     updateTransforms();
   }
