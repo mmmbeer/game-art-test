@@ -29,6 +29,7 @@ const state = {
     backgroundMode: "dark",
     rotation: 0,
     driftEnabled: false,
+    cropEnabled: false,
     driftOffset: { x: 0, y: 0 },
   },
 };

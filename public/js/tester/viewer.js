@@ -14,6 +14,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     toggleBackground,
     rotateButton,
     driftButton,
+    cropButton,
     viewerTools,
     resetView,
   } = elements;
@@ -109,6 +110,18 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
         if (viewState.driftEnabled) {
           applyRandomDrift();
         } else {
+          viewState.driftOffset = { x: 0, y: 0 };
+          updateTransforms();
+        }
+        updateDriftCrop();
+        updateControlStates();
+      });
+    }
+
+    if (cropButton) {
+      cropButton.addEventListener("click", () => {
+        viewState.cropEnabled = !viewState.cropEnabled;
+        if (!viewState.cropEnabled && !viewState.driftEnabled) {
           viewState.driftOffset = { x: 0, y: 0 };
           updateTransforms();
         }
@@ -234,7 +247,8 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (!assetDriftCrop) {
       return;
     }
-    const crop = viewState.driftEnabled ? Math.round(80 * zoomState.scale) : 0;
+    const shouldCrop = viewState.driftEnabled || viewState.cropEnabled;
+    const crop = shouldCrop ? Math.round(80 * zoomState.scale) : 0;
     assetDriftCrop.style.inset = `${crop}px`;
   }
 
@@ -275,8 +289,15 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
   function updateOverlaySource(asset) {
     viewState.overlayUrl = resolveOverlayTemplate(asset);
     if (overlayImage) {
-      overlayImage.onload = () => syncOverlaySize();
-      overlayImage.onerror = () => overlayImage.classList.add("hidden");
+      overlayImage.classList.remove("loaded");
+      overlayImage.onload = () => {
+        overlayImage.classList.add("loaded");
+        syncOverlaySize();
+      };
+      overlayImage.onerror = () => {
+        overlayImage.classList.remove("loaded");
+        overlayImage.classList.add("hidden");
+      };
       overlayImage.src = viewState.overlayUrl || "";
       if (!viewState.overlayUrl) {
         overlayImage.classList.add("hidden");
@@ -321,6 +342,10 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     if (driftButton) {
       driftButton.classList.toggle("is-on", viewState.driftEnabled);
       driftButton.setAttribute("aria-pressed", String(viewState.driftEnabled));
+    }
+    if (cropButton) {
+      cropButton.classList.toggle("is-on", viewState.cropEnabled);
+      cropButton.setAttribute("aria-pressed", String(viewState.cropEnabled));
     }
   }
 

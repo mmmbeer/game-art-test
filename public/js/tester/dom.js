@@ -16,6 +16,7 @@ export function getElements() {
     toggleBackground: byId("toggleBackground"),
     rotateButton: byId("rotateButton"),
     driftButton: byId("driftButton"),
+    cropButton: byId("cropButton"),
     viewerTools: byId("viewerTools"),
     resetView: byId("resetView"),
     ratingPanel: byId("ratingPanel"),
