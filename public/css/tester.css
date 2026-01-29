@@ -137,6 +137,7 @@ body.tester-body {
   height: 1px;
   display: block;
   pointer-events: none;
+  transform-origin: center center;
 }
 
 .asset-drift-crop {
