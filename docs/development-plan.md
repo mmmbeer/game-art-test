@@ -419,7 +419,7 @@ No login required for testers. Public art test links must allow anonymous voting
 
 ---
 
-## Phase 6 - Test Monitoring & Control
+## Phase 6 - Test Monitoring & Control (COMPLETED)
 
 **Goals**
 
@@ -431,6 +431,16 @@ No login required for testers. Public art test links must allow anonymous voting
 * Pause / resume tests
 * Auto-complete at vote limit
 
+**Implemented**
+
+* Creator dashboard ("Test Command Center") with all-tests list, filters, and selection state
+* `/tests/overview` endpoint returning progress across all tests
+* `/tests/:uuid/status` endpoint with per-asset progress and averages
+* Pause / resume / restart test endpoints with status updates
+* Automatic completion when vote thresholds are met
+* Per-asset progress UI with filters and sorting
+* Public link access directly from dashboard
+
 **Testing**
 
 * Concurrent testers
@@ -438,7 +448,7 @@ No login required for testers. Public art test links must allow anonymous voting
 
 ---
 
-## Phase 7 - Results & Analysis
+## Phase 7 - Results & Analysis (COMPLETED)
 
 **Goals**
 
@@ -449,6 +459,15 @@ No login required for testers. Public art test links must allow anonymous voting
 * Aggregated scores
 * Per-asset breakdown
 * Comment review
+
+**Implemented**
+
+* `/tests/:uuid/results` endpoint returning assets + votes for client-side analysis
+* Client-side analytics engine (averages, distributions, completion, time series)
+* Multi-chart reporting suite: radar profile, stacked distribution, ranking bars, timeline, type averages, heatmap
+* Grouping by asset, asset type, and asset type groupings
+* Comment explorer with keyword tags and search
+* CSV and JSON exports (client-side)
 
 **Testing**
 

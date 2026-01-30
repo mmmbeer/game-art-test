@@ -9,6 +9,7 @@ import {
   getVoteCountForTestAsset,
   insertVote,
 } from "../db/tester.js";
+import { completeTestIfSatisfied } from "../db/tests.js";
 import { resolveOverlayUrl } from "../services/overlay.js";
 import { isDownloadableAsset } from "../services/assetRules.js";
 
@@ -69,6 +70,8 @@ router.post("/:uuid/vote", async (req, res) => {
       understandability,
       comment,
     });
+
+    await completeTestIfSatisfied({ testId: test.id, minVotes });
 
     return res.status(201).json({
       status: "recorded",

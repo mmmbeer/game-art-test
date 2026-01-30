@@ -8,6 +8,7 @@ const gameSearch = document.getElementById("gameSearch");
 const designerFilter = document.getElementById("designerFilter");
 const clearFilters = document.getElementById("clearFilters");
 const gamesLoading = document.getElementById("gamesLoading");
+const openDashboard = document.getElementById("openDashboard");
 
 let games = [];
 let designers = [];
@@ -16,7 +17,7 @@ let currentFilter = {
   designerUuid: "",
 };
 
-export function initGamesView({ onBrowseAssets, onAuthLost }) {
+export function initGamesView({ onBrowseAssets, onOpenDashboard, onAuthLost }) {
   gamesList.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-game-uuid]");
     if (!button) {
@@ -49,6 +50,12 @@ export function initGamesView({ onBrowseAssets, onAuthLost }) {
     currentFilter = { query: "", designerUuid: "" };
     renderGames();
   });
+
+  if (openDashboard) {
+    openDashboard.addEventListener("click", () => {
+      onOpenDashboard?.();
+    });
+  }
 
   return {
     loadGames: async () => {

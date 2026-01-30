@@ -5,6 +5,7 @@
   --font-display: "Fraunces", "Times New Roman", serif;
   --radius-lg: 20px;
   --radius-md: 12px;
+  --radius-sm: 8px;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.15);
   --transition: 180ms ease;
 }
