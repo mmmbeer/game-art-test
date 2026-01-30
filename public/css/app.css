@@ -678,57 +678,6 @@ body.app-body {
   gap: 16px;
 }
 
-.dashboard-list {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-alt);
-  padding: 12px;
-  display: grid;
-  gap: 12px;
-}
-
-.dashboard-list-body {
-  display: grid;
-  gap: 10px;
-}
-
-.dashboard-test-card {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  padding: 12px;
-  display: grid;
-  gap: 8px;
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-
-.dashboard-test-card.is-selected {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
-}
-
-.dashboard-test-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-}
-
-.dashboard-test-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.dashboard-test-meta {
-  color: var(--color-muted);
-  font-size: 0.85rem;
-  margin-bottom: 0;
-}
-
-.dashboard-test-progress {
-  display: grid;
-  gap: 6px;
-}
 
 .progress-track {
   width: 100%;
@@ -1092,7 +1041,7 @@ body.app-body {
   }
 
   .dashboard-grid {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .dashboard-detail-header {

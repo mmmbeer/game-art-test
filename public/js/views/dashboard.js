@@ -5,11 +5,10 @@ const backButton = document.getElementById("backToGamesFromDashboard");
 const refreshButton = document.getElementById("refreshDashboard");
 const summaryEl = document.getElementById("dashboardSummary");
 const searchInput = document.getElementById("dashboardSearch");
+const testSelect = document.getElementById("dashboardTestSelect");
 const statusFilter = document.getElementById("dashboardStatusFilter");
 const gameFilter = document.getElementById("dashboardGameFilter");
 const dateFilter = document.getElementById("dashboardDateFilter");
-const testList = document.getElementById("dashboardTestList");
-const listMeta = document.getElementById("dashboardListMeta");
 const selectedTitle = document.getElementById("selectedTestTitle");
 const selectedMeta = document.getElementById("selectedTestMeta");
 const openPublicButton = document.getElementById("dashboardOpenPublic");
@@ -65,29 +64,26 @@ export function initDashboardView({ onBack, onAuthLost }) {
 
   searchInput?.addEventListener("input", () => {
     filterState.query = searchInput.value.trim().toLowerCase();
-    renderTestList();
+    renderTestSelect();
   });
   statusFilter?.addEventListener("change", () => {
     filterState.status = statusFilter.value;
-    renderTestList();
+    renderTestSelect();
   });
   gameFilter?.addEventListener("change", () => {
     filterState.game = gameFilter.value;
-    renderTestList();
+    renderTestSelect();
   });
   dateFilter?.addEventListener("change", () => {
     filterState.since = dateFilter.value;
-    renderTestList();
+    renderTestSelect();
   });
 
-  testList?.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-test-uuid]");
-    if (!button) {
-      return;
-    }
-    const uuid = button.dataset.testUuid;
+  testSelect?.addEventListener("change", () => {
+    const uuid = testSelect.value;
     const match = tests.find((test) => test.uuid === uuid);
     if (!match) {
+      clearSelection();
       return;
     }
     selectTest(match, onAuthLost);
@@ -159,7 +155,7 @@ async function loadOverview(onAuthLost) {
   tests = Array.isArray(data.tests) ? data.tests : [];
   renderSummary();
   renderGameFilter();
-  renderTestList();
+  renderTestSelect();
 
   if (selectedTest) {
     const updated = tests.find((test) => test.uuid === selectedTest.uuid);
@@ -238,45 +234,23 @@ function applyFilters() {
   });
 }
 
-function renderTestList() {
-  if (!testList) {
+function renderTestSelect() {
+  if (!testSelect) {
     return;
   }
   const filtered = applyFilters();
-  listMeta.textContent = `${filtered.length} tests shown`;
-  if (!filtered.length) {
-    testList.innerHTML = "<p class=\"text-muted mb-0\">No tests match your filters.</p>";
-    return;
-  }
-  testList.innerHTML = filtered
-    .map((test) => {
-      const created = test.created_at ? new Date(test.created_at) : null;
-      const createdLabel = created ? created.toLocaleDateString() : "Unknown date";
-      const progress = Number(test.progress_percent) || 0;
-      const isSelected = selectedTest?.uuid === test.uuid;
-      return `
-        <div class="dashboard-test-card ${isSelected ? "is-selected" : ""}">
-          <div class="dashboard-test-top">
-            <div>
-              <p class="dashboard-test-title">${test.game?.name || "Untitled game"}</p>
-              <p class="dashboard-test-meta">Test ${test.uuid.slice(0, 8)}... | ${createdLabel}</p>
-            </div>
-            <button class="btn btn-outline-light btn-sm" data-test-uuid="${test.uuid}" type="button">
-              View
-            </button>
-          </div>
-          <div class="dashboard-test-progress">
-            <span class="pill">${test.completed_assets}/${test.total_assets} complete</span>
-            <span class="pill pill-muted">${test.total_votes} votes</span>
-            <span class="pill pill-accent">${test.status.toUpperCase()}</span>
-            <div class="progress-track">
-              <div class="progress-bar" style="width: ${progress}%"></div>
-            </div>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
+  testSelect.innerHTML = "<option value=\"\">Select a test</option>";
+  filtered.forEach((test) => {
+    const created = test.created_at ? new Date(test.created_at) : null;
+    const createdLabel = created ? created.toLocaleDateString() : "Unknown date";
+    const option = document.createElement("option");
+    option.value = test.uuid;
+    option.textContent = `${test.game?.name || "Untitled game"} | ${test.uuid.slice(0, 8)}... | ${createdLabel} | ${test.status.toUpperCase()}`;
+    if (selectedTest?.uuid === test.uuid) {
+      option.selected = true;
+    }
+    testSelect.appendChild(option);
+  });
 }
 
 function clearSelection() {
@@ -317,7 +291,7 @@ async function selectTest(test, onAuthLost, options = {}) {
   selectedTitle.textContent = `${test.game?.name || "Untitled game"}`;
   selectedMeta.textContent = `Test ${test.uuid} | ${test.status.toUpperCase()}`;
   enableActionButtons(test.status);
-  renderTestList();
+  renderTestSelect();
 
   await loadStatus(test.uuid, onAuthLost);
   if (!options.skipStatusReload) {

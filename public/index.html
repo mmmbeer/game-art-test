@@ -186,6 +186,12 @@
                 <input class="form-control" id="dashboardSearch" type="search" placeholder="Search by game or test UUID">
               </div>
               <div class="input-group">
+                <label class="input-group-text" for="dashboardTestSelect">Test</label>
+                <select class="form-select" id="dashboardTestSelect">
+                  <option value="">Select a test</option>
+                </select>
+              </div>
+              <div class="input-group">
                 <label class="input-group-text" for="dashboardStatusFilter">Status</label>
                 <select class="form-select" id="dashboardStatusFilter">
                   <option value="">All statuses</option>
@@ -207,13 +213,6 @@
             </div>
 
             <div class="dashboard-grid">
-              <div class="dashboard-list">
-                <div class="dashboard-list-header">
-                  <p class="app-eyebrow mb-1">All Tests</p>
-                  <p class="text-muted mb-0" id="dashboardListMeta"></p>
-                </div>
-                <div class="dashboard-list-body" id="dashboardTestList"></div>
-              </div>
               <div class="dashboard-detail">
                 <div class="dashboard-detail-header">
                   <div>
