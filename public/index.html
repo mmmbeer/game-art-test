@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TGC Art Test Platform</title>
+    <link rel="icon" href="favicon.png">
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -15,13 +16,33 @@
   <body class="app-body">
     <div class="app-shell">
       <header class="app-header">
-        <div>
-          <p class="app-eyebrow">TGC Art Test Platform</p>
-          <h1 class="app-title">TGC Art Test Platform</h1>
+        <div class="app-topbar">
+          <div class="app-left">
+            <button class="app-back-btn is-hidden" id="appBackButton" type="button" aria-label="Back">
+              <span aria-hidden="true">&lt;</span>
+            </button>
+            <div class="app-logo">
+              <img src="favicon.png" alt="TGC logo">
+            </div>
+          </div>
+          <div class="app-title-wrap">
+            <h1 class="app-title">
+              <span id="appPageTitle">TGC Art Test Platform</span>
+              <span class="app-title-sep is-hidden" id="appTitleSep">:</span>
+              <span id="appSubpageTitle"></span>
+            </h1>
+          </div>
+          <div class="app-menu dropdown">
+            <button class="app-menu-btn" id="appMenuButton" data-bs-toggle="dropdown" type="button" aria-expanded="false" aria-label="User menu">
+              <img src="assets/icons/person.svg" alt="User menu">
+            </button>
+            <div class="dropdown-menu dropdown-menu-end app-menu-panel">
+              <button class="dropdown-item" id="themeToggle" type="button">Toggle theme</button>
+              <a class="dropdown-item" href="auth/tgc/sso/start">Sign in</a>
+              <a class="dropdown-item" href="auth/tgc/logout">Sign out</a>
+            </div>
+          </div>
         </div>
-        <button class="btn btn-outline-light btn-sm" id="themeToggle" type="button">
-          Switch Theme
-        </button>
       </header>
 
       <main class="app-main">
@@ -37,77 +58,94 @@
               <p class="mb-0">Follow the link you were given to vote.</p>
             </div>
           </div>
+        </div>
+      </div>
         </section>
 
         <section id="gamesView" class="card app-card d-none">
           <div class="card-body">
-            <h2 class="card-title">Select a Game</h2>
-            <p class="card-subtitle" id="userDisplay"></p>
-            <div class="games-actions">
-              <button class="btn btn-outline-light w-100" id="openDashboard" type="button">
-                Open Test Command Center
-              </button>
+            <p class="card-subtitle mb-2" id="userDisplay"></p>
+            <div class="app-layout">
+              <aside class="app-sidebar">
+                <div class="sidebar-section">
+                  <button class="btn btn-outline-light w-100" id="openDashboard" type="button">
+                    Open Test Command Center
+                  </button>
+                </div>
+                <div class="filter-stack" data-filter-group="games">
+                  <div class="filter-primary">
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <img class="icon-sm" src="assets/icons/search.svg" alt="">
+                        <span>Search</span>
+                      </span>
+                      <input
+                        class="form-control"
+                        id="gameSearch"
+                        type="search"
+                        placeholder="Type a game name"
+                        autocomplete="off"
+                      >
+                    </div>
+                    <button
+                      class="btn btn-outline-light btn-sm filter-toggle"
+                      type="button"
+                      data-filter-toggle="gamesFilterPanel"
+                      aria-expanded="false"
+                    >
+                      <span>More filters</span>
+                      <img class="icon-sm chevron-icon" src="assets/icons/chevron-down.svg" alt="">
+                    </button>
+                  </div>
+                  <div class="filter-panel" id="gamesFilterPanel">
+                    <div class="input-group">
+                      <label class="input-group-text" for="designerFilter">
+                        <img class="icon-sm" src="assets/icons/filter.svg" alt="">
+                        <span>Designer</span>
+                      </label>
+                      <select class="form-select" id="designerFilter">
+                        <option value="">All designers</option>
+                      </select>
+                    </div>
+                    <button class="btn btn-outline-light w-100" id="clearFilters" type="button">
+                      Clear filters
+                    </button>
+                  </div>
+                </div>
+              </aside>
+              <div class="app-content">
+                <div class="loading-stack d-none" id="gamesLoading" aria-live="polite">
+                  <div class="loading-row">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span>Loading designers...</span>
+                  </div>
+                  <div class="loading-row">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span>Loading games...</span>
+                  </div>
+                </div>
+                <div class="section-divider"></div>
+                <div id="gamesList" class="games-list"></div>
+              </div>
             </div>
-            <div class="loading-stack d-none" id="gamesLoading" aria-live="polite">
-              <div class="loading-row">
-                <span class="loading-spinner" aria-hidden="true"></span>
-                <span>Loading designers...</span>
-              </div>
-              <div class="loading-row">
-                <span class="loading-spinner" aria-hidden="true"></span>
-                <span>Loading games...</span>
-              </div>
-            </div>
-            <div class="filter-bar">
-              <div class="input-group">
-                <span class="input-group-text">
-                  <img class="icon-sm" src="assets/icons/search.svg" alt="">
-                  <span>Search</span>
-                </span>
-                <input
-                  class="form-control"
-                  id="gameSearch"
-                  type="search"
-                  placeholder="Type a game name"
-                  autocomplete="off"
-                >
-              </div>
-              <div class="input-group">
-                <label class="input-group-text" for="designerFilter">
-                  <img class="icon-sm" src="assets/icons/filter.svg" alt="">
-                  <span>Designer</span>
-                </label>
-                <select class="form-select" id="designerFilter">
-                  <option value="">All designers</option>
-                </select>
-              </div>
-              <button class="btn btn-outline-light w-100" id="clearFilters" type="button">
-                Clear filters
-              </button>
-            </div>
-            <div class="section-divider"></div>
-            <div id="gamesList" class="games-list"></div>
           </div>
+        </div>
+      </div>
         </section>
 
         <section id="assetsView" class="card app-card d-none">
           <div class="card-body">
             <div class="asset-header">
-              <button class="btn btn-outline-light btn-sm" id="backToGames" type="button">
-                <img class="icon-sm" src="assets/icons/back.svg" alt="">
-                Back to games
-              </button>
-              <div>
-                <h2 class="card-title mb-1" id="assetGameTitle"></h2>
-                <p class="card-subtitle" id="assetGameDesigner"></p>
+              <div class="asset-submeta">
+                <p class="card-subtitle mb-0" id="assetGameDesigner"></p>
               </div>
-            </div>
-            <div class="asset-toolbar">
-              <div class="asset-metrics" id="assetMetrics"></div>
-              <button class="btn btn-outline-light btn-sm" id="refreshAssets" type="button">
-                <img class="icon-sm" src="assets/icons/refresh.svg" alt="">
-                Refresh assets
-              </button>
+              <div class="asset-toolbar">
+                <div class="asset-metrics" id="assetMetrics"></div>
+                <button class="btn btn-outline-light btn-sm" id="refreshAssets" type="button">
+                  <img class="icon-sm" src="assets/icons/refresh.svg" alt="">
+                  Refresh assets
+                </button>
+              </div>
             </div>
             <div class="loading-row d-none" id="assetsLoading" aria-live="polite">
               <span class="loading-spinner" aria-hidden="true"></span>
@@ -160,60 +198,72 @@
 
         <section id="dashboardView" class="card app-card d-none">
           <div class="card-body">
-            <div class="dashboard-header">
-              <button class="btn btn-outline-light btn-sm" id="backToGamesFromDashboard" type="button">
-                <img class="icon-sm" src="assets/icons/back.svg" alt="">
-                Back to games
-              </button>
-              <div>
-                <h2 class="card-title mb-1">Test Command Center</h2>
-                <p class="card-subtitle mb-0">Monitor progress, control tests, and explore results.</p>
-              </div>
-              <button class="btn btn-outline-light btn-sm" id="refreshDashboard" type="button">
-                <img class="icon-sm" src="assets/icons/refresh.svg" alt="">
-                Refresh
-              </button>
-            </div>
+            <div class="app-layout">
+              <aside class="app-sidebar">
+                <div class="sidebar-section">
+                  <button class="btn btn-outline-light w-100" id="refreshDashboard" type="button">
+                    <img class="icon-sm" src="assets/icons/refresh.svg" alt="">
+                    Refresh
+                  </button>
+                </div>
+                <div class="filter-stack" data-filter-group="dashboard">
+                  <div class="filter-primary">
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <img class="icon-sm" src="assets/icons/search.svg" alt="">
+                        <span>Search</span>
+                      </span>
+                      <input
+                        class="form-control"
+                        id="dashboardSearch"
+                        type="search"
+                        placeholder="Search by game or test UUID"
+                      >
+                    </div>
+                    <button
+                      class="btn btn-outline-light btn-sm filter-toggle"
+                      type="button"
+                      data-filter-toggle="dashboardFilterPanel"
+                      aria-expanded="false"
+                    >
+                      <span>More filters</span>
+                      <img class="icon-sm chevron-icon" src="assets/icons/chevron-down.svg" alt="">
+                    </button>
+                  </div>
+                  <div class="filter-panel" id="dashboardFilterPanel">
+                    <div class="input-group">
+                      <label class="input-group-text" for="dashboardTestSelect">Test</label>
+                      <select class="form-select" id="dashboardTestSelect">
+                        <option value="">Select a test</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label class="input-group-text" for="dashboardStatusFilter">Status</label>
+                      <select class="form-select" id="dashboardStatusFilter">
+                        <option value="">All statuses</option>
+                        <option value="active">Active</option>
+                        <option value="paused">Paused</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label class="input-group-text" for="dashboardGameFilter">Game</label>
+                      <select class="form-select" id="dashboardGameFilter">
+                        <option value="">All games</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label class="input-group-text" for="dashboardDateFilter">Since</label>
+                      <input class="form-control" id="dashboardDateFilter" type="date">
+                    </div>
+                  </div>
+                </div>
+              </aside>
+              <div class="app-content">
+                <div class="dashboard-summary" id="dashboardSummary"></div>
 
-            <div class="dashboard-summary" id="dashboardSummary"></div>
-
-            <div class="dashboard-filters">
-              <div class="input-group">
-                <span class="input-group-text">
-                  <img class="icon-sm" src="assets/icons/search.svg" alt="">
-                  <span>Search</span>
-                </span>
-                <input class="form-control" id="dashboardSearch" type="search" placeholder="Search by game or test UUID">
-              </div>
-              <div class="input-group">
-                <label class="input-group-text" for="dashboardTestSelect">Test</label>
-                <select class="form-select" id="dashboardTestSelect">
-                  <option value="">Select a test</option>
-                </select>
-              </div>
-              <div class="input-group">
-                <label class="input-group-text" for="dashboardStatusFilter">Status</label>
-                <select class="form-select" id="dashboardStatusFilter">
-                  <option value="">All statuses</option>
-                  <option value="active">Active</option>
-                  <option value="paused">Paused</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-              <div class="input-group">
-                <label class="input-group-text" for="dashboardGameFilter">Game</label>
-                <select class="form-select" id="dashboardGameFilter">
-                  <option value="">All games</option>
-                </select>
-              </div>
-              <div class="input-group">
-                <label class="input-group-text" for="dashboardDateFilter">Since</label>
-                <input class="form-control" id="dashboardDateFilter" type="date">
-              </div>
-            </div>
-
-            <div class="dashboard-grid">
-              <div class="dashboard-detail">
+                <div class="dashboard-grid">
+                  <div class="dashboard-detail">
                 <div class="dashboard-detail-header">
                   <div>
                     <p class="app-eyebrow mb-1">Selected Test</p>
@@ -340,6 +390,8 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
         </section>
       </main>
     </div>

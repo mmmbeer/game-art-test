@@ -1,7 +1,6 @@
 import { fetchJson } from "../api.js";
 import { showToast } from "../toast.js";
 
-const backButton = document.getElementById("backToGamesFromDashboard");
 const refreshButton = document.getElementById("refreshDashboard");
 const summaryEl = document.getElementById("dashboardSummary");
 const searchInput = document.getElementById("dashboardSearch");
@@ -58,8 +57,7 @@ const filterState = {
   since: "",
 };
 
-export function initDashboardView({ onBack, onAuthLost }) {
-  backButton?.addEventListener("click", () => onBack());
+export function initDashboardView({ onAuthLost }) {
   refreshButton?.addEventListener("click", () => loadOverview(onAuthLost));
 
   searchInput?.addEventListener("input", () => {
@@ -259,6 +257,7 @@ function clearSelection() {
   resultsData = null;
   selectedTitle.textContent = "Select a test to view details.";
   selectedMeta.textContent = "";
+  setHeaderSubpage("");
   progressMetrics.innerHTML = "";
   progressList.innerHTML = "<p class=\"text-muted mb-0\">Select a test to see progress.</p>";
   scorecards.innerHTML = "";
@@ -290,6 +289,7 @@ async function selectTest(test, onAuthLost, options = {}) {
   selectedTest = test;
   selectedTitle.textContent = `${test.game?.name || "Untitled game"}`;
   selectedMeta.textContent = `Test ${test.uuid} | ${test.status.toUpperCase()}`;
+  setHeaderSubpage(`Test ${test.uuid.slice(0, 8)}...`);
   enableActionButtons(test.status);
   renderTestSelect();
 
@@ -297,6 +297,10 @@ async function selectTest(test, onAuthLost, options = {}) {
   if (!options.skipStatusReload) {
     await loadResults(test.uuid, onAuthLost);
   }
+}
+
+function setHeaderSubpage(title) {
+  document.dispatchEvent(new CustomEvent("app:set-subpage", { detail: { title } }));
 }
 
 async function loadStatus(testUuid, onAuthLost) {

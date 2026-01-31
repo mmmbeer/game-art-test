@@ -8,7 +8,16 @@ const landingView = document.getElementById("landingView");
 const gamesView = document.getElementById("gamesView");
 const assetsView = document.getElementById("assetsView");
 const dashboardView = document.getElementById("dashboardView");
-const appTitle = document.querySelector(".app-title");
+const appPageTitle = document.getElementById("appPageTitle");
+const appSubpageTitle = document.getElementById("appSubpageTitle");
+const appTitleSep = document.getElementById("appTitleSep");
+const appBackButton = document.getElementById("appBackButton");
+
+let activeBackAction = null;
+
+appBackButton?.addEventListener("click", () => {
+  activeBackAction?.();
+});
 
 function setView(view) {
   if (view === "games") {
@@ -16,35 +25,44 @@ function setView(view) {
     gamesView.classList.remove("d-none");
     assetsView.classList.add("d-none");
     dashboardView.classList.add("d-none");
-    appTitle.textContent = "Select a Game";
+    setPageTitle("Select a Game");
+    setSubpageTitle("");
+    setBackVisible(false);
   } else if (view === "assets") {
     landingView.classList.add("d-none");
     gamesView.classList.add("d-none");
     assetsView.classList.remove("d-none");
     dashboardView.classList.add("d-none");
-    appTitle.textContent = "Browse Assets";
+    setPageTitle("Browse Assets");
+    setSubpageTitle("");
+    setBackVisible(true);
   } else if (view === "dashboard") {
     landingView.classList.add("d-none");
     gamesView.classList.add("d-none");
     assetsView.classList.add("d-none");
     dashboardView.classList.remove("d-none");
-    appTitle.textContent = "Test Command Center";
+    setPageTitle("Command Center");
+    setSubpageTitle("");
+    setBackVisible(true);
   } else {
     landingView.classList.remove("d-none");
     gamesView.classList.add("d-none");
     assetsView.classList.add("d-none");
     dashboardView.classList.add("d-none");
-    appTitle.textContent = "TGC Art Test Platform";
+    setPageTitle("TGC Art Test Platform");
+    setSubpageTitle("");
+    setBackVisible(false);
   }
 }
 
 let dashboardViewApi = null;
 
+const goBackToGames = () => {
+  setView("games");
+  updateUrlForView("games");
+};
+
 const assetsViewApi = initAssetsView({
-  onBack: () => {
-    setView("games");
-    updateUrlForView("games");
-  },
   onAuthLost: () => {
     setView("landing");
     updateUrlForView("landing");
@@ -70,10 +88,6 @@ const gamesViewApi = initGamesView({
 });
 
 dashboardViewApi = initDashboardView({
-  onBack: () => {
-    setView("games");
-    updateUrlForView("games");
-  },
   onAuthLost: () => {
     setView("landing");
     updateUrlForView("landing");
@@ -146,3 +160,47 @@ function updateUrlForView(view, gameUuid = "") {
   }
   window.history.replaceState({ view, gameUuid }, "", url);
 }
+
+function setPageTitle(title) {
+  if (appPageTitle) {
+    appPageTitle.textContent = title;
+  }
+}
+
+function setSubpageTitle(title) {
+  if (appSubpageTitle) {
+    appSubpageTitle.textContent = title || "";
+  }
+  if (appTitleSep) {
+    appTitleSep.classList.toggle("is-hidden", !title);
+  }
+}
+
+function setBackVisible(visible) {
+  if (!appBackButton) {
+    return;
+  }
+  appBackButton.classList.toggle("is-hidden", !visible);
+  activeBackAction = visible ? goBackToGames : null;
+}
+
+function initFilterToggles() {
+  document.querySelectorAll("[data-filter-toggle]").forEach((toggle) => {
+    const panelId = toggle.dataset.filterToggle;
+    const panel = panelId ? document.getElementById(panelId) : null;
+    if (!panel) {
+      return;
+    }
+    toggle.addEventListener("click", () => {
+      const isOpen = panel.classList.toggle("is-open");
+      toggle.classList.toggle("is-open", isOpen);
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
+  });
+}
+
+document.addEventListener("app:set-subpage", (event) => {
+  setSubpageTitle(event.detail?.title || "");
+});
+
+initFilterToggles();

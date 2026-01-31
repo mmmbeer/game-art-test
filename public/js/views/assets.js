@@ -2,8 +2,6 @@ import { fetchJson } from "../api.js";
 import { showToast } from "../toast.js";
 import { initTestBuilder } from "./testBuilder/index.js";
 
-const backToGames = document.getElementById("backToGames");
-const assetGameTitle = document.getElementById("assetGameTitle");
 const assetGameDesigner = document.getElementById("assetGameDesigner");
 const assetMetrics = document.getElementById("assetMetrics");
 const refreshAssets = document.getElementById("refreshAssets");
@@ -16,13 +14,10 @@ let groupedAssets = [];
 let assetsByType = {};
 let testBuilderApi = null;
 
-export function initAssetsView({ onBack, onAuthLost }) {
+export function initAssetsView({ onAuthLost }) {
   if (!testBuilderApi) {
     testBuilderApi = initTestBuilder({ onAuthLost });
   }
-  backToGames.addEventListener("click", () => {
-    onBack();
-  });
 
   refreshAssets.addEventListener("click", () => {
     if (activeGame) {
@@ -39,7 +34,7 @@ export function initAssetsView({ onBack, onAuthLost }) {
 
 async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
   activeGame = game;
-  assetGameTitle.textContent = game.name;
+  setHeaderSubpage(game.name);
   assetGameDesigner.textContent = game.designer_name
     ? `Designer: ${game.designer_name}`
     : "Designer unavailable";
@@ -81,6 +76,10 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
   } finally {
     assetsLoading.classList.add("d-none");
   }
+}
+
+function setHeaderSubpage(title) {
+  document.dispatchEvent(new CustomEvent("app:set-subpage", { detail: { title } }));
 }
 
 function renderTestsList(tests) {
