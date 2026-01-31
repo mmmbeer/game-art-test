@@ -51,12 +51,12 @@ export function renderPreviewRow({ type, assetsByType, deckCardsByAssetUuid, exp
       }
       if (!expanded) {
         return `
-        <div class="type-preview-card"></div>
+        <div class="type-preview-card image-frame"></div>
       `;
       }
       return `
-        <div class="type-preview-card">
-          <img src="${preview}" alt="${asset.asset_type}">
+        <div class="type-preview-card image-frame">
+          <img data-src="${preview}" alt="${asset.asset_type}" loading="lazy" decoding="async">
         </div>
       `;
     })

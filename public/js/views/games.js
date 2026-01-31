@@ -1,6 +1,7 @@
 import { fetchJson } from "../api.js";
 import { showToast } from "../toast.js";
 import { getSelectedGameUuid, setSelectedGameUuid } from "../state.js";
+import { initLazyImages } from "../lazyImages.js";
 
 const userDisplay = document.getElementById("userDisplay");
 const gamesList = document.getElementById("gamesList");
@@ -141,8 +142,12 @@ function renderGames() {
     const imageUrl = game.shop_image_url;
     card.className = `game-item ${isSelected ? "is-selected" : ""}`;
     card.innerHTML = `
-      <div class="game-thumb">
-        ${imageUrl ? `<img src="${imageUrl}" alt="${game.name}">` : "<span>IMG</span>"}
+      <div class="game-thumb image-frame">
+        ${
+          imageUrl
+            ? `<img data-src="${imageUrl}" alt="${game.name}" loading="lazy" decoding="async">`
+            : "<span>IMG</span>"
+        }
       </div>
       <div class="game-body">
         <div class="game-top">
@@ -162,6 +167,8 @@ function renderGames() {
     `;
     gamesList.appendChild(card);
   });
+
+  initLazyImages(gamesList);
 }
 
 function resolveDesignerName(designerUuid) {

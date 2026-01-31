@@ -9,6 +9,7 @@ import {
 } from "./state.js";
 import { buildTypeRow } from "./ui.js";
 import { setExpandedState, refreshTypeSelectionUI } from "./events.js";
+import { initLazyImages } from "../../lazyImages.js";
 
 const testBuilderMetrics = document.getElementById("testBuilderMetrics");
 const testTypeSelection = document.getElementById("testTypeSelection");
@@ -342,12 +343,17 @@ function openPreviewModal(data) {
       const image = asset.image_url || "";
       return `
         <div class="test-preview-scroll-card">
-          <img src="${image}" alt="${asset.asset_type || "Asset"}">
+          <div class="test-preview-image image-frame">
+
+            <img data-src="${image}" alt="${asset.asset_type || "Asset"}" loading="lazy" decoding="async">
+
+          </div>
           <div class="test-preview-meta">${asset.asset_type || "Asset"}${asset.dpi ? ` • ${asset.dpi} DPI` : ""}</div>
         </div>
       `;
     })
     .join("");
+  initLazyImages(testPreviewScroll, { root: testPreviewScroll, rootMargin: "80px" });
   const modal = bootstrap.Modal.getOrCreateInstance(testPreviewModal);
   modal.show();
 }
@@ -437,4 +443,5 @@ function openStartModal() {
   const modal = bootstrap.Modal.getOrCreateInstance(testStartModal);
   modal.show();
 }
+
 

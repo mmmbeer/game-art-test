@@ -1,5 +1,6 @@
 import { renderAssetsForType, renderSelectedAssets, renderPreviewRow } from "./ui.js";
 import { isTypePartiallySelected, resolveTypeCounts } from "./state.js";
+import { initLazyImages } from "../../lazyImages.js";
 
 export function setExpandedState({
   type,
@@ -83,7 +84,7 @@ export function refreshTypeSelectionUI({
       expanded: assetsWrap.classList.contains("is-open"),
     });
     if (assetsWrap.classList.contains("is-open")) {
-      loadPreviewImages(previewRow);
+      initLazyImages(previewRow);
       previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">v</span>";
     } else {
       previewToggle.innerHTML = "Preview Assets <span class=\"chevron\">></span>";
@@ -92,8 +93,5 @@ export function refreshTypeSelectionUI({
 }
 
 export function loadPreviewImages(container) {
-  container.querySelectorAll("img[data-src]").forEach((img) => {
-    img.src = img.dataset.src;
-    img.removeAttribute("data-src");
-  });
+  initLazyImages(container);
 }
