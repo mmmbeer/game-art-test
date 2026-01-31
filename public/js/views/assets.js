@@ -29,11 +29,15 @@ export function initAssetsView({ onAuthLost }) {
     loadAssets: (game) => {
       loadAssets(game, { showToastOnSuccess: false, onAuthLost });
     },
+    reset: () => {
+      clearAssetsView();
+    },
   };
 }
 
 async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
   activeGame = game;
+  clearAssetsView();
   setHeaderSubpage(game.name);
   assetGameDesigner.textContent = game.designer_name
     ? `Designer: ${game.designer_name}`
@@ -43,6 +47,9 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
     : "";
   assetStatus.textContent = "Loading assets...";
   assetsLoading.classList.remove("d-none");
+  if (gameTestsList) {
+    gameTestsList.innerHTML = "<p class=\"text-muted mb-0\">Loading tests...</p>";
+  }
 
   try {
     const { response, data } = await fetchJson(`games/${game.uuid}/assets`);
@@ -76,6 +83,18 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
   } finally {
     assetsLoading.classList.add("d-none");
   }
+}
+
+function clearAssetsView() {
+  groupedAssets = [];
+  assetsByType = {};
+  assetGameDesigner.textContent = "";
+  assetMetrics.textContent = "";
+  assetStatus.textContent = "";
+  if (gameTestsList) {
+    gameTestsList.innerHTML = "<p class=\"text-muted mb-0\">No tests created for this game yet.</p>";
+  }
+  testBuilderApi?.reset?.();
 }
 
 function setHeaderSubpage(title) {

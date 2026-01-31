@@ -32,7 +32,6 @@ export function renderAssetsForType({ type, assetsByType, selectionState }) {
           <div>
             <div class="type-asset-name">${name}${cardCount ? ` (${cardCount})` : ""}</div>
           </div>
-          <span class="test-type-meta">${selected.has(asset.uuid) ? "Selected" : ""}</span>
         </label>
       `;
     })

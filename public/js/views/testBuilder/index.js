@@ -139,6 +139,17 @@ export function initTestBuilder({ onAuthLost }) {
       updateMetrics();
       clearPreview();
     },
+    reset: () => {
+      activeGame = null;
+      assetTypes = [];
+      assetsByType = {};
+      deckCardsByAssetUuid = {};
+      selectionState = new Map();
+      testDefaults = { sample_size: 10, min_votes_per_asset: 10 };
+      testTypeSelection.innerHTML = "";
+      testBuilderMetrics.textContent = "";
+      clearPreview();
+    },
   };
 }
 

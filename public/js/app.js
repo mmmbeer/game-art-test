@@ -14,12 +14,16 @@ const appTitleSep = document.getElementById("appTitleSep");
 const appBackButton = document.getElementById("appBackButton");
 
 let activeBackAction = null;
+let currentView = "";
 
 appBackButton?.addEventListener("click", () => {
   activeBackAction?.();
 });
 
 function setView(view) {
+  if (currentView === "assets" && view !== "assets") {
+    assetsViewApi?.reset?.();
+  }
   if (view === "games") {
     landingView.classList.add("d-none");
     gamesView.classList.remove("d-none");
@@ -53,6 +57,7 @@ function setView(view) {
     setSubpageTitle("");
     setBackVisible(false);
   }
+  currentView = view;
 }
 
 let dashboardViewApi = null;
