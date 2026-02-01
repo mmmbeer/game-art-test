@@ -635,7 +635,7 @@
           <div class="modal-body">
             <div class="action-shot-studio">
               <div class="action-shot-stage" id="actionShotStage">
-                <div class="action-shot-surface">
+                <div class="action-shot-surface" id="actionShotSurface">
                   <canvas class="action-shot-canvas" id="actionShotCanvas"></canvas>
                 </div>
                 <div class="action-shot-toolbar">
@@ -678,6 +678,14 @@
                         <option value="banner-2400">Wide 2400 x 1350</option>
                         <option value="tall-1200">Tall 1200 x 2000</option>
                       </select>
+                    </div>
+                    <div class="action-shot-toolbar-group">
+                      <label class="form-label" for="actionShotCameraX">Camera pan X</label>
+                      <input class="form-range" id="actionShotCameraX" type="range" min="-400" max="400" step="2" value="0">
+                      <label class="form-label" for="actionShotCameraY">Camera pan Y</label>
+                      <input class="form-range" id="actionShotCameraY" type="range" min="-400" max="400" step="2" value="0">
+                      <label class="form-label" for="actionShotZoom">Camera zoom</label>
+                      <input class="form-range" id="actionShotZoom" type="range" min="0.6" max="1.6" step="0.02" value="1">
                     </div>
                     <div class="action-shot-toolbar-group">
                       <label class="form-label" for="actionShotTrim">Card trim (px)</label>

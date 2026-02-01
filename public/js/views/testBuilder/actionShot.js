@@ -3,6 +3,7 @@ import { resolveAssetName, isDeckType, isCardType } from "./state.js";
 
 const actionShotModal = document.getElementById("actionShotModal");
 const actionShotStage = document.getElementById("actionShotStage");
+const actionShotSurface = document.getElementById("actionShotSurface");
 const actionShotCanvas = document.getElementById("actionShotCanvas");
 const actionShotAssetsScroll = document.getElementById("actionShotAssetsScroll");
 const actionShotSubtitle = document.getElementById("actionShotSubtitle");
@@ -18,6 +19,9 @@ const dimensionsSelect = document.getElementById("actionShotDimensions");
 const trimRange = document.getElementById("actionShotTrim");
 const cornerRange = document.getElementById("actionShotCorner");
 const scaleRange = document.getElementById("actionShotScale");
+const cameraXRange = document.getElementById("actionShotCameraX");
+const cameraYRange = document.getElementById("actionShotCameraY");
+const cameraZoomRange = document.getElementById("actionShotZoom");
 const borderRange = document.getElementById("actionShotBorder");
 const borderColorInput = document.getElementById("actionShotBorderColor");
 const shadowRange = document.getElementById("actionShotShadow");
@@ -45,6 +49,9 @@ const defaultSettings = {
   border: 0,
   borderColor: "#f6f7fb",
   shadow: 0.25,
+  cameraX: 0,
+  cameraY: 0,
+  cameraZoom: 1,
 };
 
 const state = {
@@ -59,6 +66,10 @@ const state = {
 
 let ctx = null;
 let renderQueued = false;
+let previewMetrics = null;
+let dragging = false;
+let lastPointer = null;
+let resizeObserver = null;
 
 export function initActionShotStudio() {
   if (!actionShotModal || !actionShotCanvas || !actionShotStage) {
@@ -70,6 +81,8 @@ export function initActionShotStudio() {
   ctx = actionShotCanvas.getContext("2d");
 
   bindControls();
+  setupCanvasInteractions();
+  observeSurfaceResize();
 
   actionShotModal.addEventListener("hidden.bs.modal", () => {
     resetStudio();
@@ -187,6 +200,29 @@ function bindControls() {
     });
   }
 
+  if (cameraXRange) {
+    cameraXRange.addEventListener("input", () => {
+      state.settings.cameraX = Number.parseFloat(cameraXRange.value) || 0;
+      clampCamera();
+      queueRender();
+    });
+  }
+
+  if (cameraYRange) {
+    cameraYRange.addEventListener("input", () => {
+      state.settings.cameraY = Number.parseFloat(cameraYRange.value) || 0;
+      clampCamera();
+      queueRender();
+    });
+  }
+
+  if (cameraZoomRange) {
+    cameraZoomRange.addEventListener("input", () => {
+      state.settings.cameraZoom = Number.parseFloat(cameraZoomRange.value) || 1;
+      queueRender();
+    });
+  }
+
   if (borderRange) {
     borderRange.addEventListener("input", () => {
       state.settings.border = Number.parseFloat(borderRange.value) || 0;
@@ -264,6 +300,15 @@ function syncControls() {
   }
   if (scaleRange) {
     scaleRange.value = String(state.settings.scale);
+  }
+  if (cameraXRange) {
+    cameraXRange.value = String(state.settings.cameraX);
+  }
+  if (cameraYRange) {
+    cameraYRange.value = String(state.settings.cameraY);
+  }
+  if (cameraZoomRange) {
+    cameraZoomRange.value = String(state.settings.cameraZoom);
   }
   if (borderRange) {
     borderRange.value = String(state.settings.border);
@@ -396,14 +441,180 @@ function queueRender() {
   });
 }
 
+function observeSurfaceResize() {
+  if (!actionShotSurface || typeof ResizeObserver === "undefined") {
+    return;
+  }
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
+  resizeObserver = new ResizeObserver(() => {
+    updateCanvasSize();
+    updateCameraBounds();
+    queueRender();
+  });
+  resizeObserver.observe(actionShotSurface);
+}
+
+function updateCanvasSize() {
+  if (!actionShotSurface || !actionShotCanvas) {
+    return;
+  }
+  const rect = actionShotSurface.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return;
+  }
+  const ratio = window.devicePixelRatio || 1;
+  const nextWidth = Math.max(1, Math.floor(rect.width * ratio));
+  const nextHeight = Math.max(1, Math.floor(rect.height * ratio));
+  if (actionShotCanvas.width !== nextWidth || actionShotCanvas.height !== nextHeight) {
+    actionShotCanvas.width = nextWidth;
+    actionShotCanvas.height = nextHeight;
+  }
+}
+
+function setupCanvasInteractions() {
+  if (!actionShotCanvas) {
+    return;
+  }
+  actionShotCanvas.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+    dragging = true;
+    lastPointer = { x: event.clientX, y: event.clientY };
+    actionShotCanvas.setPointerCapture(event.pointerId);
+  });
+
+  actionShotCanvas.addEventListener("pointermove", (event) => {
+    if (!dragging || !lastPointer) {
+      return;
+    }
+    const dx = event.clientX - lastPointer.x;
+    const dy = event.clientY - lastPointer.y;
+    lastPointer = { x: event.clientX, y: event.clientY };
+    if (!previewMetrics) {
+      return;
+    }
+    state.settings.cameraX += dx / previewMetrics.previewScale;
+    state.settings.cameraY += dy / previewMetrics.previewScale;
+    clampCamera();
+    syncCameraControls();
+    queueRender();
+  });
+
+  const stopDrag = () => {
+    dragging = false;
+    lastPointer = null;
+  };
+
+  actionShotCanvas.addEventListener("pointerup", stopDrag);
+  actionShotCanvas.addEventListener("pointercancel", stopDrag);
+  actionShotCanvas.addEventListener("pointerleave", stopDrag);
+
+  actionShotCanvas.addEventListener(
+    "wheel",
+    (event) => {
+      event.preventDefault();
+      const delta = Math.sign(event.deltaY);
+      const step = 0.06;
+      const nextZoom = state.settings.cameraZoom - delta * step;
+      state.settings.cameraZoom = clamp(nextZoom, 0.6, 1.8);
+      syncCameraControls();
+      queueRender();
+    },
+    { passive: false }
+  );
+}
+
+function syncCameraControls() {
+  if (cameraXRange) {
+    cameraXRange.value = String(state.settings.cameraX);
+  }
+  if (cameraYRange) {
+    cameraYRange.value = String(state.settings.cameraY);
+  }
+  if (cameraZoomRange) {
+    cameraZoomRange.value = String(state.settings.cameraZoom);
+  }
+}
+
+function getPreset() {
+  return dimensionPresets[state.settings.dimensions] || dimensionPresets["portrait-1600"];
+}
+
+function updateCameraBounds() {
+  if (!actionShotCanvas) {
+    return;
+  }
+  const preset = getPreset();
+  if (!preset) {
+    return;
+  }
+  const metrics = buildPreviewMetrics(actionShotCanvas.width, actionShotCanvas.height, preset.width, preset.height);
+  const maxX = Math.max(0, metrics.maxOffsetX);
+  const maxY = Math.max(0, metrics.maxOffsetY);
+  if (cameraXRange) {
+    cameraXRange.min = String(-maxX);
+    cameraXRange.max = String(maxX);
+  }
+  if (cameraYRange) {
+    cameraYRange.min = String(-maxY);
+    cameraYRange.max = String(maxY);
+  }
+  clampCamera(maxX, maxY);
+  syncCameraControls();
+}
+
+function clampCamera(forceMaxX, forceMaxY) {
+  const preset = getPreset();
+  if (!preset || !actionShotCanvas) {
+    return;
+  }
+  let maxX = forceMaxX;
+  let maxY = forceMaxY;
+  if (maxX === undefined || maxY === undefined) {
+    const metrics = buildPreviewMetrics(actionShotCanvas.width, actionShotCanvas.height, preset.width, preset.height);
+    maxX = metrics.maxOffsetX;
+    maxY = metrics.maxOffsetY;
+  }
+  state.settings.cameraX = clamp(state.settings.cameraX, -maxX, maxX);
+  state.settings.cameraY = clamp(state.settings.cameraY, -maxY, maxY);
+}
+
+function buildPreviewMetrics(canvasWidth, canvasHeight, outputWidth, outputHeight) {
+  const ratio = window.devicePixelRatio || 1;
+  const padding = 18 * ratio;
+  const availableWidth = Math.max(1, canvasWidth - padding * 2);
+  const availableHeight = Math.max(1, canvasHeight - padding * 2);
+  const previewScale = Math.min(availableWidth / outputWidth, availableHeight / outputHeight);
+  const boxWidth = outputWidth * previewScale;
+  const boxHeight = outputHeight * previewScale;
+  const maxOffsetX = Math.max(0, (availableWidth - boxWidth) / 2 / previewScale);
+  const maxOffsetY = Math.max(0, (availableHeight - boxHeight) / 2 / previewScale);
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+  return {
+    ratio,
+    padding,
+    previewScale,
+    boxWidth,
+    boxHeight,
+    maxOffsetX,
+    maxOffsetY,
+    centerX,
+    centerY,
+  };
+}
+
 function applyDimensions() {
-  const preset = dimensionPresets[state.settings.dimensions] || dimensionPresets["portrait-1600"];
+  const preset = getPreset();
   if (!preset || !actionShotCanvas || !actionShotStage) {
     return;
   }
-  actionShotCanvas.width = preset.width;
-  actionShotCanvas.height = preset.height;
   actionShotStage.style.setProperty("--action-shot-aspect", `${preset.width} / ${preset.height}`);
+  updateCanvasSize();
+  updateCameraBounds();
   updateFooterMeta();
 }
 
@@ -420,30 +631,81 @@ function renderCanvas() {
   if (!ctx || !actionShotCanvas) {
     return;
   }
-  const width = actionShotCanvas.width;
-  const height = actionShotCanvas.height;
-  ctx.clearRect(0, 0, width, height);
-  drawBackground(ctx, width, height);
-
-  const cards = state.selectedCards.filter((card) => card.image);
-  updateFooterMeta();
-
-  if (!cards.length) {
-    drawEmptyState(ctx, width, height);
+  updateCanvasSize();
+  const preset = getPreset();
+  if (!preset) {
     return;
   }
+  const width = actionShotCanvas.width;
+  const height = actionShotCanvas.height;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  previewMetrics = buildPreviewMetrics(width, height, preset.width, preset.height);
+  clampCamera(previewMetrics.maxOffsetX, previewMetrics.maxOffsetY);
+  syncCameraControls();
+  updateFooterMeta();
 
+  ctx.fillStyle = "rgba(10, 14, 24, 0.4)";
+  ctx.fillRect(0, 0, width, height);
+
+  const boxCenterX = previewMetrics.centerX + state.settings.cameraX * previewMetrics.previewScale;
+  const boxCenterY = previewMetrics.centerY + state.settings.cameraY * previewMetrics.previewScale;
+  const boxX = boxCenterX - previewMetrics.boxWidth / 2;
+  const boxY = boxCenterY - previewMetrics.boxHeight / 2;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(boxX, boxY, previewMetrics.boxWidth, previewMetrics.boxHeight);
+  ctx.clip();
+  ctx.save();
+  ctx.translate(previewMetrics.centerX, previewMetrics.centerY);
+  const previewScale = previewMetrics.previewScale * state.settings.cameraZoom;
+  ctx.scale(previewScale, previewScale);
+  ctx.translate(-preset.width / 2, -preset.height / 2);
+  renderScene(ctx, preset.width, preset.height, { applyCamera: false });
+  ctx.restore();
+  ctx.restore();
+
+  drawImageBox(ctx, boxX, boxY, previewMetrics.boxWidth, previewMetrics.boxHeight, previewMetrics.ratio);
+}
+
+function renderScene(ctx, width, height, options = {}) {
+  const reflectionBaseline = height * 0.66;
+  ctx.save();
+  if (options.applyCamera) {
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(state.settings.cameraZoom, state.settings.cameraZoom);
+    ctx.translate(-width / 2, -height / 2);
+    ctx.translate(-state.settings.cameraX, -state.settings.cameraY);
+  }
+  drawBackground(ctx, width, height);
+  const cards = state.selectedCards.filter((card) => card.image);
+  if (!cards.length) {
+    drawEmptyState(ctx, width, height);
+    ctx.restore();
+    return;
+  }
   const displayType = state.settings.displayType;
   const drawCards =
     displayType === "single" ? cards.slice(-1) : cards.slice(0, Math.min(cards.length, 5));
 
   if (displayType === "fan") {
-    renderFan(ctx, drawCards, width, height);
+    renderFan(ctx, drawCards, width, height, reflectionBaseline);
   } else if (displayType === "angle") {
-    renderAngle(ctx, drawCards, width, height);
+    renderAngle(ctx, drawCards, width, height, reflectionBaseline);
   } else {
-    renderSingle(ctx, drawCards[drawCards.length - 1], width, height);
+    renderSingle(ctx, drawCards[drawCards.length - 1], width, height, reflectionBaseline);
   }
+  ctx.restore();
+}
+
+function drawImageBox(ctx, x, y, width, height, ratio) {
+  ctx.save();
+  ctx.strokeStyle = "#28ff4f";
+  ctx.lineWidth = Math.max(2, 2 * ratio);
+  ctx.setLineDash([]);
+  ctx.strokeRect(x, y, width, height);
+  ctx.restore();
 }
 
 function drawEmptyState(ctx, width, height) {
@@ -483,17 +745,17 @@ function drawCoverImage(ctx, image, x, y, width, height) {
   ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
 }
 
-function renderSingle(ctx, card, width, height) {
+function renderSingle(ctx, card, width, height, reflectionBaseline) {
   if (!card?.image) {
     return;
   }
   const size = computeCardSize(card.image, width, height, 0.78);
   const x = width / 2 - size.width / 2;
   const y = height / 2 - size.height / 2;
-  drawCard(ctx, card.image, x, y, size.width, size.height, 0, 0);
+  drawCard(ctx, card.image, x, y, size.width, size.height, 0, 0, reflectionBaseline);
 }
 
-function renderFan(ctx, cards, width, height) {
+function renderFan(ctx, cards, width, height, reflectionBaseline) {
   if (!cards.length) {
     return;
   }
@@ -513,11 +775,11 @@ function renderFan(ctx, cards, width, height) {
     const offsetY = Math.abs(index - (cards.length - 1) / 2) * size.height * 0.04;
     const x = width / 2 - cardSize.width / 2 + offsetX;
     const y = height / 2 - cardSize.height / 2 + offsetY;
-    drawCard(ctx, card.image, x, y, cardSize.width, cardSize.height, angle, 0);
+    drawCard(ctx, card.image, x, y, cardSize.width, cardSize.height, angle, 0, reflectionBaseline);
   });
 }
 
-function renderAngle(ctx, cards, width, height) {
+function renderAngle(ctx, cards, width, height, reflectionBaseline) {
   if (!cards.length) {
     return;
   }
@@ -533,7 +795,7 @@ function renderAngle(ctx, cards, width, height) {
     const x = width / 2 - cardSize.width / 2 + index * offset * 0.6;
     const y = height / 2 - cardSize.height / 2 + index * offset * 0.15;
     const angle = (-12 + index * 6) * (Math.PI / 180);
-    drawCard(ctx, card.image, x, y, cardSize.width, cardSize.height, angle, -0.18);
+    drawCard(ctx, card.image, x, y, cardSize.width, cardSize.height, angle, -0.18, reflectionBaseline);
   });
 }
 
@@ -567,7 +829,11 @@ function clampTrim(image, trim) {
   return Math.max(0, Math.min(trim, maxTrim));
 }
 
-function drawCard(ctx, image, x, y, width, height, rotation, skewX) {
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(value, max));
+}
+
+function drawCard(ctx, image, x, y, width, height, rotation, skewX, reflectionBaseline) {
   const trim = clampTrim(image, state.settings.trim);
   const srcX = trim;
   const srcY = trim;
@@ -609,8 +875,9 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX) {
     drawRoundedRectPath(ctx, -width / 2, -height / 2, width, height, radius);
     ctx.stroke();
   }
+  ctx.restore();
+
   if (state.settings.effects === "reflection") {
-    ctx.shadowColor = "transparent";
     drawReflection(
       ctx,
       image,
@@ -618,14 +885,16 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX) {
       srcY,
       srcWidth,
       srcHeight,
-      -width / 2,
-      -height / 2,
+      x,
+      y,
       width,
       height,
-      radius
+      radius,
+      reflectionBaseline,
+      rotation,
+      skewX
     );
   }
-  ctx.restore();
 }
 
 function drawRoundedImage(ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, radius) {
@@ -648,36 +917,56 @@ function drawRoundedRectPath(ctx, dx, dy, dWidth, dHeight, radius) {
   ctx.closePath();
 }
 
-function drawReflection(ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, radius) {
+function drawReflection(
+  ctx,
+  image,
+  sx,
+  sy,
+  sWidth,
+  sHeight,
+  dx,
+  dy,
+  dWidth,
+  dHeight,
+  radius,
+  baseline,
+  rotation,
+  skewX
+) {
   const gap = Math.max(6, dHeight * 0.04);
   ctx.save();
   ctx.globalAlpha = 0.22;
+  ctx.translate(0, baseline * 2);
   ctx.scale(1, -1);
-  drawRoundedImage(
-    ctx,
-    image,
-    sx,
-    sy,
-    sWidth,
-    sHeight,
-    dx,
-    -dy - dHeight - gap - dHeight,
-    dWidth,
-    dHeight,
-    radius
-  );
+  ctx.translate(dx + dWidth / 2, dy + dHeight / 2 + gap);
+  ctx.rotate(rotation);
+  if (skewX) {
+    ctx.transform(1, 0, skewX, 1, 0, 0);
+  }
+  drawRoundedImage(ctx, image, sx, sy, sWidth, sHeight, -dWidth / 2, -dHeight / 2, dWidth, dHeight, radius);
   ctx.restore();
 }
 
 function saveActionShot() {
-  if (!actionShotCanvas) {
-    return;
-  }
   if (!state.selectedCards.length) {
     showToast("Add at least one card before saving.", "warning");
     return;
   }
-  actionShotCanvas.toBlob((blob) => {
+  const preset = getPreset();
+  if (!preset) {
+    showToast("Unable to export image. Missing dimensions.", "warning");
+    return;
+  }
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = preset.width;
+  exportCanvas.height = preset.height;
+  const exportCtx = exportCanvas.getContext("2d");
+  if (!exportCtx) {
+    showToast("Unable to export image. Canvas unavailable.", "warning");
+    return;
+  }
+  renderScene(exportCtx, preset.width, preset.height, { applyCamera: true });
+  exportCanvas.toBlob((blob) => {
     if (!blob) {
       showToast("Unable to export image. Check image permissions.", "warning");
       return;
