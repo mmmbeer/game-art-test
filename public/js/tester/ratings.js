@@ -1,6 +1,6 @@
 export function createRatings({ elements, state }) {
   const { ratingState } = state;
-  const { ratingPanel, voteTrack, voteBack, voteSkip } = elements;
+  const { ratingPanel, voteTrack, voteSkip, commentInput, commentSubmit } = elements;
   const slides = Array.from(ratingPanel.querySelectorAll(".vote-slide"));
   const metricOrder = slides.map((slide) => slide.dataset.metric);
   let currentIndex = 0;
@@ -58,26 +58,30 @@ export function createRatings({ elements, state }) {
       restoreStars(group);
     });
 
-    voteBack.addEventListener("click", () => {
-      if (!isEnabled || currentIndex <= 0) {
-        return;
-      }
-      setIndex(currentIndex - 1);
-    });
-
     voteSkip.addEventListener("click", () => {
       if (!isEnabled) {
         return;
       }
-      if (currentIndex < slides.length - 1) {
-        setIndex(currentIndex + 1);
-        return;
-      }
-      const firstMissingIndex = findFirstMissingIndex();
-      if (firstMissingIndex !== null) {
-        setIndex(firstMissingIndex);
-      }
+      handleSkip();
     });
+
+    if (commentSubmit) {
+      commentSubmit.addEventListener("click", () => {
+        if (!isEnabled) {
+          return;
+        }
+        ratingPanel.dispatchEvent(new CustomEvent("ratings:complete", { bubbles: true }));
+      });
+    }
+
+    if (commentInput) {
+      commentInput.addEventListener("input", () => {
+        const trimmed = commentInput.value.slice(0, 500);
+        if (trimmed !== commentInput.value) {
+          commentInput.value = trimmed;
+        }
+      });
+    }
   }
 
   function resetRatings() {
@@ -87,6 +91,9 @@ export function createRatings({ elements, state }) {
     ratingPanel.querySelectorAll(".vote-slide").forEach((group) => {
       group.querySelectorAll(".star-button").forEach((star) => star.classList.remove("is-on"));
     });
+    if (commentInput) {
+      commentInput.value = "";
+    }
     setIndex(0, { instant: true });
   }
 
@@ -123,7 +130,6 @@ export function createRatings({ elements, state }) {
     }
     const slidePct = slides.length ? 100 / slides.length : 100;
     voteTrack.style.transform = `translateX(-${currentIndex * slidePct}%)`;
-    voteBack.classList.toggle("hidden", currentIndex === 0);
     if (instant) {
       requestAnimationFrame(() => voteTrack.classList.remove("no-transition"));
     }
@@ -145,6 +151,22 @@ export function createRatings({ elements, state }) {
     }
   }
 
+  function handleSkip() {
+    const metric = metricOrder[currentIndex];
+    if (metric === "comment") {
+      ratingPanel.dispatchEvent(new CustomEvent("ratings:complete", { bubbles: true }));
+      return;
+    }
+    if (metric && !ratingState[metric]) {
+      ratingState[metric] = 3;
+      const group = slides[currentIndex];
+      updateRatingUI(group, 3);
+    }
+    if (currentIndex < slides.length - 1) {
+      setIndex(currentIndex + 1);
+    }
+  }
+
   function findFirstMissingIndex() {
     for (let i = 0; i < metricOrder.length; i += 1) {
       if (!ratingState[metricOrder[i]]) {
@@ -157,6 +179,12 @@ export function createRatings({ elements, state }) {
   function setEnabled(enabled) {
     isEnabled = enabled;
     ratingPanel.classList.toggle("is-disabled", !enabled);
+    if (commentInput) {
+      commentInput.disabled = !enabled;
+    }
+    if (commentSubmit) {
+      commentSubmit.disabled = !enabled;
+    }
   }
 
   return {

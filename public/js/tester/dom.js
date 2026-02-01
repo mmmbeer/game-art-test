@@ -22,8 +22,9 @@ export function getElements() {
     resetView: byId("resetView"),
     ratingPanel: byId("ratingPanel"),
     voteTrack: byId("voteTrack"),
-    voteBack: byId("voteBack"),
     voteSkip: byId("voteSkip"),
+    commentInput: byId("commentInput"),
+    commentSubmit: byId("commentSubmit"),
     completePanel: byId("completePanel"),
     reloadButton: byId("reloadButton"),
   };

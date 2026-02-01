@@ -60,9 +60,6 @@
       </section>
 
       <section class="vote-dock" id="ratingPanel">
-        <button class="vote-nav-btn nav-back hidden" id="voteBack" type="button" aria-label="Go back">
-          &lsaquo;
-        </button>
         <div class="vote-carousel" aria-live="polite">
           <div class="vote-track" id="voteTrack">
             <div class="vote-slide" data-metric="appeal">
@@ -95,10 +92,21 @@
                 <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
               </div>
             </div>
+            <div class="vote-slide vote-slide-comment" data-metric="comment">
+              <div class="vote-label">Comment</div>
+              <div class="vote-comment-row" role="group" aria-label="Comment">
+                <textarea
+                  id="commentInput"
+                  rows="1"
+                  placeholder="Optional..."
+                ></textarea>
+                <button class="comment-submit" id="commentSubmit" type="button" aria-label="Submit vote"></button>
+              </div>
+            </div>
           </div>
         </div>
-        <button class="vote-nav-btn nav-skip" id="voteSkip" type="button" aria-label="Skip rating">
-          skip >
+        <button class="vote-nav-btn nav-skip" id="voteSkip" type="button" aria-label="Skip rating" title="Skip">
+          &rsaquo;
         </button>
       </section>
 

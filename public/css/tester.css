@@ -106,11 +106,6 @@ body {
   cursor: not-allowed;
 }
 
-.divider-line {
-  height: 2px;
-  background: var(--tester-border);
-}
-
 .asset-sticky {
   z-index: 2;
   background: var(--tester-bg);
@@ -350,6 +345,40 @@ body {
   gap: 0;
 }
 
+.vote-comment-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  width: min(100%, 520px);
+  height: 80px;
+  align-items: stretch;
+}
+
+.vote-comment-row textarea {
+  border: 1px solid var(--tester-border);
+  background: var(--tester-panel);
+  color: var(--tester-text);
+  padding: 10px 12px;
+  resize: none;
+  height: 80px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.comment-submit {
+  width: 80px;
+  height: 80px;
+  border: none;
+  background: var(--tester-accent);
+  cursor: pointer;
+  clip-path: polygon(22% 15%, 85% 50%, 22% 85%);
+}
+
+.comment-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .star-button {
   width: 80px;
   height: 80px;
@@ -405,7 +434,7 @@ body {
   border: none;
   background: transparent;
   color: var(--tester-text);
-  font-size: 22px;
+  font-size: 48px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
@@ -416,13 +445,8 @@ body {
 }
 
 .vote-nav-btn.nav-skip {
-  font-size: 13px;
   color: var(--tester-muted);
   right: 6px;
-}
-
-.vote-nav-btn.nav-back {
-  left: 6px;
 }
 
 .vote-nav-btn.hidden {

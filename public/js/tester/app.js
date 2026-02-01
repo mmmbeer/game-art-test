@@ -72,7 +72,7 @@ async function submitVote() {
     professionalism: state.ratingState.professionalism,
     appeal: state.ratingState.appeal,
     understandability: state.ratingState.understandability,
-    comment: "",
+    comment: elements.commentInput?.value.trim() || "",
   };
 
   try {
