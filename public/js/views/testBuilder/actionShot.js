@@ -685,18 +685,19 @@ function renderCanvas() {
 function renderScene(ctx, width, height, options = {}) {
   const reflectionBaseline = height * 0.66;
   ctx.save();
-  if (options.applyCamera) {
-    ctx.translate(width / 2, height / 2);
-    ctx.scale(state.settings.cameraZoom, state.settings.cameraZoom);
-    ctx.translate(-width / 2, -height / 2);
-    ctx.translate(-state.settings.cameraX, -state.settings.cameraY);
-  }
+  // Background should always fill the camera view (screen space).
   drawBackground(ctx, width, height);
   const cards = state.selectedCards.filter((card) => card.image);
   if (!cards.length) {
     drawEmptyState(ctx, width, height);
     ctx.restore();
     return;
+  }
+  if (options.applyCamera) {
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(state.settings.cameraZoom, state.settings.cameraZoom);
+    ctx.translate(-width / 2, -height / 2);
+    ctx.translate(-state.settings.cameraX, -state.settings.cameraY);
   }
   const displayType = state.settings.displayType;
   const drawCards =
