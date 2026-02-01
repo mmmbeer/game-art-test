@@ -16,6 +16,7 @@
   --tester-star-on-5: #ffa64a;
   --vote-star-size: 64px;
   --vote-dock-height: 120px;
+  --vote-nav-size: 64px;
 }
 
 body.tester-body {
@@ -316,12 +317,13 @@ body {
   transform: translateX(-50%);
   z-index: 6;
   min-height: var(--vote-dock-height);
+  overflow: hidden;
 }
 
 .vote-carousel {
   overflow: hidden;
   width: 100%;
-  padding: 0 36px;
+  padding: 0 calc(var(--vote-nav-size) + 6px) 0 8px;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -404,12 +406,19 @@ body {
 }
 
 .comment-submit {
-  width: var(--vote-star-size);
-  height: var(--vote-star-size);
+  width: var(--vote-nav-size);
+  height: var(--vote-nav-size);
   border: none;
-  background: var(--tester-accent);
+  background-color: #35c46a;
   cursor: pointer;
-  clip-path: polygon(22% 15%, 85% 50%, 22% 85%);
+  mask-image: url("../assets/icons/vote.svg");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 60% 60%;
+  -webkit-mask-image: url("../assets/icons/vote.svg");
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: 60% 60%;
 }
 
 .comment-submit:disabled {
@@ -476,7 +485,11 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
-  padding: 6px 8px;
+  padding: 0;
+  width: var(--vote-nav-size);
+  height: var(--vote-nav-size);
+  display: grid;
+  place-items: center;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);

@@ -7,6 +7,14 @@ export function resolveOverlayTemplate(asset) {
   if (typeof direct === "string" && direct.trim()) {
     return normalizeOverlayUrl(direct);
   }
+  if (meta?.relationship === "card") {
+    const cardOverlay = resolveCardOverlay(meta);
+    if (cardOverlay) {
+      return cardOverlay;
+    }
+    const fallback = buildPrintedOverlayFallback(asset);
+    return fallback ? normalizeOverlayUrl(fallback) : "";
+  }
   if (isPrintedComponentAsset(asset)) {
     const overlay = findOverlay(meta) || findOverlay(meta?.source || {});
     if (overlay) {
@@ -178,6 +186,18 @@ function normalizeOverlayUrl(file) {
   return trimmed;
 }
 
+function resolveCardOverlay(meta) {
+  const source = meta?.source || {};
+  const candidates = [meta, source, source.deck, source.parent, source.game];
+  for (const candidate of candidates) {
+    const overlay = findOverlay(candidate);
+    if (overlay) {
+      return normalizeOverlayUrl(overlay);
+    }
+  }
+  return "";
+}
+
 function firstTemplateValue(templates) {
   for (const value of Object.values(templates || {})) {
     if (typeof value === "string" && value.trim()) {
@@ -190,6 +210,14 @@ function firstTemplateValue(templates) {
 function buildPrintedOverlayFallback(asset) {
   const identityRaw = String(asset?.asset_type || "").trim();
   if (!identityRaw) {
+    const meta = asset?.metadata || {};
+    const source = meta?.source || {};
+    const deckIdentity = String(source?.deck?.identity || source?.parent?.identity || "").trim();
+    if (deckIdentity) {
+      return `${OVERLAY_BASE}/overlays/${deckIdentity.toLowerCase()}.png`;
+    }
+  }
+  if (!identityRaw) {
     return "";
   }
   const identity = identityRaw.toLowerCase();
@@ -198,9 +226,6 @@ function buildPrintedOverlayFallback(asset) {
 
 function isPrintedComponentAsset(asset) {
   const meta = asset?.metadata || {};
-  if (meta?.relationship === "card") {
-    return false;
-  }
   const source = meta?.source || {};
   if (Array.isArray(source?.sides)) {
     return true;
