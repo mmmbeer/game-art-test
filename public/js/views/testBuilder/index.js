@@ -10,6 +10,7 @@ import {
 import { buildTypeRow } from "./ui.js";
 import { setExpandedState, refreshTypeSelectionUI } from "./events.js";
 import { initLazyImages } from "../../lazyImages.js";
+import { initActionShotStudio } from "./actionShot.js";
 
 const testBuilderMetrics = document.getElementById("testBuilderMetrics");
 const testTypeSelection = document.getElementById("testTypeSelection");
@@ -40,8 +41,13 @@ let lastPreviewSignature = "";
 let lastPreviewSampleSize = null;
 let selectionState = new Map();
 let testDefaults = { sample_size: 10, min_votes_per_asset: 10 };
+let actionShotApi = null;
 
 export function initTestBuilder({ onAuthLost }) {
+  if (!actionShotApi) {
+    actionShotApi = initActionShotStudio();
+  }
+
   testTypeSelection.addEventListener("change", () => {
     updateMetrics();
     clearPreview();
@@ -175,7 +181,8 @@ function renderTypeOptions() {
       const isExpanded = selectedCount > 0;
       const isFullySelected = isTypeFullySelected({ type, assetsByType, selectionState });
 
-      const { wrapper, option, previewToggle, previewRow, assetsWrap } = buildTypeRow({
+      const { wrapper, option, previewToggle, previewRow, assetsWrap, actionShotButton } =
+        buildTypeRow({
         entry,
         assetsByType,
         deckCardsByAssetUuid,
@@ -200,6 +207,17 @@ function renderTypeOptions() {
       });
 
       testTypeSelection.appendChild(wrapper);
+
+      if (actionShotButton) {
+        actionShotButton.addEventListener("click", () => {
+          actionShotApi?.openStudio?.({
+            type,
+            game: activeGame,
+            assetsByType,
+            deckCardsByAssetUuid,
+          });
+        });
+      }
 
       const checkbox = option.querySelector("input");
       checkbox.indeterminate = isTypePartiallySelected({ type, assetsByType, selectionState });

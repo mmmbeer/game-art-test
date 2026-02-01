@@ -978,7 +978,7 @@ function renderHeatmap(stats) {
   rows.forEach((asset) => {
     const row = document.createElement("div");
     row.className = "heatmap-row";
-    row.appendChild(labelCell(asset.asset.asset_type || asset.asset.uuid.slice(0, 6)));
+    row.appendChild(labelCell(formatAssetLabel(asset.asset)));
     row.appendChild(scoreCell(asset.averages.professionalism));
     row.appendChild(scoreCell(asset.averages.appeal));
     row.appendChild(scoreCell(asset.averages.understandability));
@@ -1086,6 +1086,26 @@ function renderChart(canvasId, config) {
   chartStore.set(canvasId, chart);
 }
 
+function resolveAssetName(asset) {
+  const source = asset?.metadata?.source || {};
+  const name =
+    (source.name || "").trim() ||
+    (source.title || "").trim() ||
+    (source.object_name || "").trim();
+  return name;
+}
+
+function formatAssetLabel(asset) {
+  const name = resolveAssetName(asset);
+  if (name) {
+    return name;
+  }
+  if (asset?.uuid) {
+    return `Asset ${asset.uuid.slice(0, 6)}`;
+  }
+  return "Asset";
+}
+
 function groupStats(stats, { dimension, groupBy, includeIncomplete }) {
   const minVotes = stats.minVotes || 0;
   const items = stats.assetStats.filter((asset) =>
@@ -1094,7 +1114,7 @@ function groupStats(stats, { dimension, groupBy, includeIncomplete }) {
   const map = new Map();
   items.forEach((asset) => {
     let key = asset.asset.uuid;
-    let label = `${asset.asset.asset_type || "Asset"} ${asset.asset.uuid.slice(0, 6)}`;
+    let label = formatAssetLabel(asset.asset);
     if (groupBy === "asset_type") {
       key = asset.asset.asset_type || "Unknown";
       label = key;
@@ -1153,9 +1173,7 @@ function buildAssetItems(stats, { groupBy, includeIncomplete }) {
   if (groupBy === "asset") {
     return assets.map((asset) => ({
       key: asset.asset.uuid,
-      label: asset.asset.asset_type
-        ? `${asset.asset.asset_type} - ${asset.asset.uuid.slice(0, 6)}`
-        : asset.asset.uuid.slice(0, 6),
+      label: formatAssetLabel(asset.asset),
       value: asset.overall,
       votes: asset.vote_count,
       remaining: Math.max(minVotes - asset.vote_count, 0),

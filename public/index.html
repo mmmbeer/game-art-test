@@ -622,6 +622,86 @@
       </div>
     </div>
 
+    <div class="modal fade" id="actionShotModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl action-shot-modal">
+        <div class="modal-content app-card">
+          <div class="modal-header action-shot-header">
+            <div>
+              <h5 class="modal-title">Action Shot Render Studio</h5>
+              <p class="action-shot-subtitle" id="actionShotSubtitle"></p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="action-shot-studio">
+              <div class="action-shot-stage" id="actionShotStage">
+                <canvas class="action-shot-canvas" id="actionShotCanvas"></canvas>
+                <div class="action-shot-toolbar">
+                  <div class="action-shot-toolbar-inner">
+                    <div class="action-shot-toolbar-group">
+                      <label class="form-label" for="actionShotDisplay">Display type</label>
+                      <select class="form-select form-select-sm" id="actionShotDisplay">
+                        <option value="single">Single card</option>
+                        <option value="fan">Fanned display</option>
+                        <option value="angle">3D angle</option>
+                      </select>
+                    </div>
+                    <div class="action-shot-toolbar-group">
+                      <label class="form-label" for="actionShotBackgroundType">Background</label>
+                      <select class="form-select form-select-sm" id="actionShotBackgroundType">
+                        <option value="solid">Solid color</option>
+                        <option value="gradient">Gradient</option>
+                        <option value="image">Background image</option>
+                      </select>
+                      <div class="action-shot-inline">
+                        <input class="form-control form-control-color" id="actionShotBackgroundColor" type="color" value="#101827">
+                        <input class="form-control form-control-color" id="actionShotBackgroundColor2" type="color" value="#2f3b55">
+                      </div>
+                      <input class="form-control form-control-sm" id="actionShotBackgroundImage" type="file" accept="image/*">
+                    </div>
+                    <div class="action-shot-toolbar-group">
+                      <label class="form-label" for="actionShotEffects">Effects</label>
+                      <select class="form-select form-select-sm" id="actionShotEffects">
+                        <option value="none">None</option>
+                        <option value="reflection">Reflection</option>
+                      </select>
+                    </div>
+                    <div class="action-shot-toolbar-group">
+                      <label class="form-label" for="actionShotDimensions">Dimensions</label>
+                      <select class="form-select form-select-sm" id="actionShotDimensions">
+                        <option value="portrait-1600">Portrait 1600 x 2200</option>
+                        <option value="landscape-2200">Landscape 2200 x 1600</option>
+                        <option value="square-1800">Square 1800 x 1800</option>
+                        <option value="banner-2400">Wide 2400 x 1350</option>
+                        <option value="tall-1200">Tall 1200 x 2000</option>
+                      </select>
+                    </div>
+                    <div class="action-shot-toolbar-group">
+                      <label class="form-label" for="actionShotTrim">Card trim (px)</label>
+                      <input class="form-range" id="actionShotTrim" type="range" min="0" max="80" step="2" value="40">
+                      <label class="form-label" for="actionShotCorner">Corner round (% of size)</label>
+                      <input class="form-range" id="actionShotCorner" type="range" min="0" max="20" step="1" value="5">
+                      <label class="form-label" for="actionShotScale">Card size</label>
+                      <input class="form-range" id="actionShotScale" type="range" min="0.7" max="1.4" step="0.05" value="1">
+                      <button class="btn btn-outline-light btn-sm" id="actionShotClear" type="button">Clear canvas</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="action-shot-assets">
+                <div class="action-shot-assets-label">Asset listing</div>
+                <div class="action-shot-assets-scroll" id="actionShotAssetsScroll"></div>
+              </div>
+              <div class="action-shot-footer">
+                <div class="action-shot-footer-meta" id="actionShotFooterMeta"></div>
+                <button class="btn btn-primary btn-sm" id="actionShotSave" type="button">Save action shot</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastHost"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

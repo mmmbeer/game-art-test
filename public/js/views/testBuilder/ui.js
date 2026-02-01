@@ -1,4 +1,10 @@
-import { resolveAssetName, resolveCardCount, getPreviewAssetsForType } from "./state.js";
+import {
+  resolveAssetName,
+  resolveCardCount,
+  getPreviewAssetsForType,
+  isDeckType,
+  isCardType,
+} from "./state.js";
 
 export function renderSelectedAssets({ type, assetsByType, selectionState }) {
   const items = assetsByType[type] || [];
@@ -85,7 +91,22 @@ export function buildTypeRow({
 
   const wrapper = document.createElement("div");
   wrapper.className = "test-type-block";
-  wrapper.appendChild(option);
+
+  const headerRow = document.createElement("div");
+  headerRow.className = "test-type-header";
+  headerRow.appendChild(option);
+
+  let actionShotButton = null;
+  if (isDeckType(type) || isCardType(type)) {
+    actionShotButton = document.createElement("button");
+    actionShotButton.type = "button";
+    actionShotButton.className = "btn btn-outline-light btn-sm action-shot-trigger";
+    actionShotButton.dataset.actionShotType = type;
+    actionShotButton.textContent = "Action Shot";
+    headerRow.appendChild(actionShotButton);
+  }
+
+  wrapper.appendChild(headerRow);
 
   const selectedList = document.createElement("div");
   selectedList.className = "type-selected";
@@ -126,5 +147,6 @@ export function buildTypeRow({
     previewRow,
     assetsWrap,
     selectedList,
+    actionShotButton,
   };
 }

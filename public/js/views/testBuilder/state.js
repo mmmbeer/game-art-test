@@ -63,6 +63,10 @@ export function isDeckType(type) {
   return String(type || "").toLowerCase().includes("deck");
 }
 
+export function isCardType(type) {
+  return String(type || "").toLowerCase().includes("card");
+}
+
 export function getPreviewAssetsForType({ type, assetsByType, deckCardsByAssetUuid }) {
   const items = assetsByType[type] || [];
   const previewItems = [];
