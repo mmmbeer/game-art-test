@@ -294,7 +294,7 @@ function updateProgressBar() {
   );
 
   state.progressDom.assetNodes.forEach((entry, index) => {
-    const { el, dots } = entry;
+    const { el, segments } = entry;
     el.classList.toggle("is-complete", index < completedAssets);
     el.classList.toggle("is-current", hasCurrentAsset && index === currentIndex);
     el.classList.toggle(
@@ -302,11 +302,11 @@ function updateProgressBar() {
       index > completedAssets || (!hasCurrentAsset && index >= completedAssets)
     );
 
-    dots.forEach((dot, dotIndex) => {
+    segments.forEach((segment, segmentIndex) => {
       const shouldFill =
         index < completedAssets ||
-        (hasCurrentAsset && index === currentIndex && dotIndex < ratingCompleted);
-      dot.classList.toggle("is-filled", shouldFill);
+        (hasCurrentAsset && index === currentIndex && segmentIndex < ratingCompleted);
+      segment.classList.toggle("is-filled", shouldFill);
     });
   });
 
@@ -325,15 +325,15 @@ function renderProgressAssets(totalAssets) {
     if (i === totalAssets - 1) {
       asset.classList.add("is-last");
     }
-    const dots = [];
+    const segments = [];
     for (let d = 0; d < 3; d += 1) {
       const dot = document.createElement("span");
-      dot.className = "progress-dot";
+      dot.className = "progress-segment";
       asset.appendChild(dot);
-      dots.push(dot);
+      segments.push(dot);
     }
     elements.testerProgressTrack.appendChild(asset);
-    assetNodes.push({ el: asset, dots });
+    assetNodes.push({ el: asset, segments });
   }
   state.progressDom = { totalAssets, assetNodes };
 }
