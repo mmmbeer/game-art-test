@@ -579,30 +579,27 @@ function buildStats(data) {
 }
 
 function renderScorecards(stats) {
-  const percent =
-    stats.assetStats.length > 0
-      ? Math.round((stats.completedAssets / stats.assetStats.length) * 100)
-      : 0;
+  const overall =
+    (stats.overallAvg.professionalism +
+      stats.overallAvg.appeal +
+      stats.overallAvg.understandability) /
+    3;
   scorecards.innerHTML = `
     <div class="summary-card">
-      <span class="summary-label">Overall average</span>
-      <p class="summary-value">${stats.overallAvg.professionalism.toFixed(2)}</p>
-      <span class="text-muted small">Professionalism</span>
-    </div>
-    <div class="summary-card">
-      <span class="summary-label">Overall average</span>
+      <span class="summary-label">Appeal average</span>
       <p class="summary-value">${stats.overallAvg.appeal.toFixed(2)}</p>
-      <span class="text-muted small">Appeal</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Professionalism average</span>
+      <p class="summary-value">${stats.overallAvg.professionalism.toFixed(2)}</p>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Understandability average</span>
+      <p class="summary-value">${stats.overallAvg.understandability.toFixed(2)}</p>
     </div>
     <div class="summary-card">
       <span class="summary-label">Overall average</span>
-      <p class="summary-value">${stats.overallAvg.understandability.toFixed(2)}</p>
-      <span class="text-muted small">Understandability</span>
-    </div>
-    <div class="summary-card">
-      <span class="summary-label">Completion</span>
-      <p class="summary-value">${percent}%</p>
-      <span class="text-muted small">${stats.completedAssets}/${stats.assetStats.length} assets</span>
+      <p class="summary-value">${overall.toFixed(2)}</p>
     </div>
   `;
 }

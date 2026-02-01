@@ -208,6 +208,15 @@
                 </div>
                 <div class="filter-stack" data-filter-group="dashboard">
                   <div class="filter-primary">
+                    <button
+                      class="btn btn-outline-light btn-sm filter-toggle is-open"
+                      type="button"
+                      data-filter-toggle="dashboardFilterPanel"
+                      aria-expanded="true"
+                    >
+                      <span>More filters</span>
+                      <img class="icon-sm chevron-icon" src="assets/icons/chevron-down.svg" alt="">
+                    </button>
                     <div class="input-group">
                       <span class="input-group-text">
                         <img class="icon-sm" src="assets/icons/search.svg" alt="">
@@ -220,17 +229,8 @@
                         placeholder="Search by game or test UUID"
                       >
                     </div>
-                    <button
-                      class="btn btn-outline-light btn-sm filter-toggle"
-                      type="button"
-                      data-filter-toggle="dashboardFilterPanel"
-                      aria-expanded="false"
-                    >
-                      <span>More filters</span>
-                      <img class="icon-sm chevron-icon" src="assets/icons/chevron-down.svg" alt="">
-                    </button>
                   </div>
-                  <div class="filter-panel" id="dashboardFilterPanel">
+                  <div class="filter-panel is-open" id="dashboardFilterPanel">
                     <div class="input-group">
                       <label class="input-group-text" for="dashboardTestSelect">Test</label>
                       <select class="form-select" id="dashboardTestSelect">
@@ -279,15 +279,15 @@
                 </div>
 
                 <div class="dashboard-tabs">
-                  <button class="btn btn-outline-light btn-sm is-active" data-dashboard-tab="progress" type="button">
-                    Progress
-                  </button>
-                  <button class="btn btn-outline-light btn-sm" data-dashboard-tab="results" type="button">
+                  <button class="btn btn-outline-light btn-sm is-active" data-dashboard-tab="results" type="button">
                     Results
+                  </button>
+                  <button class="btn btn-outline-light btn-sm" data-dashboard-tab="progress" type="button">
+                    Assets
                   </button>
                 </div>
 
-                <div id="dashboardProgressPanel">
+                <div id="dashboardProgressPanel" class="d-none">
                   <div class="dashboard-metrics" id="dashboardProgressMetrics"></div>
                   <div class="dashboard-progress-controls">
                     <div class="input-group">
@@ -308,7 +308,7 @@
                   <div class="dashboard-asset-progress" id="dashboardAssetProgress"></div>
                 </div>
 
-                <div id="dashboardResultsPanel" class="d-none">
+                <div id="dashboardResultsPanel">
                   <div class="dashboard-results-controls">
                     <div class="input-group">
                       <label class="input-group-text" for="resultsDimension">Dimension</label>
