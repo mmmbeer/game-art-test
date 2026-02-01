@@ -62,7 +62,7 @@ export function createRatings({ elements, state }) {
       if (!isEnabled) {
         return;
       }
-      handleSkip();
+      ratingPanel.dispatchEvent(new CustomEvent("ratings:skip", { bubbles: true }));
     });
 
     if (commentSubmit) {
@@ -139,33 +139,9 @@ export function createRatings({ elements, state }) {
     const metricIndex = metricOrder.indexOf(metric);
     if (metricIndex !== -1 && metricIndex < slides.length - 1) {
       setIndex(metricIndex + 1);
-      return;
-    }
-    const firstMissingIndex = findFirstMissingIndex();
-    if (firstMissingIndex !== null) {
-      setIndex(firstMissingIndex);
-      return;
-    }
-    if (state.currentAsset) {
-      ratingPanel.dispatchEvent(new CustomEvent("ratings:complete", { bubbles: true }));
     }
   }
 
-  function handleSkip() {
-    const metric = metricOrder[currentIndex];
-    if (metric === "comment") {
-      ratingPanel.dispatchEvent(new CustomEvent("ratings:complete", { bubbles: true }));
-      return;
-    }
-    if (metric && !ratingState[metric]) {
-      ratingState[metric] = 3;
-      const group = slides[currentIndex];
-      updateRatingUI(group, 3);
-    }
-    if (currentIndex < slides.length - 1) {
-      setIndex(currentIndex + 1);
-    }
-  }
 
   function findFirstMissingIndex() {
     for (let i = 0; i < metricOrder.length; i += 1) {

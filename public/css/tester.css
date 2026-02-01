@@ -14,6 +14,8 @@
   --tester-star-on-3: #ffc04a;
   --tester-star-on-4: #ffb14a;
   --tester-star-on-5: #ffa64a;
+  --vote-star-size: 64px;
+  --vote-dock-height: 120px;
 }
 
 body.tester-body {
@@ -32,11 +34,17 @@ body {
   overflow-x: hidden;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 .tester-shell {
   max-width: 640px;
   width: min(640px, 100%);
   margin: 0 auto;
-  padding: 10px 12px 0;
+  padding: 10px 12px var(--vote-dock-height);
   display: grid;
   gap: 8px;
   height: 100vh;
@@ -116,6 +124,7 @@ body {
   width: 100%;
   overflow-x: hidden;
   min-width: 0;
+  max-height: calc(100vh - var(--vote-dock-height));
 }
 
 .asset-frame {
@@ -293,21 +302,26 @@ body {
 }
 
 .vote-dock {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 8px 14px;
+  padding: 8px 6px;
   background: var(--tester-panel);
   border-top: 1px solid var(--tester-border);
-  width: 100%;
+  width: min(640px, 100%);
   min-width: 0;
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 6;
+  min-height: var(--vote-dock-height);
 }
 
 .vote-carousel {
   overflow: hidden;
   width: 100%;
-  padding: 0 clamp(4px, 2vw, 24px);
+  padding: 0 36px;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -340,7 +354,7 @@ body {
 
 .vote-stars {
   display: flex;
-  width: min(100%, 520px);
+  width: min(100%, 420px);
   justify-content: space-between;
   gap: 0;
 }
@@ -348,9 +362,9 @@ body {
 .vote-comment-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px;
-  width: min(100%, 520px);
-  height: 80px;
+  gap: 8px;
+  width: min(100%, 420px);
+  height: var(--vote-star-size);
   align-items: stretch;
 }
 
@@ -358,16 +372,16 @@ body {
   border: 1px solid var(--tester-border);
   background: var(--tester-panel);
   color: var(--tester-text);
-  padding: 10px 12px;
+  padding: 8px 10px;
   resize: none;
-  height: 80px;
+  height: var(--vote-star-size);
   font-family: inherit;
   font-size: 14px;
 }
 
 .comment-submit {
-  width: 80px;
-  height: 80px;
+  width: var(--vote-star-size);
+  height: var(--vote-star-size);
   border: none;
   background: var(--tester-accent);
   cursor: pointer;
@@ -380,19 +394,19 @@ body {
 }
 
 .star-button {
-  width: 80px;
-  height: 80px;
+  width: var(--vote-star-size);
+  height: var(--vote-star-size);
   border: none;
   background: transparent;
   background-color: var(--tester-star-off);
   mask-image: url("../assets/icons/star-outline.svg");
   mask-repeat: no-repeat;
   mask-position: center;
-  mask-size: 80px 80px;
+  mask-size: var(--vote-star-size) var(--vote-star-size);
   -webkit-mask-image: url("../assets/icons/star-outline.svg");
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
-  -webkit-mask-size: 80px 80px;
+  -webkit-mask-size: var(--vote-star-size) var(--vote-star-size);
   cursor: pointer;
   padding: 0;
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
@@ -434,7 +448,7 @@ body {
   border: none;
   background: transparent;
   color: var(--tester-text);
-  font-size: 48px;
+  font-size: 38px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
@@ -482,7 +496,7 @@ body {
   text-align: center;
   position: fixed;
   left: 50%;
-  bottom: 140px;
+  bottom: calc(var(--vote-dock-height) + 20px);
   transform: translateX(-50%);
   width: min(90vw, 420px);
   z-index: 5;
@@ -494,7 +508,7 @@ body {
 
 .toast-host {
   position: fixed;
-  bottom: 120px;
+  bottom: calc(var(--vote-dock-height) + 12px);
   right: 12px;
   display: grid;
   gap: 6px;

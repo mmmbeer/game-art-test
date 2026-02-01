@@ -60,6 +60,7 @@ function bindActionEvents() {
   elements.reloadButton.addEventListener("click", () => loadNextAsset());
 
   elements.ratingPanel.addEventListener("ratings:complete", () => submitVote());
+  elements.ratingPanel.addEventListener("ratings:skip", () => skipAsset());
 }
 
 async function submitVote() {
@@ -136,6 +137,16 @@ async function loadNextAsset() {
   } finally {
     setLoading(false);
   }
+}
+
+async function skipAsset() {
+  if (!state.currentAsset) {
+    return;
+  }
+  ratings.setEnabled(false);
+  showToast("Skipped. Loading next asset...", "success");
+  await loadNextAsset();
+  ratings.setEnabled(true);
 }
 
 function updateTestMeta(data) {
