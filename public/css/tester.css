@@ -26,6 +26,12 @@ body.tester-body {
   overflow-x: hidden;
 }
 
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .tester-shell {
   max-width: 640px;
   width: min(640px, 100%);
@@ -300,7 +306,7 @@ body.tester-body {
 
 .vote-track {
   display: flex;
-  width: 100%;
+  width: calc(100% * var(--slide-count, 1));
   transform: translateX(0);
   transition: transform 0.32s ease;
 }
@@ -310,7 +316,8 @@ body.tester-body {
 }
 
 .vote-slide {
-  flex: 0 0 100%;
+  flex: 0 0 auto;
+  width: calc(100% / var(--slide-count, 1));
   display: grid;
   gap: 6px;
   justify-items: center;

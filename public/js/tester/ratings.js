@@ -5,6 +5,7 @@ export function createRatings({ elements, state }) {
   const metricOrder = slides.map((slide) => slide.dataset.metric);
   let currentIndex = 0;
   let isEnabled = true;
+  ratingPanel.style.setProperty("--slide-count", slides.length);
 
   function bindRatingEvents() {
     ratingPanel.addEventListener("click", (event) => {
@@ -120,7 +121,8 @@ export function createRatings({ elements, state }) {
     if (instant) {
       voteTrack.classList.add("no-transition");
     }
-    voteTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+    const slidePct = slides.length ? 100 / slides.length : 100;
+    voteTrack.style.transform = `translateX(-${currentIndex * slidePct}%)`;
     voteBack.classList.toggle("hidden", currentIndex === 0);
     if (instant) {
       requestAnimationFrame(() => voteTrack.classList.remove("no-transition"));
