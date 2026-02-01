@@ -271,7 +271,7 @@
                     <p class="text-muted mb-0" id="selectedTestMeta"></p>
                   </div>
                   <div class="dashboard-detail-actions">
-                    <button class="btn btn-outline-light btn-sm" id="dashboardOpenPublic" type="button">Public link</button>
+                    <button class="btn btn-outline-light btn-sm" id="dashboardOpenPublic" type="button">Link</button>
                     <button class="btn btn-outline-light btn-sm" id="dashboardPause" type="button">Pause</button>
                     <button class="btn btn-outline-light btn-sm" id="dashboardResume" type="button">Resume</button>
                     <button class="btn btn-outline-danger btn-sm" id="dashboardRestart" type="button">Restart</button>
@@ -282,108 +282,250 @@
                   <button class="btn btn-outline-light btn-sm is-active" data-dashboard-tab="results" type="button">
                     Results
                   </button>
-                  <button class="btn btn-outline-light btn-sm" data-dashboard-tab="progress" type="button">
+                  <button class="btn btn-outline-light btn-sm" data-dashboard-tab="assets" type="button">
                     Assets
+                  </button>
+                  <button class="btn btn-outline-light btn-sm" data-dashboard-tab="export" type="button">
+                    Export options
                   </button>
                 </div>
 
-                <div id="dashboardProgressPanel" class="d-none">
-                  <div class="dashboard-metrics" id="dashboardProgressMetrics"></div>
-                  <div class="dashboard-progress-controls">
-                    <div class="input-group">
-                      <label class="input-group-text" for="progressAssetFilter">Asset type</label>
-                      <select class="form-select" id="progressAssetFilter">
-                        <option value="">All types</option>
-                      </select>
-                    </div>
-                    <div class="input-group">
-                      <label class="input-group-text" for="progressSort">Sort</label>
-                      <select class="form-select" id="progressSort">
-                        <option value="remaining">Most remaining</option>
-                        <option value="votes">Most votes</option>
-                        <option value="name">Asset type A-Z</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="dashboard-asset-progress" id="dashboardAssetProgress"></div>
-                </div>
-
                 <div id="dashboardResultsPanel">
-                  <div class="dashboard-results-controls">
-                    <div class="input-group">
-                      <label class="input-group-text" for="resultsDimension">Dimension</label>
-                      <select class="form-select" id="resultsDimension">
-                        <option value="overall">Overall average</option>
-                        <option value="professionalism">Professionalism</option>
-                        <option value="appeal">Appeal</option>
-                        <option value="understandability">Understandability</option>
-                      </select>
-                    </div>
-                    <div class="input-group">
-                      <label class="input-group-text" for="resultsGroupBy">Group by</label>
-                      <select class="form-select" id="resultsGroupBy">
-                        <option value="asset">Asset</option>
-                        <option value="asset_type">Asset type</option>
-                        <option value="asset_group">Asset type group</option>
-                      </select>
-                    </div>
-                    <div class="input-group">
-                      <label class="input-group-text" for="resultsSort">Sort</label>
-                      <select class="form-select" id="resultsSort">
-                        <option value="best">Best scores</option>
-                        <option value="worst">Lowest scores</option>
-                        <option value="votes">Most votes</option>
-                        <option value="name">Name A-Z</option>
-                      </select>
-                    </div>
-                    <div class="input-group">
-                      <label class="input-group-text" for="resultsLimit">Show</label>
-                      <input class="form-control" id="resultsLimit" type="number" min="3" max="50" value="12">
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="resultsIncludeIncomplete" checked>
-                      <label class="form-check-label" for="resultsIncludeIncomplete">
-                        Include incomplete assets
-                      </label>
-                    </div>
-                    <button class="btn btn-outline-light btn-sm" id="resultsExportCsv" type="button">Export CSV</button>
-                    <button class="btn btn-outline-light btn-sm" id="resultsExportJson" type="button">Export JSON</button>
-                  </div>
-
                   <div class="dashboard-results-grid">
                     <div class="dashboard-scorecards" id="dashboardScorecards"></div>
                     <div class="dashboard-chart-card">
-                      <h4 class="dashboard-chart-title">Score profile</h4>
+                      <div class="dashboard-chart-header">
+                        <h4 class="dashboard-chart-title">Score profile</h4>
+                        <button class="icon-button" type="button" aria-label="Score profile settings" data-card-toggle="radarSettings" aria-expanded="false">
+                          <img src="assets/icons/gear.svg" alt="">
+                        </button>
+                      </div>
+                      <div class="dashboard-card-settings" id="radarSettings">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="radarIncludeIncomplete" checked>
+                          <label class="form-check-label" for="radarIncludeIncomplete">
+                            Include incomplete assets
+                          </label>
+                        </div>
+                      </div>
                       <canvas id="resultsRadarChart" height="220"></canvas>
                     </div>
                     <div class="dashboard-chart-card">
-                      <h4 class="dashboard-chart-title">Ratings distribution</h4>
+                      <div class="dashboard-chart-header">
+                        <h4 class="dashboard-chart-title">Ratings distribution</h4>
+                        <button class="icon-button" type="button" aria-label="Ratings distribution settings" data-card-toggle="distributionSettings" aria-expanded="false">
+                          <img src="assets/icons/gear.svg" alt="">
+                        </button>
+                      </div>
+                      <div class="dashboard-card-settings" id="distributionSettings">
+                        <div class="input-group">
+                          <label class="input-group-text" for="distributionMode">View</label>
+                          <select class="form-select" id="distributionMode">
+                            <option value="all">All dimensions</option>
+                            <option value="professionalism">Professionalism only</option>
+                            <option value="appeal">Appeal only</option>
+                            <option value="understandability">Understandability only</option>
+                          </select>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="distributionIncludeIncomplete" checked>
+                          <label class="form-check-label" for="distributionIncludeIncomplete">
+                            Include incomplete assets
+                          </label>
+                        </div>
+                      </div>
                       <canvas id="resultsDistributionChart" height="220"></canvas>
                     </div>
                     <div class="dashboard-chart-card">
-                      <h4 class="dashboard-chart-title">Top ranking</h4>
+                      <div class="dashboard-chart-header">
+                        <h4 class="dashboard-chart-title">Top ranking</h4>
+                        <button class="icon-button" type="button" aria-label="Top ranking settings" data-card-toggle="rankingSettings" aria-expanded="false">
+                          <img src="assets/icons/gear.svg" alt="">
+                        </button>
+                      </div>
+                      <div class="dashboard-card-settings" id="rankingSettings">
+                        <div class="input-group">
+                          <label class="input-group-text" for="rankingDimension">Dimension</label>
+                          <select class="form-select" id="rankingDimension">
+                            <option value="overall">Overall average</option>
+                            <option value="professionalism">Professionalism</option>
+                            <option value="appeal">Appeal</option>
+                            <option value="understandability">Understandability</option>
+                          </select>
+                        </div>
+                        <div class="input-group">
+                          <label class="input-group-text" for="rankingGroupBy">Group by</label>
+                          <select class="form-select" id="rankingGroupBy">
+                            <option value="asset">Asset</option>
+                            <option value="asset_type">Asset type</option>
+                            <option value="asset_group">Asset type group</option>
+                          </select>
+                        </div>
+                        <div class="input-group">
+                          <label class="input-group-text" for="rankingSort">Sort</label>
+                          <select class="form-select" id="rankingSort">
+                            <option value="best">Best scores</option>
+                            <option value="worst">Lowest scores</option>
+                            <option value="votes">Most votes</option>
+                            <option value="name">Name A-Z</option>
+                          </select>
+                        </div>
+                        <div class="input-group">
+                          <label class="input-group-text" for="rankingLimit">Show</label>
+                          <input class="form-control" id="rankingLimit" type="number" min="3" max="50" value="12">
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="rankingIncludeIncomplete" checked>
+                          <label class="form-check-label" for="rankingIncludeIncomplete">
+                            Include incomplete assets
+                          </label>
+                        </div>
+                      </div>
                       <canvas id="resultsRankingChart" height="260"></canvas>
                     </div>
                     <div class="dashboard-chart-card">
-                      <h4 class="dashboard-chart-title">Votes over time</h4>
+                      <div class="dashboard-chart-header">
+                        <h4 class="dashboard-chart-title">Votes over time</h4>
+                        <button class="icon-button" type="button" aria-label="Votes over time settings" data-card-toggle="timelineSettings" aria-expanded="false">
+                          <img src="assets/icons/gear.svg" alt="">
+                        </button>
+                      </div>
+                      <div class="dashboard-card-settings" id="timelineSettings">
+                        <div class="input-group">
+                          <label class="input-group-text" for="timelineRange">Range</label>
+                          <select class="form-select" id="timelineRange">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="all" selected>All time</option>
+                          </select>
+                        </div>
+                      </div>
                       <canvas id="resultsTimelineChart" height="200"></canvas>
                     </div>
                     <div class="dashboard-chart-card">
-                      <h4 class="dashboard-chart-title">Asset type averages</h4>
+                      <div class="dashboard-chart-header">
+                        <h4 class="dashboard-chart-title">Asset type averages</h4>
+                        <button class="icon-button" type="button" aria-label="Asset type averages settings" data-card-toggle="typeSettings" aria-expanded="false">
+                          <img src="assets/icons/gear.svg" alt="">
+                        </button>
+                      </div>
+                      <div class="dashboard-card-settings" id="typeSettings">
+                        <div class="input-group">
+                          <label class="input-group-text" for="typeDimension">Dimension</label>
+                          <select class="form-select" id="typeDimension">
+                            <option value="overall">Overall average</option>
+                            <option value="professionalism">Professionalism</option>
+                            <option value="appeal">Appeal</option>
+                            <option value="understandability">Understandability</option>
+                          </select>
+                        </div>
+                        <div class="input-group">
+                          <label class="input-group-text" for="typeSort">Sort</label>
+                          <select class="form-select" id="typeSort">
+                            <option value="best">Best scores</option>
+                            <option value="worst">Lowest scores</option>
+                          </select>
+                        </div>
+                        <div class="input-group">
+                          <label class="input-group-text" for="typeLimit">Show</label>
+                          <input class="form-control" id="typeLimit" type="number" min="3" max="50" value="12">
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="typeIncludeIncomplete" checked>
+                          <label class="form-check-label" for="typeIncludeIncomplete">
+                            Include incomplete assets
+                          </label>
+                        </div>
+                      </div>
                       <canvas id="resultsTypeChart" height="240"></canvas>
                     </div>
                     <div class="dashboard-chart-card">
-                      <h4 class="dashboard-chart-title">Asset score heatmap</h4>
+                      <div class="dashboard-chart-header">
+                        <h4 class="dashboard-chart-title">Asset score heatmap</h4>
+                        <button class="icon-button" type="button" aria-label="Asset score heatmap settings" data-card-toggle="heatmapSettings" aria-expanded="false">
+                          <img src="assets/icons/gear.svg" alt="">
+                        </button>
+                      </div>
+                      <div class="dashboard-card-settings" id="heatmapSettings">
+                        <div class="input-group">
+                          <label class="input-group-text" for="heatmapLimit">Show</label>
+                          <input class="form-control" id="heatmapLimit" type="number" min="3" max="50" value="12">
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="heatmapIncludeIncomplete" checked>
+                          <label class="form-check-label" for="heatmapIncludeIncomplete">
+                            Include incomplete assets
+                          </label>
+                        </div>
+                      </div>
                       <div class="dashboard-heatmap" id="resultsHeatmap"></div>
                     </div>
                     <div class="dashboard-chart-card">
-                      <h4 class="dashboard-chart-title">Comment explorer</h4>
+                      <div class="dashboard-chart-header">
+                        <h4 class="dashboard-chart-title">Comment explorer</h4>
+                        <button class="icon-button" type="button" aria-label="Comment explorer settings" data-card-toggle="commentSettings" aria-expanded="false">
+                          <img src="assets/icons/gear.svg" alt="">
+                        </button>
+                      </div>
+                      <div class="dashboard-card-settings" id="commentSettings">
+                        <div class="input-group">
+                          <label class="input-group-text" for="commentDefaultView">Default view</label>
+                          <select class="form-select" id="commentDefaultView">
+                            <option value="top">Top comments</option>
+                            <option value="all">All comments</option>
+                          </select>
+                        </div>
+                      </div>
                       <div class="comment-controls">
                         <input class="form-control" id="commentSearch" type="search" placeholder="Search comments">
                         <button class="btn btn-outline-light btn-sm" id="commentToggle" type="button">Show all</button>
                       </div>
                       <div class="comment-cloud" id="commentCloud"></div>
                       <div class="comment-list" id="commentList"></div>
+                    </div>
+                  </div>
+                </div>
+                <div id="dashboardAssetsPanel" class="d-none">
+                  <div class="dashboard-metrics" id="dashboardProgressMetrics"></div>
+                  <div class="dashboard-assets-controls">
+                    <div class="input-group">
+                      <label class="input-group-text" for="assetsGroupBy">Group by</label>
+                      <select class="form-select" id="assetsGroupBy">
+                        <option value="asset">Asset</option>
+                        <option value="asset_type">Asset type</option>
+                        <option value="asset_group">Asset type group</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label class="input-group-text" for="assetsSort">Sort</label>
+                      <select class="form-select" id="assetsSort">
+                        <option value="best">Best scores</option>
+                        <option value="worst">Lowest scores</option>
+                        <option value="votes">Most votes</option>
+                        <option value="remaining">Most remaining</option>
+                        <option value="name">Name A-Z</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label class="input-group-text" for="assetsLimit">Show</label>
+                      <input class="form-control" id="assetsLimit" type="number" min="3" max="50" value="12">
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="assetsIncludeIncomplete" checked>
+                      <label class="form-check-label" for="assetsIncludeIncomplete">
+                        Include incomplete assets
+                      </label>
+                    </div>
+                  </div>
+                  <div class="dashboard-asset-progress" id="dashboardAssetProgress"></div>
+                </div>
+                <div id="dashboardExportPanel" class="d-none">
+                  <div class="dashboard-export">
+                    <p class="card-subtitle mb-2">Download summarized or raw results for offline analysis.</p>
+                    <div class="dashboard-export-actions">
+                      <button class="btn btn-outline-light btn-sm" id="resultsExportCsv" type="button">Export CSV</button>
+                      <button class="btn btn-outline-light btn-sm" id="resultsExportJson" type="button">Export JSON</button>
                     </div>
                   </div>
                 </div>

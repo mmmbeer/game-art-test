@@ -15,16 +15,10 @@ const pauseButton = document.getElementById("dashboardPause");
 const resumeButton = document.getElementById("dashboardResume");
 const restartButton = document.getElementById("dashboardRestart");
 const progressMetrics = document.getElementById("dashboardProgressMetrics");
-const progressAssetFilter = document.getElementById("progressAssetFilter");
-const progressSort = document.getElementById("progressSort");
 const progressList = document.getElementById("dashboardAssetProgress");
 const resultsPanel = document.getElementById("dashboardResultsPanel");
-const progressPanel = document.getElementById("dashboardProgressPanel");
-const resultsDimension = document.getElementById("resultsDimension");
-const resultsGroupBy = document.getElementById("resultsGroupBy");
-const resultsSort = document.getElementById("resultsSort");
-const resultsLimit = document.getElementById("resultsLimit");
-const resultsIncludeIncomplete = document.getElementById("resultsIncludeIncomplete");
+const assetsPanel = document.getElementById("dashboardAssetsPanel");
+const exportPanel = document.getElementById("dashboardExportPanel");
 const resultsExportCsv = document.getElementById("resultsExportCsv");
 const resultsExportJson = document.getElementById("resultsExportJson");
 const scorecards = document.getElementById("dashboardScorecards");
@@ -33,6 +27,26 @@ const commentSearch = document.getElementById("commentSearch");
 const commentToggle = document.getElementById("commentToggle");
 const commentCloud = document.getElementById("commentCloud");
 const commentList = document.getElementById("commentList");
+const assetsGroupBy = document.getElementById("assetsGroupBy");
+const assetsSort = document.getElementById("assetsSort");
+const assetsLimit = document.getElementById("assetsLimit");
+const assetsIncludeIncomplete = document.getElementById("assetsIncludeIncomplete");
+const radarIncludeIncomplete = document.getElementById("radarIncludeIncomplete");
+const distributionMode = document.getElementById("distributionMode");
+const distributionIncludeIncomplete = document.getElementById("distributionIncludeIncomplete");
+const rankingDimension = document.getElementById("rankingDimension");
+const rankingGroupBy = document.getElementById("rankingGroupBy");
+const rankingSort = document.getElementById("rankingSort");
+const rankingLimit = document.getElementById("rankingLimit");
+const rankingIncludeIncomplete = document.getElementById("rankingIncludeIncomplete");
+const timelineRange = document.getElementById("timelineRange");
+const typeDimension = document.getElementById("typeDimension");
+const typeSort = document.getElementById("typeSort");
+const typeLimit = document.getElementById("typeLimit");
+const typeIncludeIncomplete = document.getElementById("typeIncludeIncomplete");
+const heatmapLimit = document.getElementById("heatmapLimit");
+const heatmapIncludeIncomplete = document.getElementById("heatmapIncludeIncomplete");
+const commentDefaultView = document.getElementById("commentDefaultView");
 
 const chartIds = {
   radar: "resultsRadarChart",
@@ -94,24 +108,119 @@ export function initDashboardView({ onAuthLost }) {
         .forEach((item) => item.classList.remove("is-active"));
       button.classList.add("is-active");
       const tab = button.dataset.dashboardTab;
-      if (tab === "results") {
-        progressPanel.classList.add("d-none");
-        resultsPanel.classList.remove("d-none");
-      } else {
-        progressPanel.classList.remove("d-none");
-        resultsPanel.classList.add("d-none");
-      }
+      resultsPanel?.classList.toggle("d-none", tab !== "results");
+      assetsPanel?.classList.toggle("d-none", tab !== "assets");
+      exportPanel?.classList.toggle("d-none", tab !== "export");
     });
   });
 
-  progressAssetFilter?.addEventListener("change", renderProgressAssets);
-  progressSort?.addEventListener("change", renderProgressAssets);
+  initCardToggles();
 
-  resultsDimension?.addEventListener("change", renderResults);
-  resultsGroupBy?.addEventListener("change", renderResults);
-  resultsSort?.addEventListener("change", renderResults);
-  resultsLimit?.addEventListener("input", renderResults);
-  resultsIncludeIncomplete?.addEventListener("change", renderResults);
+  assetsGroupBy?.addEventListener("change", renderAssetsList);
+  assetsSort?.addEventListener("change", renderAssetsList);
+  assetsLimit?.addEventListener("input", renderAssetsList);
+  assetsIncludeIncomplete?.addEventListener("change", renderAssetsList);
+
+  radarIncludeIncomplete?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (!stats) {
+      return;
+    }
+    renderScorecards(stats);
+    renderRadar(stats);
+  });
+  distributionMode?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderDistribution(stats);
+    }
+  });
+  distributionIncludeIncomplete?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderDistribution(stats);
+    }
+  });
+  rankingDimension?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderRanking(stats);
+    }
+  });
+  rankingGroupBy?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderRanking(stats);
+    }
+  });
+  rankingSort?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderRanking(stats);
+    }
+  });
+  rankingLimit?.addEventListener("input", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderRanking(stats);
+    }
+  });
+  rankingIncludeIncomplete?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderRanking(stats);
+    }
+  });
+  timelineRange?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderTimeline(stats);
+    }
+  });
+  typeDimension?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderTypeChart(stats);
+    }
+  });
+  typeSort?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderTypeChart(stats);
+    }
+  });
+  typeLimit?.addEventListener("input", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderTypeChart(stats);
+    }
+  });
+  typeIncludeIncomplete?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderTypeChart(stats);
+    }
+  });
+  heatmapLimit?.addEventListener("input", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderHeatmap(stats);
+    }
+  });
+  heatmapIncludeIncomplete?.addEventListener("change", () => {
+    const stats = getStatsForResults();
+    if (stats) {
+      renderHeatmap(stats);
+    }
+  });
+  commentDefaultView?.addEventListener("change", () => {
+    showAllComments = commentDefaultView.value === "all";
+    commentToggle.textContent = showAllComments ? "Show top" : "Show all";
+    const stats = getStatsForResults();
+    if (stats) {
+      renderComments(stats);
+    }
+  });
 
   resultsExportCsv?.addEventListener("click", () => exportResults("csv"));
   resultsExportJson?.addEventListener("click", () => exportResults("json"));
@@ -120,6 +229,9 @@ export function initDashboardView({ onAuthLost }) {
   commentToggle?.addEventListener("click", () => {
     showAllComments = !showAllComments;
     commentToggle.textContent = showAllComments ? "Show top" : "Show all";
+    if (commentDefaultView) {
+      commentDefaultView.value = showAllComments ? "all" : "top";
+    }
     renderComments();
   });
 
@@ -137,6 +249,27 @@ export function initDashboardView({ onAuthLost }) {
   return {
     loadOverview: () => loadOverview(onAuthLost),
   };
+}
+
+function initCardToggles() {
+  document.querySelectorAll("[data-card-toggle]").forEach((button) => {
+    const panelId = button.dataset.cardToggle;
+    const panel = panelId ? document.getElementById(panelId) : null;
+    if (!panel) {
+      return;
+    }
+    button.addEventListener("click", () => {
+      const isOpen = panel.classList.toggle("is-open");
+      button.setAttribute("aria-expanded", String(isOpen));
+    });
+  });
+}
+
+function getStatsForResults() {
+  if (!resultsData?.assets) {
+    return null;
+  }
+  return buildStats(resultsData);
 }
 
 async function loadOverview(onAuthLost) {
@@ -259,7 +392,7 @@ function clearSelection() {
   selectedMeta.textContent = "";
   setHeaderSubpage("");
   progressMetrics.innerHTML = "";
-  progressList.innerHTML = "<p class=\"text-muted mb-0\">Select a test to see progress.</p>";
+  progressList.innerHTML = "<p class=\"text-muted mb-0\">Select a test to see assets.</p>";
   scorecards.innerHTML = "";
   heatmap.innerHTML = "";
   commentCloud.innerHTML = "";
@@ -287,8 +420,8 @@ function enableActionButtons(status) {
 
 async function selectTest(test, onAuthLost, options = {}) {
   selectedTest = test;
-  selectedTitle.textContent = `${test.game?.name || "Untitled game"}`;
-  selectedMeta.textContent = `Test ${test.uuid} | ${test.status.toUpperCase()}`;
+  selectedTitle.textContent = `${test.game?.name || "Untitled game"} (${test.status.toUpperCase()})`;
+  selectedMeta.textContent = `Test ${test.uuid}`;
   setHeaderSubpage(`Test ${test.uuid.slice(0, 8)}...`);
   enableActionButtons(test.status);
   renderTestSelect();
@@ -330,7 +463,12 @@ async function loadResults(testUuid, onAuthLost) {
     return;
   }
   resultsData = data;
+  showAllComments = commentDefaultView?.value === "all";
+  if (commentToggle) {
+    commentToggle.textContent = showAllComments ? "Show top" : "Show all";
+  }
   renderResults();
+  renderAssetsList();
 }
 
 async function handleTestAction(action, onAuthLost, confirmAction = false) {
@@ -386,74 +524,32 @@ function renderProgress() {
       <span class="metric-value">${progress.progress_percent}%</span>
     </div>
   `;
-  renderProgressFilterOptions();
-  renderProgressAssets();
+  renderAssetsList();
 }
 
-function renderProgressFilterOptions() {
-  if (!progressAssetFilter || !statusData?.assets) {
+function renderAssetsList() {
+  if (!progressList) {
     return;
   }
-  const types = Array.from(
-    new Set(statusData.assets.map((asset) => asset.asset_type).filter(Boolean))
-  ).sort((a, b) => a.localeCompare(b));
-  progressAssetFilter.innerHTML = "<option value=\"\">All types</option>";
-  types.forEach((type) => {
-    const option = document.createElement("option");
-    option.value = type;
-    option.textContent = type;
-    progressAssetFilter.appendChild(option);
-  });
-}
-
-function renderProgressAssets() {
-  if (!statusData?.assets || !progressList) {
+  const stats = getStatsForResults();
+  if (!stats?.assetStats) {
+    progressList.innerHTML = "<p class=\"text-muted mb-0\">Select a test to see assets.</p>";
     return;
   }
-  const minVotes = statusData.progress?.min_votes_per_asset || 0;
-  let assets = statusData.assets.slice();
 
-  const filterType = progressAssetFilter?.value || "";
-  if (filterType) {
-    assets = assets.filter((asset) => asset.asset_type === filterType);
-  }
+  const groupBy = assetsGroupBy?.value || "asset";
+  const sortBy = assetsSort?.value || "best";
+  const includeIncomplete = assetsIncludeIncomplete?.checked ?? true;
+  const limit = clamp(Number(assetsLimit?.value) || 12, 3, 50);
+  const items = buildAssetItems(stats, { groupBy, includeIncomplete });
+  const sorted = sortAssetItems(items, sortBy).slice(0, limit);
 
-  const sortBy = progressSort?.value || "remaining";
-  assets.sort((a, b) => {
-    if (sortBy === "votes") {
-      return b.vote_count - a.vote_count;
-    }
-    if (sortBy === "name") {
-      return String(a.asset_type || "").localeCompare(String(b.asset_type || ""));
-    }
-    return (minVotes - b.vote_count) - (minVotes - a.vote_count);
-  });
-
-  if (!assets.length) {
+  if (!sorted.length) {
     progressList.innerHTML = "<p class=\"text-muted mb-0\">No assets match this filter.</p>";
     return;
   }
-  progressList.innerHTML = assets
-    .map((asset) => {
-      const remaining = Math.max(minVotes - asset.vote_count, 0);
-      const percent = minVotes > 0 ? Math.round((asset.vote_count / minVotes) * 100) : 0;
-      return `
-        <div class="asset-progress-card">
-          <div class="asset-progress-header">
-            <div class="asset-progress-thumb">
-              <img src="${asset.image_url}" alt="${asset.asset_type}">
-            </div>
-            <div>
-              <p class="mb-1"><strong>${asset.asset_type}</strong></p>
-              <p class="asset-progress-meta">${asset.vote_count} votes | ${remaining} remaining</p>
-            </div>
-          </div>
-          <div class="progress-track">
-            <div class="progress-bar" style="width: ${Math.min(percent, 100)}%"></div>
-          </div>
-        </div>
-      `;
-    })
+  progressList.innerHTML = sorted
+    .map((item) => renderAssetRow(item, stats.minVotes || 0, groupBy))
     .join("");
 }
 
@@ -578,42 +674,131 @@ function buildStats(data) {
   };
 }
 
+function getFilteredVotes(stats, includeIncomplete) {
+  if (includeIncomplete) {
+    return stats.votes || [];
+  }
+  const minVotes = stats.minVotes || 0;
+  if (!minVotes) {
+    return stats.votes || [];
+  }
+  const completed = new Set(
+    stats.assetStats.filter((asset) => asset.vote_count >= minVotes).map((asset) => asset.asset.uuid)
+  );
+  return (stats.votes || []).filter((vote) => completed.has(vote.asset_uuid));
+}
+
+function computeOverallAvg(votes) {
+  if (!votes.length) {
+    return { professionalism: 0, appeal: 0, understandability: 0 };
+  }
+  const sums = votes.reduce(
+    (acc, vote) => {
+      acc.professionalism += vote.professionalism || 0;
+      acc.appeal += vote.appeal || 0;
+      acc.understandability += vote.understandability || 0;
+      return acc;
+    },
+    { professionalism: 0, appeal: 0, understandability: 0 }
+  );
+  const total = votes.length;
+  return {
+    professionalism: sums.professionalism / total,
+    appeal: sums.appeal / total,
+    understandability: sums.understandability / total,
+  };
+}
+
+function buildDistributionFromVotes(votes) {
+  const distribution = {
+    professionalism: [0, 0, 0, 0, 0],
+    appeal: [0, 0, 0, 0, 0],
+    understandability: [0, 0, 0, 0, 0],
+  };
+  votes.forEach((vote) => {
+    if (vote.professionalism) {
+      distribution.professionalism[vote.professionalism - 1] += 1;
+    }
+    if (vote.appeal) {
+      distribution.appeal[vote.appeal - 1] += 1;
+    }
+    if (vote.understandability) {
+      distribution.understandability[vote.understandability - 1] += 1;
+    }
+  });
+  return distribution;
+}
+
+function buildVotesByDayFromVotes(votes, range) {
+  const filtered = filterVotesByRange(votes, range);
+  const map = new Map();
+  filtered.forEach((vote) => {
+    if (!vote.created_at) {
+      return;
+    }
+    const dateKey = new Date(vote.created_at).toISOString().slice(0, 10);
+    map.set(dateKey, (map.get(dateKey) || 0) + 1);
+  });
+  return map;
+}
+
+function filterVotesByRange(votes, range) {
+  if (!range || range === "all") {
+    return votes;
+  }
+  const days = Number(range);
+  if (!days || Number.isNaN(days)) {
+    return votes;
+  }
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days + 1);
+  return votes.filter((vote) => {
+    if (!vote.created_at) {
+      return false;
+    }
+    return new Date(vote.created_at) >= cutoff;
+  });
+}
+
 function renderScorecards(stats) {
+  const includeIncomplete = radarIncludeIncomplete?.checked ?? true;
+  const filteredVotes = getFilteredVotes(stats, includeIncomplete);
+  const overallAvg = computeOverallAvg(filteredVotes);
   const overall =
-    (stats.overallAvg.professionalism +
-      stats.overallAvg.appeal +
-      stats.overallAvg.understandability) /
-    3;
+    (overallAvg.professionalism + overallAvg.appeal + overallAvg.understandability) / 3;
   scorecards.innerHTML = `
-    <div class="summary-card">
-      <span class="summary-label">Appeal average</span>
-      <p class="summary-value">${stats.overallAvg.appeal.toFixed(2)}</p>
-    </div>
-    <div class="summary-card">
-      <span class="summary-label">Professionalism average</span>
-      <p class="summary-value">${stats.overallAvg.professionalism.toFixed(2)}</p>
-    </div>
-    <div class="summary-card">
-      <span class="summary-label">Understandability average</span>
-      <p class="summary-value">${stats.overallAvg.understandability.toFixed(2)}</p>
-    </div>
     <div class="summary-card">
       <span class="summary-label">Overall average</span>
       <p class="summary-value">${overall.toFixed(2)}</p>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Appeal average</span>
+      <p class="summary-value">${overallAvg.appeal.toFixed(2)}</p>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Professionalism average</span>
+      <p class="summary-value">${overallAvg.professionalism.toFixed(2)}</p>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Understandability average</span>
+      <p class="summary-value">${overallAvg.understandability.toFixed(2)}</p>
     </div>
   `;
 }
 
 function renderRadar(stats) {
+  const includeIncomplete = radarIncludeIncomplete?.checked ?? true;
+  const filteredVotes = getFilteredVotes(stats, includeIncomplete);
+  const overallAvg = computeOverallAvg(filteredVotes);
   const data = {
     labels: ["Professionalism", "Appeal", "Understandability"],
     datasets: [
       {
         label: "Average",
         data: [
-          stats.overallAvg.professionalism,
-          stats.overallAvg.appeal,
-          stats.overallAvg.understandability,
+          overallAvg.professionalism,
+          overallAvg.appeal,
+          overallAvg.understandability,
         ],
         fill: true,
         backgroundColor: "rgba(111, 211, 192, 0.25)",
@@ -639,44 +824,53 @@ function renderRadar(stats) {
 }
 
 function renderDistribution(stats) {
+  const includeIncomplete = distributionIncludeIncomplete?.checked ?? true;
+  const filteredVotes = getFilteredVotes(stats, includeIncomplete);
+  const distribution = buildDistributionFromVotes(filteredVotes);
+  const mode = distributionMode?.value || "all";
   const labels = ["1", "2", "3", "4", "5"];
-  const datasets = [
-    {
+  const datasets = [];
+  if (mode === "professionalism" || mode === "all") {
+    datasets.push({
       label: "Professionalism",
-      data: stats.distribution.professionalism,
+      data: distribution.professionalism,
       backgroundColor: "rgba(45, 125, 210, 0.6)",
-    },
-    {
+    });
+  }
+  if (mode === "appeal" || mode === "all") {
+    datasets.push({
       label: "Appeal",
-      data: stats.distribution.appeal,
+      data: distribution.appeal,
       backgroundColor: "rgba(111, 211, 192, 0.6)",
-    },
-    {
+    });
+  }
+  if (mode === "understandability" || mode === "all") {
+    datasets.push({
       label: "Understandability",
-      data: stats.distribution.understandability,
+      data: distribution.understandability,
       backgroundColor: "rgba(231, 156, 83, 0.6)",
-    },
-  ];
+    });
+  }
   renderChart(chartIds.distribution, {
     type: "bar",
     data: { labels, datasets },
     options: {
       responsive: true,
       scales: {
-        x: { stacked: true },
-        y: { stacked: true, beginAtZero: true },
+        x: { stacked: mode === "all" },
+        y: { stacked: mode === "all", beginAtZero: true },
       },
     },
   });
 }
 
 function renderRanking(stats) {
-  const dimension = resultsDimension.value;
-  const groupBy = resultsGroupBy.value;
-  const includeIncomplete = resultsIncludeIncomplete.checked;
-  const limit = clamp(Number(resultsLimit.value) || 12, 3, 50);
+  const dimension = rankingDimension?.value || "overall";
+  const groupBy = rankingGroupBy?.value || "asset";
+  const includeIncomplete = rankingIncludeIncomplete?.checked ?? true;
+  const limit = clamp(Number(rankingLimit?.value) || 12, 3, 50);
   const items = groupStats(stats, { dimension, groupBy, includeIncomplete });
-  const sorted = sortItems(items, resultsSort.value).slice(0, limit);
+  const sorted = sortItems(items, rankingSort?.value || "best").slice(0, limit);
 
   renderChart(chartIds.ranking, {
     type: "bar",
@@ -704,8 +898,10 @@ function renderRanking(stats) {
 }
 
 function renderTimeline(stats) {
-  const labels = Array.from(stats.votesByDay.keys()).sort();
-  const data = labels.map((label) => stats.votesByDay.get(label) || 0);
+  const range = timelineRange?.value || "all";
+  const votesByDay = buildVotesByDayFromVotes(stats.votes || [], range);
+  const labels = Array.from(votesByDay.keys()).sort();
+  const data = labels.map((label) => votesByDay.get(label) || 0);
   renderChart(chartIds.timeline, {
     type: "line",
     data: {
@@ -731,12 +927,15 @@ function renderTimeline(stats) {
 }
 
 function renderTypeChart(stats) {
+  const dimension = typeDimension?.value || "overall";
+  const includeIncomplete = typeIncludeIncomplete?.checked ?? true;
+  const limit = clamp(Number(typeLimit?.value) || 12, 3, 50);
   const groups = groupStats(stats, {
-    dimension: "overall",
+    dimension,
     groupBy: "asset_type",
-    includeIncomplete: true,
+    includeIncomplete,
   });
-  const sorted = groups.sort((a, b) => b.value - a.value).slice(0, 12);
+  const sorted = sortItems(groups, typeSort?.value || "best").slice(0, limit);
   renderChart(chartIds.type, {
     type: "bar",
     data: {
@@ -759,7 +958,13 @@ function renderTypeChart(stats) {
 }
 function renderHeatmap(stats) {
   heatmap.innerHTML = "";
-  const rows = stats.assetStats.slice(0, 12);
+  const includeIncomplete = heatmapIncludeIncomplete?.checked ?? true;
+  const limit = clamp(Number(heatmapLimit?.value) || 12, 3, 50);
+  const minVotes = stats.minVotes || 0;
+  const filtered = includeIncomplete
+    ? stats.assetStats
+    : stats.assetStats.filter((asset) => asset.vote_count >= minVotes);
+  const rows = filtered.slice(0, limit);
   const header = document.createElement("div");
   header.className = "heatmap-row";
   header.innerHTML = `
@@ -782,10 +987,14 @@ function renderHeatmap(stats) {
 }
 
 function renderComments(stats) {
+  const resolvedStats = stats || getStatsForResults();
+  if (!resolvedStats) {
+    return;
+  }
   const query = commentSearch.value.trim().toLowerCase();
   const filtered = query
-    ? stats.comments.filter((comment) => comment.text.toLowerCase().includes(query))
-    : stats.comments.slice();
+    ? resolvedStats.comments.filter((comment) => comment.text.toLowerCase().includes(query))
+    : resolvedStats.comments.slice();
   const display = showAllComments ? filtered : filtered.slice(0, 6);
   commentList.innerHTML = display.length
     ? display
@@ -894,12 +1103,13 @@ function groupStats(stats, { dimension, groupBy, includeIncomplete }) {
       label = key;
     }
     if (!map.has(key)) {
-      map.set(key, { label, value: 0, votes: 0 });
+      map.set(key, { label, value: 0, votes: 0, voteTotal: 0 });
     }
     const entry = map.get(key);
     const value = resolveDimensionValue(asset, dimension);
     entry.value += value;
     entry.votes += 1;
+    entry.voteTotal += asset.vote_count || 0;
   });
   return Array.from(map.values()).map((entry) => ({
     ...entry,
@@ -926,12 +1136,112 @@ function sortItems(items, sortBy) {
     return sorted.sort((a, b) => a.label.localeCompare(b.label));
   }
   if (sortBy === "votes") {
-    return sorted.sort((a, b) => b.votes - a.votes);
+    return sorted.sort((a, b) => (b.voteTotal ?? b.votes) - (a.voteTotal ?? a.votes));
   }
   if (sortBy === "worst") {
     return sorted.sort((a, b) => a.value - b.value);
   }
   return sorted.sort((a, b) => b.value - a.value);
+}
+
+function buildAssetItems(stats, { groupBy, includeIncomplete }) {
+  const minVotes = stats.minVotes || 0;
+  let assets = stats.assetStats.slice();
+  if (!includeIncomplete) {
+    assets = assets.filter((asset) => asset.vote_count >= minVotes);
+  }
+  if (groupBy === "asset") {
+    return assets.map((asset) => ({
+      key: asset.asset.uuid,
+      label: asset.asset.asset_type
+        ? `${asset.asset.asset_type} - ${asset.asset.uuid.slice(0, 6)}`
+        : asset.asset.uuid.slice(0, 6),
+      value: asset.overall,
+      votes: asset.vote_count,
+      remaining: Math.max(minVotes - asset.vote_count, 0),
+      count: 1,
+      image_url: asset.asset.image_url,
+    }));
+  }
+  const map = new Map();
+  assets.forEach((asset) => {
+    const key =
+      groupBy === "asset_group"
+        ? resolveAssetGroup(asset.asset.asset_type || "")
+        : asset.asset.asset_type || "Unknown";
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        label: key,
+        valueSum: 0,
+        votes: 0,
+        remaining: 0,
+        count: 0,
+      });
+    }
+    const entry = map.get(key);
+    entry.valueSum += asset.overall;
+    entry.votes += asset.vote_count;
+    entry.remaining += Math.max(minVotes - asset.vote_count, 0);
+    entry.count += 1;
+  });
+  return Array.from(map.values()).map((entry) => ({
+    ...entry,
+    value: entry.count ? entry.valueSum / entry.count : 0,
+  }));
+}
+
+function sortAssetItems(items, sortBy) {
+  const sorted = items.slice();
+  if (sortBy === "name") {
+    return sorted.sort((a, b) => a.label.localeCompare(b.label));
+  }
+  if (sortBy === "votes") {
+    return sorted.sort((a, b) => b.votes - a.votes);
+  }
+  if (sortBy === "remaining") {
+    return sorted.sort((a, b) => b.remaining - a.remaining);
+  }
+  if (sortBy === "worst") {
+    return sorted.sort((a, b) => a.value - b.value);
+  }
+  return sorted.sort((a, b) => b.value - a.value);
+}
+
+function renderAssetRow(item, minVotes, groupBy) {
+  const hasThumb = Boolean(item.image_url);
+  const title = escapeHtml(item.label || "Asset");
+  const votes = Number(item.votes || 0);
+  const remaining = Number(item.remaining || 0);
+  const count = Number(item.count || 0);
+  const valueLabel = item.value ? item.value.toFixed(2) : "0.00";
+  const totalTarget = minVotes * (groupBy === "asset" ? 1 : count);
+  const completed = totalTarget > 0 ? Math.max(totalTarget - remaining, 0) : 0;
+  const percent = totalTarget > 0 ? Math.round((completed / totalTarget) * 100) : 0;
+  const metaParts = [
+    `Score ${valueLabel}`,
+    `${votes} votes`,
+    `${remaining} remaining`,
+  ];
+  if (groupBy !== "asset") {
+    metaParts.push(`${count} assets`);
+  }
+  return `
+    <div class="asset-progress-card">
+      <div class="asset-progress-header">
+        <div class="asset-progress-thumb${hasThumb ? "" : " is-empty"}">
+          <img src="${hasThumb ? item.image_url : "assets/icons/asset.svg"}" alt="">
+        </div>
+        <div>
+          <p class="mb-1"><strong>${title}</strong></p>
+          <p class="asset-progress-meta">${metaParts.join(" | ")}</p>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-bar" style="width: ${Math.min(percent, 100)}%"></div>
+      </div>
+    </div>
+  `;
 }
 
 function resolveAssetGroup(type) {
