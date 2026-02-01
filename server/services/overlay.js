@@ -1,4 +1,21 @@
 const OVERLAY_BASE = "https://www.thegamecrafter.com";
+const CARD_OVERLAY_MAP = new Map([
+  ["pokerdeck", "overlays/pokerdeck.png"],
+  ["smallsquaredeck", "overlays/smallsquaredeck.png"],
+  ["squaredeck", "overlays/squaredeck.png"],
+  ["tarotdeck", "overlays/tarotdeck.png"],
+  ["tradingdeck", "overlays/tradingdeck.png"],
+  ["usgamedeck", "overlays/usgamedeck.png"],
+  ["bridgedeck", "overlays/bridgedeck.png"],
+  ["businessdeck", "overlays/businessdeck.png"],
+  ["cardcraftingdeck", "overlays/cardcraftingdeck.png"],
+  ["circledeck", "overlays/circledeck.png"],
+  ["clearcardcraftingdeck", "overlays/clearcardcraftingdeck.png"],
+  ["cleareuropokerdeck", "overlays/cleareuropokerdeck.png"],
+  ["europokerdeck", "overlays/europokerdeck.png"],
+  ["dividerdeck", "overlays/dividerdeck.png"],
+  ["dominodeck", "overlays/dominodeck.png"],
+]);
 
 export function resolveOverlayUrl(asset) {
   if (!asset) {
@@ -110,6 +127,15 @@ function resolveCardOverlay(meta) {
     const overlay = findOverlay(candidate);
     if (overlay) {
       return normalizeOverlayUrl(overlay);
+    }
+  }
+  const identityRaw =
+    String(source?.deck?.identity || source?.parent?.identity || source?.identity || "").trim();
+  if (identityRaw) {
+    const identity = identityRaw.toLowerCase();
+    const mapped = CARD_OVERLAY_MAP.get(identity);
+    if (mapped) {
+      return normalizeOverlayUrl(mapped);
     }
   }
   return "";
