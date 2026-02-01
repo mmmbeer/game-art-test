@@ -24,6 +24,7 @@ const cameraYRange = document.getElementById("actionShotCameraY");
 const cameraZoomRange = document.getElementById("actionShotZoom");
 const borderRange = document.getElementById("actionShotBorder");
 const borderColorInput = document.getElementById("actionShotBorderColor");
+const shadowStyleSelect = document.getElementById("actionShotShadowStyle");
 const shadowRange = document.getElementById("actionShotShadow");
 const clearButton = document.getElementById("actionShotClear");
 
@@ -48,6 +49,7 @@ const defaultSettings = {
   scale: 1,
   border: 0,
   borderColor: "#f6f7fb",
+  shadowStyle: "soft",
   shadow: 0.25,
   cameraX: 0,
   cameraY: 0,
@@ -244,6 +246,13 @@ function bindControls() {
     });
   }
 
+  if (shadowStyleSelect) {
+    shadowStyleSelect.addEventListener("change", () => {
+      state.settings.shadowStyle = shadowStyleSelect.value;
+      queueRender();
+    });
+  }
+
   if (clearButton) {
     clearButton.addEventListener("click", () => {
       state.selectedCards = [];
@@ -318,6 +327,9 @@ function syncControls() {
   }
   if (shadowRange) {
     shadowRange.value = String(state.settings.shadow);
+  }
+  if (shadowStyleSelect) {
+    shadowStyleSelect.value = state.settings.shadowStyle;
   }
   if (backgroundImageInput) {
     backgroundImageInput.value = "";
@@ -585,13 +597,14 @@ function clampCamera(forceMaxX, forceMaxY) {
 function buildPreviewMetrics(canvasWidth, canvasHeight, outputWidth, outputHeight) {
   const ratio = window.devicePixelRatio || 1;
   const padding = 18 * ratio;
+  const panSlack = 80 * ratio;
   const availableWidth = Math.max(1, canvasWidth - padding * 2);
   const availableHeight = Math.max(1, canvasHeight - padding * 2);
   const previewScale = Math.min(availableWidth / outputWidth, availableHeight / outputHeight);
   const boxWidth = outputWidth * previewScale;
   const boxHeight = outputHeight * previewScale;
-  const maxOffsetX = Math.max(0, (availableWidth - boxWidth) / 2 / previewScale);
-  const maxOffsetY = Math.max(0, (availableHeight - boxHeight) / 2 / previewScale);
+  const maxOffsetX = Math.max(0, (availableWidth - boxWidth) / 2 / previewScale) + panSlack / previewScale;
+  const maxOffsetY = Math.max(0, (availableHeight - boxHeight) / 2 / previewScale) + panSlack / previewScale;
   const centerX = canvasWidth / 2;
   const centerY = canvasHeight / 2;
   return {
@@ -662,7 +675,7 @@ function renderCanvas() {
   const previewScale = previewMetrics.previewScale * state.settings.cameraZoom;
   ctx.scale(previewScale, previewScale);
   ctx.translate(-preset.width / 2, -preset.height / 2);
-  renderScene(ctx, preset.width, preset.height, { applyCamera: false });
+  renderScene(ctx, preset.width, preset.height, { applyCamera: true });
   ctx.restore();
   ctx.restore();
 
@@ -842,6 +855,7 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX, reflectionBa
   const radius = Math.min(width, height) * (state.settings.corner / 100);
   const borderWidth = Math.max(0, state.settings.border || 0);
   const shadowStrength = Math.max(0, Math.min(state.settings.shadow || 0, 1));
+  const shadowStyle = state.settings.shadowStyle || "soft";
 
   ctx.save();
   ctx.translate(x + width / 2, y + height / 2);
@@ -849,12 +863,16 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX, reflectionBa
   if (skewX) {
     ctx.transform(1, 0, skewX, 1, 0, 0);
   }
-  if (shadowStrength > 0.01) {
-    ctx.shadowColor = `rgba(8, 12, 20, ${0.45 * shadowStrength})`;
-    ctx.shadowBlur = 26 * shadowStrength;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 12 * shadowStrength;
+  if (shadowStrength > 0.01 && shadowStyle !== "none") {
+    applyShadow(ctx, shadowStyle, shadowStrength);
+    drawRoundedRectPath(ctx, -width / 2, -height / 2, width, height, radius);
+    ctx.fillStyle = "rgba(0, 0, 0, 0)";
+    ctx.fill();
   }
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
   drawRoundedImage(
     ctx,
     image,
@@ -869,7 +887,6 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX, reflectionBa
     radius
   );
   if (borderWidth > 0.25) {
-    ctx.shadowColor = "transparent";
     ctx.lineWidth = borderWidth;
     ctx.strokeStyle = state.settings.borderColor || "#f6f7fb";
     drawRoundedRectPath(ctx, -width / 2, -height / 2, width, height, radius);
@@ -917,6 +934,49 @@ function drawRoundedRectPath(ctx, dx, dy, dWidth, dHeight, radius) {
   ctx.closePath();
 }
 
+function applyShadow(ctx, style, strength) {
+  const amount = clamp(strength, 0, 1);
+  let blur = 20;
+  let offsetY = 12;
+  let offsetX = 0;
+  let alpha = 0.4;
+  let color = "rgba(8, 12, 20, 1)";
+
+  switch (style) {
+    case "lifted":
+      blur = 34;
+      offsetY = 18;
+      alpha = 0.35;
+      break;
+    case "hard":
+      blur = 6;
+      offsetY = 10;
+      alpha = 0.45;
+      break;
+    case "long":
+      blur = 28;
+      offsetY = 26;
+      alpha = 0.3;
+      break;
+    case "glow":
+      blur = 28;
+      offsetY = 0;
+      alpha = 0.45;
+      color = "rgba(120, 220, 255, 1)";
+      break;
+    default:
+      blur = 22;
+      offsetY = 12;
+      alpha = 0.4;
+      break;
+  }
+
+  ctx.shadowColor = color.replace("1)", `${alpha * amount})`);
+  ctx.shadowBlur = blur * amount;
+  ctx.shadowOffsetX = offsetX * amount;
+  ctx.shadowOffsetY = offsetY * amount;
+}
+
 function drawReflection(
   ctx,
   image,
@@ -936,9 +996,10 @@ function drawReflection(
   const gap = Math.max(6, dHeight * 0.04);
   ctx.save();
   ctx.globalAlpha = 0.22;
-  ctx.translate(0, baseline * 2);
+  ctx.translate(0, baseline);
   ctx.scale(1, -1);
-  ctx.translate(dx + dWidth / 2, dy + dHeight / 2 + gap);
+  ctx.translate(0, -baseline - gap);
+  ctx.translate(dx + dWidth / 2, dy + dHeight / 2);
   ctx.rotate(rotation);
   if (skewX) {
     ctx.transform(1, 0, skewX, 1, 0, 0);

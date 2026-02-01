@@ -877,6 +877,8 @@ body.app-body {
   transform: translateX(-18px);
   opacity: 0;
   transition: transform var(--transition), opacity var(--transition);
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
 }
 
 .action-shot-stage:hover .action-shot-toolbar-inner,
