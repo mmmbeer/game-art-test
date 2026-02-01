@@ -22,18 +22,20 @@ body.tester-body {
   background: linear-gradient(160deg, #0b1016 0%, #0f1722 60%, #0a0f16 100%);
   color: var(--tester-text);
   min-height: 100vh;
-  min-width: 420px;
-  overflow: hidden;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .tester-shell {
   max-width: 640px;
+  width: min(640px, 100%);
   margin: 0 auto;
   padding: 10px 12px 0;
   display: grid;
   gap: 8px;
   height: 100vh;
   grid-template-rows: minmax(0, 1fr) auto;
+  overflow-x: hidden;
 }
 
 .tester-header {
