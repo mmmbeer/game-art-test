@@ -154,10 +154,7 @@ function buildPrintedOverlayFallback(asset) {
     return "";
   }
   if (identityRaw.toLowerCase().startsWith("card_")) {
-    const cardOverlay = resolveCardOverlay(meta);
-    if (cardOverlay) {
-      return cardOverlay;
-    }
+    return "";
   }
   const identity = identityRaw.toLowerCase();
   return `${OVERLAY_BASE}/overlays/${identity}.png`;

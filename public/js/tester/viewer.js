@@ -272,7 +272,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
   }
 
   function resetViewState({
-    preserveOverlay = false,
+    preserveOverlay = true,
     preserveBackground = false,
     preserveZoomMode = false,
   } = {}) {
@@ -293,9 +293,6 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
       viewState.driftOffset = { x: 0, y: 0 };
     }
     updateDriftCrop();
-    if (!preserveOverlay) {
-      viewState.overlayEnabled = false;
-    }
     if (!preserveBackground) {
       viewState.backgroundMode = "dark";
     }
@@ -325,7 +322,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
         overlayImage.classList.add("hidden");
       };
       overlayImage.src = viewState.overlayUrl || "";
-      if (!viewState.overlayUrl) {
+      if (!viewState.overlayUrl || !viewState.overlayEnabled) {
         overlayImage.classList.add("hidden");
       }
     }

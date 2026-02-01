@@ -244,11 +244,7 @@ function buildPrintedOverlayFallback(asset) {
     }
   }
   if (identityRaw.toLowerCase().startsWith("card_")) {
-    const meta = asset?.metadata || {};
-    const cardOverlay = resolveCardOverlay(meta);
-    if (cardOverlay) {
-      return cardOverlay;
-    }
+    return "";
   }
   if (!identityRaw) {
     return "";

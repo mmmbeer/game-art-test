@@ -326,6 +326,9 @@ body {
   padding: 0 calc(var(--vote-nav-size) + 6px) 0 8px;
   flex: 1 1 auto;
   min-width: 0;
+  position: relative;
+  contain: paint;
+  clip-path: inset(0);
 }
 
 .vote-loading {
@@ -357,6 +360,7 @@ body {
   width: calc(100% * var(--slide-count, 1));
   transform: translateX(0);
   transition: transform 0.32s ease;
+  will-change: transform;
 }
 
 .vote-track.no-transition {
@@ -369,6 +373,16 @@ body {
   display: grid;
   gap: 6px;
   justify-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.vote-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .vote-label {

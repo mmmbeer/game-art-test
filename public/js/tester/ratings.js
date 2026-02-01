@@ -6,6 +6,7 @@ export function createRatings({ elements, state }) {
   let currentIndex = 0;
   let isEnabled = true;
   ratingPanel.style.setProperty("--slide-count", slides.length);
+  setActiveSlide(0);
 
   function bindRatingEvents() {
     ratingPanel.addEventListener("click", (event) => {
@@ -130,9 +131,18 @@ export function createRatings({ elements, state }) {
     }
     const slidePct = slides.length ? 100 / slides.length : 100;
     voteTrack.style.transform = `translateX(-${currentIndex * slidePct}%)`;
+    setActiveSlide(currentIndex);
     if (instant) {
       requestAnimationFrame(() => voteTrack.classList.remove("no-transition"));
     }
+  }
+
+  function setActiveSlide(activeIndex) {
+    slides.forEach((slide, index) => {
+      const isActive = index === activeIndex;
+      slide.classList.toggle("is-active", isActive);
+      slide.setAttribute("aria-hidden", String(!isActive));
+    });
   }
 
   function handleAdvanceAfterVote(metric) {
