@@ -339,7 +339,7 @@ async function loadCardImage(entry) {
   }
   entry.loading = true;
   try {
-    entry.image = await loadImage(entry.imageUrl);
+    entry.image = await loadImage(resolveProxyUrl(entry.imageUrl));
   } catch (error) {
     showToast("Unable to load a card image.", "warning");
   } finally {
@@ -646,4 +646,21 @@ function loadImage(src) {
     img.onerror = () => reject(new Error("image load failed"));
     img.src = src;
   });
+}
+
+function resolveProxyUrl(url) {
+  if (!url) {
+    return url;
+  }
+  try {
+    const target = new URL(url, window.location.href);
+    if (target.origin === window.location.origin) {
+      return target.toString();
+    }
+    const proxyUrl = new URL("image-proxy", window.location.href);
+    proxyUrl.searchParams.set("url", target.toString());
+    return proxyUrl.toString();
+  } catch (error) {
+    return url;
+  }
 }

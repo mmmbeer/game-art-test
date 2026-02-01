@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.js";
 import gamesRoutes from "./routes/games.js";
 import testsRoutes from "./routes/tests.js";
 import testerRoutes from "./routes/tester.js";
+import imageProxyRoutes from "./routes/imageProxy.js";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(`${basePath}/auth/tgc`, authRoutes);
 app.use(`${basePath}/games`, gamesRoutes);
 app.use(`${basePath}/tests`, testsRoutes);
 app.use(`${basePath}/t`, testerRoutes);
+app.use(basePath, imageProxyRoutes);
 app.use(basePath, healthRoutes);
 
 export default app;
