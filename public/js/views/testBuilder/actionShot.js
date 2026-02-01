@@ -18,9 +18,13 @@ const dimensionsSelect = document.getElementById("actionShotDimensions");
 const trimRange = document.getElementById("actionShotTrim");
 const cornerRange = document.getElementById("actionShotCorner");
 const scaleRange = document.getElementById("actionShotScale");
+const borderRange = document.getElementById("actionShotBorder");
+const borderColorInput = document.getElementById("actionShotBorderColor");
+const shadowRange = document.getElementById("actionShotShadow");
 const clearButton = document.getElementById("actionShotClear");
 
 const dimensionPresets = {
+  "landscape-1024": { width: 1024, height: 683, label: "Landscape 1024 x 683 (3:2)" },
   "portrait-1600": { width: 1600, height: 2200, label: "Portrait 1600 x 2200" },
   "landscape-2200": { width: 2200, height: 1600, label: "Landscape 2200 x 1600" },
   "square-1800": { width: 1800, height: 1800, label: "Square 1800 x 1800" },
@@ -34,10 +38,13 @@ const defaultSettings = {
   backgroundColor: "#101827",
   backgroundColor2: "#2f3b55",
   effects: "none",
-  dimensions: "portrait-1600",
+  dimensions: "landscape-1024",
   trim: 40,
   corner: 5,
   scale: 1,
+  border: 0,
+  borderColor: "#f6f7fb",
+  shadow: 0.25,
 };
 
 const state = {
@@ -180,6 +187,27 @@ function bindControls() {
     });
   }
 
+  if (borderRange) {
+    borderRange.addEventListener("input", () => {
+      state.settings.border = Number.parseFloat(borderRange.value) || 0;
+      queueRender();
+    });
+  }
+
+  if (borderColorInput) {
+    borderColorInput.addEventListener("input", () => {
+      state.settings.borderColor = borderColorInput.value;
+      queueRender();
+    });
+  }
+
+  if (shadowRange) {
+    shadowRange.addEventListener("input", () => {
+      state.settings.shadow = Number.parseFloat(shadowRange.value) || 0;
+      queueRender();
+    });
+  }
+
   if (clearButton) {
     clearButton.addEventListener("click", () => {
       state.selectedCards = [];
@@ -236,6 +264,15 @@ function syncControls() {
   }
   if (scaleRange) {
     scaleRange.value = String(state.settings.scale);
+  }
+  if (borderRange) {
+    borderRange.value = String(state.settings.border);
+  }
+  if (borderColorInput) {
+    borderColorInput.value = state.settings.borderColor;
+  }
+  if (shadowRange) {
+    shadowRange.value = String(state.settings.shadow);
   }
   if (backgroundImageInput) {
     backgroundImageInput.value = "";
@@ -461,7 +498,8 @@ function renderFan(ctx, cards, width, height) {
     return;
   }
   const base = cards[0];
-  const size = computeCardSize(base.image, width, height, 0.68);
+  const baseSize = base?.image ? computeCardSize(base.image, width, height, 0.68) : null;
+  const size = baseSize || { width: width * 0.4, height: height * 0.6 };
   const spread = Math.min(26, 8 + cards.length * 4);
   const start = -spread / 2;
   const step = cards.length > 1 ? spread / (cards.length - 1) : 0;
@@ -469,12 +507,13 @@ function renderFan(ctx, cards, width, height) {
     if (!card.image) {
       return;
     }
+    const cardSize = computeCardSize(card.image, width, height, 0.68);
     const angle = (start + step * index) * (Math.PI / 180);
     const offsetX = (index - (cards.length - 1) / 2) * size.width * 0.15;
     const offsetY = Math.abs(index - (cards.length - 1) / 2) * size.height * 0.04;
-    const x = width / 2 - size.width / 2 + offsetX;
-    const y = height / 2 - size.height / 2 + offsetY;
-    drawCard(ctx, card.image, x, y, size.width, size.height, angle, 0);
+    const x = width / 2 - cardSize.width / 2 + offsetX;
+    const y = height / 2 - cardSize.height / 2 + offsetY;
+    drawCard(ctx, card.image, x, y, cardSize.width, cardSize.height, angle, 0);
   });
 }
 
@@ -483,16 +522,18 @@ function renderAngle(ctx, cards, width, height) {
     return;
   }
   const base = cards[0];
-  const size = computeCardSize(base.image, width, height, 0.7);
+  const baseSize = base?.image ? computeCardSize(base.image, width, height, 0.7) : null;
+  const size = baseSize || { width: width * 0.4, height: height * 0.6 };
   const offset = Math.min(size.width * 0.18, 120);
   cards.forEach((card, index) => {
     if (!card.image) {
       return;
     }
-    const x = width / 2 - size.width / 2 + index * offset * 0.6;
-    const y = height / 2 - size.height / 2 + index * offset * 0.15;
+    const cardSize = computeCardSize(card.image, width, height, 0.7);
+    const x = width / 2 - cardSize.width / 2 + index * offset * 0.6;
+    const y = height / 2 - cardSize.height / 2 + index * offset * 0.15;
     const angle = (-12 + index * 6) * (Math.PI / 180);
-    drawCard(ctx, card.image, x, y, size.width, size.height, angle, -0.18);
+    drawCard(ctx, card.image, x, y, cardSize.width, cardSize.height, angle, -0.18);
   });
 }
 
@@ -507,9 +548,17 @@ function computeCardSize(image, width, height, heightRatio) {
     scale = maxWidth / srcWidth;
   }
   scale *= state.settings.scale;
+  const scaledWidth = srcWidth * scale;
+  const scaledHeight = srcHeight * scale;
+  const safeMaxWidth = width * 0.88;
+  const safeMaxHeight = height * 0.88;
+  let fitScale = 1;
+  if (scaledWidth > safeMaxWidth || scaledHeight > safeMaxHeight) {
+    fitScale = Math.min(safeMaxWidth / scaledWidth, safeMaxHeight / scaledHeight);
+  }
   return {
-    width: srcWidth * scale,
-    height: srcHeight * scale,
+    width: scaledWidth * fitScale,
+    height: scaledHeight * fitScale,
   };
 }
 
@@ -525,12 +574,20 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX) {
   const srcWidth = Math.max(1, image.width - trim * 2);
   const srcHeight = Math.max(1, image.height - trim * 2);
   const radius = Math.min(width, height) * (state.settings.corner / 100);
+  const borderWidth = Math.max(0, state.settings.border || 0);
+  const shadowStrength = Math.max(0, Math.min(state.settings.shadow || 0, 1));
 
   ctx.save();
   ctx.translate(x + width / 2, y + height / 2);
   ctx.rotate(rotation);
   if (skewX) {
     ctx.transform(1, 0, skewX, 1, 0, 0);
+  }
+  if (shadowStrength > 0.01) {
+    ctx.shadowColor = `rgba(8, 12, 20, ${0.45 * shadowStrength})`;
+    ctx.shadowBlur = 26 * shadowStrength;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 12 * shadowStrength;
   }
   drawRoundedImage(
     ctx,
@@ -545,7 +602,15 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX) {
     height,
     radius
   );
+  if (borderWidth > 0.25) {
+    ctx.shadowColor = "transparent";
+    ctx.lineWidth = borderWidth;
+    ctx.strokeStyle = state.settings.borderColor || "#f6f7fb";
+    drawRoundedRectPath(ctx, -width / 2, -height / 2, width, height, radius);
+    ctx.stroke();
+  }
   if (state.settings.effects === "reflection") {
+    ctx.shadowColor = "transparent";
     drawReflection(
       ctx,
       image,
@@ -566,6 +631,14 @@ function drawCard(ctx, image, x, y, width, height, rotation, skewX) {
 function drawRoundedImage(ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, radius) {
   ctx.save();
   const r = Math.min(radius, dWidth / 2, dHeight / 2);
+  drawRoundedRectPath(ctx, dx, dy, dWidth, dHeight, r);
+  ctx.clip();
+  ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+  ctx.restore();
+}
+
+function drawRoundedRectPath(ctx, dx, dy, dWidth, dHeight, radius) {
+  const r = Math.min(radius, dWidth / 2, dHeight / 2);
   ctx.beginPath();
   ctx.moveTo(dx + r, dy);
   ctx.arcTo(dx + dWidth, dy, dx + dWidth, dy + dHeight, r);
@@ -573,9 +646,6 @@ function drawRoundedImage(ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, d
   ctx.arcTo(dx, dy + dHeight, dx, dy, r);
   ctx.arcTo(dx, dy, dx + dWidth, dy, r);
   ctx.closePath();
-  ctx.clip();
-  ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-  ctx.restore();
 }
 
 function drawReflection(ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, radius) {
