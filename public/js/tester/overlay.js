@@ -24,7 +24,7 @@ export function resolveOverlayTemplate(asset) {
   if (typeof direct === "string" && direct.trim()) {
     return normalizeOverlayUrl(direct);
   }
-  if (meta?.relationship === "card") {
+  if (meta?.relationship === "card" || isCardAssetType(asset)) {
     const cardOverlay = resolveCardOverlay(meta);
     if (cardOverlay) {
       return cardOverlay;
@@ -243,6 +243,13 @@ function buildPrintedOverlayFallback(asset) {
       return `${OVERLAY_BASE}/overlays/${deckIdentity.toLowerCase()}.png`;
     }
   }
+  if (identityRaw.toLowerCase().startsWith("card_")) {
+    const meta = asset?.metadata || {};
+    const cardOverlay = resolveCardOverlay(meta);
+    if (cardOverlay) {
+      return cardOverlay;
+    }
+  }
   if (!identityRaw) {
     return "";
   }
@@ -253,6 +260,9 @@ function buildPrintedOverlayFallback(asset) {
 function isPrintedComponentAsset(asset) {
   const meta = asset?.metadata || {};
   const source = meta?.source || {};
+  if (isCardAssetType(asset)) {
+    return true;
+  }
   if (Array.isArray(source?.sides)) {
     return true;
   }
@@ -269,4 +279,9 @@ function isPrintedComponentAsset(asset) {
     return true;
   }
   return false;
+}
+
+function isCardAssetType(asset) {
+  const assetType = String(asset?.asset_type || "").toLowerCase();
+  return assetType.startsWith("card_");
 }
