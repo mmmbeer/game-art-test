@@ -23,6 +23,7 @@ export function getElements() {
     ratingPanel: byId("ratingPanel"),
     voteTrack: byId("voteTrack"),
     voteSkip: byId("voteSkip"),
+    voteLoading: byId("voteLoading"),
     commentInput: byId("commentInput"),
     commentSubmit: byId("commentSubmit"),
     completePanel: byId("completePanel"),

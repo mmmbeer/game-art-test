@@ -185,9 +185,15 @@ function setLoading(isLoading) {
   if (isLoading) {
     elements.assetLoading.classList.remove("hidden");
     ratings.setEnabled(false);
+    if (elements.voteLoading) {
+      elements.voteLoading.classList.remove("hidden");
+    }
   } else {
     elements.assetLoading.classList.add("hidden");
     ratings.setEnabled(true);
+    if (elements.voteLoading) {
+      elements.voteLoading.classList.add("hidden");
+    }
   }
 }
 
