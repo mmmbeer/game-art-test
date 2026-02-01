@@ -1,6 +1,10 @@
 export function createRatings({ elements, state }) {
   const { ratingState } = state;
-  const { ratingPanel, commentInput, commentHint, submitVote } = elements;
+  const { ratingPanel, voteTrack, voteBack, voteSkip } = elements;
+  const slides = Array.from(ratingPanel.querySelectorAll(".vote-slide"));
+  const metricOrder = slides.map((slide) => slide.dataset.metric);
+  let currentIndex = 0;
+  let isEnabled = true;
 
   function bindRatingEvents() {
     ratingPanel.addEventListener("click", (event) => {
@@ -8,7 +12,10 @@ export function createRatings({ elements, state }) {
       if (!button) {
         return;
       }
-      const group = event.target.closest(".rating-row");
+      if (!isEnabled) {
+        return;
+      }
+      const group = event.target.closest(".vote-slide");
       const metric = group?.dataset.metric;
       const value = Number.parseInt(button.dataset.value || "0", 10);
       if (!metric || !value) {
@@ -16,7 +23,7 @@ export function createRatings({ elements, state }) {
       }
       ratingState[metric] = value;
       updateRatingUI(group, value);
-      updateSubmitState();
+      handleAdvanceAfterVote(metric);
     });
 
     ratingPanel.addEventListener("mouseover", (event) => {
@@ -24,7 +31,10 @@ export function createRatings({ elements, state }) {
       if (!button) {
         return;
       }
-      const group = event.target.closest(".rating-row");
+      if (!isEnabled) {
+        return;
+      }
+      const group = event.target.closest(".vote-slide");
       const value = Number.parseInt(button.dataset.value || "0", 10);
       if (!group || !value) {
         return;
@@ -37,19 +47,35 @@ export function createRatings({ elements, state }) {
       if (!button) {
         return;
       }
-      const group = event.target.closest(".rating-row");
+      if (!isEnabled) {
+        return;
+      }
+      const group = event.target.closest(".vote-slide");
       if (!group) {
         return;
       }
       restoreStars(group);
     });
 
-    commentInput.addEventListener("input", () => {
-      const trimmed = commentInput.value.slice(0, 500);
-      if (trimmed !== commentInput.value) {
-        commentInput.value = trimmed;
+    voteBack.addEventListener("click", () => {
+      if (!isEnabled || currentIndex <= 0) {
+        return;
       }
-      commentHint.textContent = `${commentInput.value.length} / 500`;
+      setIndex(currentIndex - 1);
+    });
+
+    voteSkip.addEventListener("click", () => {
+      if (!isEnabled) {
+        return;
+      }
+      if (currentIndex < slides.length - 1) {
+        setIndex(currentIndex + 1);
+        return;
+      }
+      const firstMissingIndex = findFirstMissingIndex();
+      if (firstMissingIndex !== null) {
+        setIndex(firstMissingIndex);
+      }
     });
   }
 
@@ -57,11 +83,10 @@ export function createRatings({ elements, state }) {
     ratingState.professionalism = 0;
     ratingState.appeal = 0;
     ratingState.understandability = 0;
-    ratingPanel.querySelectorAll(".rating-row").forEach((group) => {
+    ratingPanel.querySelectorAll(".vote-slide").forEach((group) => {
       group.querySelectorAll(".star-button").forEach((star) => star.classList.remove("is-on"));
     });
-    commentInput.value = "";
-    commentHint.textContent = "0 / 500";
+    setIndex(0, { instant: true });
   }
 
   function updateRatingUI(group, value) {
@@ -70,15 +95,6 @@ export function createRatings({ elements, state }) {
       star.classList.toggle("is-on", starValue <= value);
       star.classList.remove("preview");
     });
-  }
-
-  function updateSubmitState() {
-    const ready =
-      ratingState.professionalism &&
-      ratingState.appeal &&
-      ratingState.understandability &&
-      state.currentAsset;
-    submitVote.disabled = !ready;
   }
 
   function applyStarPreview(group, value) {
@@ -99,9 +115,51 @@ export function createRatings({ elements, state }) {
     }
   }
 
+  function setIndex(nextIndex, { instant = false } = {}) {
+    currentIndex = Math.max(0, Math.min(nextIndex, slides.length - 1));
+    if (instant) {
+      voteTrack.classList.add("no-transition");
+    }
+    voteTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+    voteBack.classList.toggle("hidden", currentIndex === 0);
+    if (instant) {
+      requestAnimationFrame(() => voteTrack.classList.remove("no-transition"));
+    }
+  }
+
+  function handleAdvanceAfterVote(metric) {
+    const metricIndex = metricOrder.indexOf(metric);
+    if (metricIndex !== -1 && metricIndex < slides.length - 1) {
+      setIndex(metricIndex + 1);
+      return;
+    }
+    const firstMissingIndex = findFirstMissingIndex();
+    if (firstMissingIndex !== null) {
+      setIndex(firstMissingIndex);
+      return;
+    }
+    if (state.currentAsset) {
+      ratingPanel.dispatchEvent(new CustomEvent("ratings:complete", { bubbles: true }));
+    }
+  }
+
+  function findFirstMissingIndex() {
+    for (let i = 0; i < metricOrder.length; i += 1) {
+      if (!ratingState[metricOrder[i]]) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  function setEnabled(enabled) {
+    isEnabled = enabled;
+    ratingPanel.classList.toggle("is-disabled", !enabled);
+  }
+
   return {
     bindRatingEvents,
     resetRatings,
-    updateSubmitState,
+    setEnabled,
   };
 }

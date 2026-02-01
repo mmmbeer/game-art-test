@@ -57,46 +57,47 @@ if (!testUuid) {
 }
 
 function bindActionEvents() {
-  elements.submitVote.addEventListener("click", async () => {
-    if (!state.currentAsset || elements.submitVote.disabled) {
+  elements.reloadButton.addEventListener("click", () => loadNextAsset());
+
+  elements.ratingPanel.addEventListener("ratings:complete", () => submitVote());
+}
+
+async function submitVote() {
+  if (!state.currentAsset) {
+    return;
+  }
+  ratings.setEnabled(false);
+  const payload = {
+    asset_uuid: state.currentAsset.uuid,
+    professionalism: state.ratingState.professionalism,
+    appeal: state.ratingState.appeal,
+    understandability: state.ratingState.understandability,
+    comment: "",
+  };
+
+  try {
+    const response = await fetch(`${getBasePath()}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      showToast(data.error || "Unable to record vote.", "error");
+      ratings.setEnabled(true);
       return;
     }
-    elements.submitVote.disabled = true;
-    const payload = {
-      asset_uuid: state.currentAsset.uuid,
-      professionalism: state.ratingState.professionalism,
-      appeal: state.ratingState.appeal,
-      understandability: state.ratingState.understandability,
-      comment: elements.commentInput.value.trim(),
-    };
-
-    try {
-      const response = await fetch(`${getBasePath()}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        showToast(data.error || "Unable to record vote.", "error");
-        elements.submitVote.disabled = false;
-        return;
-      }
-      state.votedAssets = addVoteToHistory({
-        storageKey,
-        votedAssets: state.votedAssets,
-        assetUuid: state.currentAsset.uuid,
-      });
-      elements.sessionVotes.textContent = state.votedAssets.length.toString();
-      showToast("Vote recorded. Loading next asset...", "success");
-      await loadNextAsset();
-    } catch (error) {
-      showToast("Network error. Try again.", "error");
-      elements.submitVote.disabled = false;
-    }
-  });
-
-  elements.reloadButton.addEventListener("click", () => loadNextAsset());
+    state.votedAssets = addVoteToHistory({
+      storageKey,
+      votedAssets: state.votedAssets,
+      assetUuid: state.currentAsset.uuid,
+    });
+    showToast("Vote recorded. Loading next asset...", "success");
+    await loadNextAsset();
+  } catch (error) {
+    showToast("Network error. Try again.", "error");
+    ratings.setEnabled(true);
+  }
 }
 
 async function loadNextAsset() {
@@ -144,12 +145,6 @@ function updateTestMeta(data) {
   } else {
     elements.testTitle.textContent = "ART TEST: (Designer unavailable)";
   }
-  if (data.progress) {
-    elements.remainingAssets.textContent =
-      `${data.progress.remaining_assets}/${data.progress.total_assets}`;
-    elements.minVotes.textContent = data.progress.min_votes;
-  }
-  elements.sessionVotes.textContent = state.votedAssets.length.toString();
 }
 
 function displayAsset(asset) {
@@ -178,10 +173,10 @@ function displayAsset(asset) {
 function setLoading(isLoading) {
   if (isLoading) {
     elements.assetLoading.classList.remove("hidden");
-    elements.submitVote.disabled = true;
+    ratings.setEnabled(false);
   } else {
     elements.assetLoading.classList.add("hidden");
-    ratings.updateSubmitState();
+    ratings.setEnabled(true);
   }
 }
 
@@ -196,6 +191,7 @@ function showCompletion(data) {
   elements.assetType.textContent = "";
   updateTestMeta(data);
   elements.completePanel.classList.remove("hidden");
+  ratings.setEnabled(false);
 }
 
 function resolveAssetName(asset) {

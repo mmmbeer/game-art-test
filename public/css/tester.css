@@ -29,11 +29,11 @@ body.tester-body {
 .tester-shell {
   max-width: 640px;
   margin: 0 auto;
-  padding: 10px 12px 12px;
+  padding: 10px 12px 0;
   display: grid;
   gap: 8px;
   height: 100vh;
-  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .tester-header {
@@ -273,62 +273,68 @@ body.tester-body {
   color: var(--tester-muted);
 }
 
-.ratings-panel {
-  display: grid;
-  gap: 6px 10px;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-areas:
-    "appeal intuitive"
-    "professional empty"
-    "comment comment";
-  overflow: auto;
-}
-
-.rating-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
+.vote-dock {
+  position: relative;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 10px 8px 14px;
+  background: var(--tester-panel);
+  border-top: 1px solid var(--tester-border);
+}
+
+.vote-carousel {
+  overflow: hidden;
+  width: 100%;
+  padding: 0 clamp(4px, 2vw, 24px);
+}
+
+.vote-track {
+  display: flex;
+  width: 100%;
+  transform: translateX(0);
+  transition: transform 0.32s ease;
+}
+
+.vote-track.no-transition {
+  transition: none;
+}
+
+.vote-slide {
+  flex: 0 0 100%;
+  display: grid;
   gap: 6px;
+  justify-items: center;
 }
 
-.rating-row[data-metric="appeal"] {
-  grid-area: appeal;
+.vote-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--tester-muted);
 }
 
-.rating-row[data-metric="understandability"] {
-  grid-area: intuitive;
-}
-
-.rating-row[data-metric="professionalism"] {
-  grid-area: professional;
-}
-
-.rating-label {
-  font-weight: 600;
-  font-size: 14px;
-  cursor: help;
-}
-
-.rating-stars {
-  display: inline-flex;
-  gap: 4px;
-  justify-content: flex-end;
+.vote-stars {
+  display: flex;
+  width: min(100%, 520px);
+  justify-content: space-between;
+  gap: 0;
 }
 
 .star-button {
-  width: 22px;
-  height: 22px;
+  width: 80px;
+  height: 80px;
   border: none;
   background: transparent;
   background-color: var(--tester-star-off);
   mask-image: url("../assets/icons/star-outline.svg");
   mask-repeat: no-repeat;
   mask-position: center;
-  mask-size: 18px 18px;
+  mask-size: 80px 80px;
   -webkit-mask-image: url("../assets/icons/star-outline.svg");
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
-  -webkit-mask-size: 18px 18px;
+  -webkit-mask-size: 80px 80px;
   cursor: pointer;
   padding: 0;
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
@@ -366,48 +372,42 @@ body.tester-body {
   -webkit-mask-image: url("../assets/icons/star-solid.svg");
 }
 
-.comment-row {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-area: comment;
-  grid-template-columns: auto 1fr;
-  gap: 4px 8px;
-  align-items: center;
-}
-
-.comment-row label {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.comment-row textarea {
-  grid-column: 2 / -1;
-  border: 1px solid var(--tester-border);
-  background: var(--tester-panel);
+.vote-nav-btn {
+  border: none;
+  background: transparent;
   color: var(--tester-text);
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
   padding: 6px 8px;
-  resize: vertical;
-  min-height: 44px;
-  font-family: inherit;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-.comment-hint {
-  grid-column: 2 / -1;
-  justify-self: end;
-  font-size: 11px;
-  text-align: right;
+.vote-nav-btn.nav-skip {
+  font-size: 13px;
   color: var(--tester-muted);
+  right: 6px;
 }
 
-.action-row {
-  display: grid;
-  gap: 6px 10px;
-  grid-template-columns: auto 1fr;
-  align-items: center;
+.vote-nav-btn.nav-back {
+  left: 6px;
+}
+
+.vote-nav-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vote-dock.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .primary-btn {
-  justify-self: end;
+  justify-self: center;
   background: var(--tester-accent);
   color: #1a1405;
   border: none;
@@ -422,25 +422,17 @@ body.tester-body {
   cursor: not-allowed;
 }
 
-.progress-mini {
-  font-size: 12px;
-  color: var(--tester-muted);
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.progress-mini .dot {
-  margin: 0 2px;
-}
-
 .complete-panel {
   border: 1px solid var(--tester-border);
   background: var(--tester-panel);
   padding: 10px;
   text-align: center;
+  position: fixed;
+  left: 50%;
+  bottom: 140px;
+  transform: translateX(-50%);
+  width: min(90vw, 420px);
+  z-index: 5;
 }
 
 .complete-panel.hidden {
@@ -449,7 +441,7 @@ body.tester-body {
 
 .toast-host {
   position: fixed;
-  bottom: 12px;
+  bottom: 120px;
   right: 12px;
   display: grid;
   gap: 6px;

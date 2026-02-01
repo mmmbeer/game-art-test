@@ -61,72 +61,47 @@
         <div class="asset-type-line" id="assetType">Asset type</div>
       </section>
 
-      <section class="ratings-panel" id="ratingPanel">
-        <div class="rating-row" data-metric="appeal">
-          <div
-            class="rating-label"
-            title="Overall visual appeal and attention grab."
-          >Appeal</div>
-          <div class="rating-stars" role="group" aria-label="Appeal rating">
-            <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
-            <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
-            <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
-            <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
-            <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
+      <section class="vote-dock" id="ratingPanel">
+        <button class="vote-nav-btn nav-back hidden" id="voteBack" type="button" aria-label="Go back">
+          &lsaquo;
+        </button>
+        <div class="vote-carousel" aria-live="polite">
+          <div class="vote-track" id="voteTrack">
+            <div class="vote-slide" data-metric="appeal">
+              <div class="vote-label" title="Overall visual appeal and attention grab.">Appeal</div>
+              <div class="vote-stars" role="group" aria-label="Appeal rating">
+                <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
+                <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
+                <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
+                <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
+                <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
+              </div>
+            </div>
+            <div class="vote-slide" data-metric="understandability">
+              <div class="vote-label" title="How easy it is to grasp at a glance.">Intuitive</div>
+              <div class="vote-stars" role="group" aria-label="Intuitive rating">
+                <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
+                <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
+                <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
+                <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
+                <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
+              </div>
+            </div>
+            <div class="vote-slide" data-metric="professionalism">
+              <div class="vote-label" title="Polish, technical quality, and print readiness.">Professionalism</div>
+              <div class="vote-stars" role="group" aria-label="Professionalism rating">
+                <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
+                <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
+                <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
+                <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
+                <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="rating-row" data-metric="understandability">
-          <div
-            class="rating-label"
-            title="How easy it is to grasp at a glance."
-          >Intuitive</div>
-          <div class="rating-stars" role="group" aria-label="Intuitive rating">
-            <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
-            <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
-            <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
-            <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
-            <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
-          </div>
-        </div>
-
-        <div class="rating-row" data-metric="professionalism">
-          <div
-            class="rating-label"
-            title="Polish, technical quality, and print readiness."
-          >Professionalism</div>
-          <div class="rating-stars" role="group" aria-label="Professionalism rating">
-            <button type="button" class="star-button" data-value="1" aria-label="1 star"></button>
-            <button type="button" class="star-button" data-value="2" aria-label="2 stars"></button>
-            <button type="button" class="star-button" data-value="3" aria-label="3 stars"></button>
-            <button type="button" class="star-button" data-value="4" aria-label="4 stars"></button>
-            <button type="button" class="star-button" data-value="5" aria-label="5 stars"></button>
-          </div>
-        </div>
-
-        <div class="comment-row">
-          <label for="commentInput">Comments</label>
-          <textarea
-            id="commentInput"
-            rows="1"
-            placeholder="Comments..."
-          ></textarea>
-          <div class="comment-hint" id="commentHint">0 / 500</div>
-        </div>
-      </section>
-
-      <section class="action-row">
-        <button class="primary-btn" id="submitVote" type="button" disabled>next ></button>
-        <div class="progress-mini">
-          <span id="remainingAssets">-</span>
-          <span>assets</span>
-          <span class="dot">|</span>
-          <span id="minVotes">-</span>
-          <span>votes per asset</span>
-          <span class="dot">|</span>
-          <span id="sessionVotes">0</span>
-          <span>votes from you</span>
-        </div>
+        <button class="vote-nav-btn nav-skip" id="voteSkip" type="button" aria-label="Skip rating">
+          skip >
+        </button>
       </section>
 
       <section class="complete-panel hidden" id="completePanel">
@@ -140,3 +115,4 @@
     <script type="module" src="../../js/tester/app.js"></script>
   </body>
 </html>
+
