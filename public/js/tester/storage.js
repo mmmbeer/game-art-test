@@ -21,3 +21,27 @@ export function addVoteToHistory({ storageKey, votedAssets, assetUuid }) {
   }
   return votedAssets;
 }
+
+export function loadAssetHistory(storageKey) {
+  if (!storageKey) {
+    return [];
+  }
+  try {
+    const raw = localStorage.getItem(storageKey);
+    const parsed = JSON.parse(raw || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+export function addAssetToHistory({ storageKey, assetUuids, assetUuid }) {
+  if (!storageKey || !assetUuid) {
+    return assetUuids;
+  }
+  if (!assetUuids.includes(assetUuid)) {
+    assetUuids.push(assetUuid);
+    localStorage.setItem(storageKey, JSON.stringify(assetUuids));
+  }
+  return assetUuids;
+}

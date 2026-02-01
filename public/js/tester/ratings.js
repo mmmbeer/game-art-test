@@ -3,10 +3,12 @@ export function createRatings({ elements, state }) {
   const { ratingPanel, voteTrack, voteSkip, commentInput, commentSubmit } = elements;
   const slides = Array.from(ratingPanel.querySelectorAll(".vote-slide"));
   const metricOrder = slides.map((slide) => slide.dataset.metric);
+  const progressMetrics = metricOrder.filter((metric) => metric !== "comment");
   let currentIndex = 0;
   let isEnabled = true;
   ratingPanel.style.setProperty("--slide-count", slides.length);
   setActiveSlide(0);
+  emitProgress();
 
   function bindRatingEvents() {
     ratingPanel.addEventListener("click", (event) => {
@@ -96,6 +98,7 @@ export function createRatings({ elements, state }) {
       commentInput.value = "";
     }
     setIndex(0, { instant: true });
+    emitProgress();
   }
 
   function updateRatingUI(group, value) {
@@ -150,6 +153,17 @@ export function createRatings({ elements, state }) {
     if (metricIndex !== -1 && metricIndex < slides.length - 1) {
       setIndex(metricIndex + 1);
     }
+    emitProgress();
+  }
+
+  function emitProgress() {
+    const completed = progressMetrics.filter((metric) => ratingState[metric]).length;
+    ratingPanel.dispatchEvent(
+      new CustomEvent("ratings:progress", {
+        bubbles: true,
+        detail: { completed, total: progressMetrics.length },
+      })
+    );
   }
 
 

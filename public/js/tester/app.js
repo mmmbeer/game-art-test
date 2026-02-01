@@ -1,20 +1,38 @@
 import { getElements } from "./dom.js";
 import { getBasePath, getTestUuidFromPath, showToast } from "./utils.js";
-import { loadVoteHistory, addVoteToHistory } from "./storage.js";
+import {
+  loadVoteHistory,
+  addVoteToHistory,
+  loadAssetHistory,
+  addAssetToHistory,
+} from "./storage.js";
 import { createViewer } from "./viewer.js";
 import { createRatings } from "./ratings.js";
 
 const elements = getElements();
 const testUuid = getTestUuidFromPath();
 const storageKey = `tgc_tester_votes_${testUuid}`;
+const viewedStorageKey = `tgc_tester_viewed_${testUuid}`;
 
 const state = {
   currentAsset: null,
   votedAssets: loadVoteHistory(storageKey),
+  viewedAssets: loadAssetHistory(viewedStorageKey),
   ratingState: {
     professionalism: 0,
     appeal: 0,
     understandability: 0,
+  },
+  progressState: {
+    totalAssets: 0,
+    remainingAssets: 0,
+    minVotes: 0,
+    ratingCompleted: 0,
+    ratingTotal: 3,
+  },
+  progressDom: {
+    totalAssets: 0,
+    assetNodes: [],
   },
   zoomState: {
     scale: 1,
@@ -61,6 +79,11 @@ function bindActionEvents() {
 
   elements.ratingPanel.addEventListener("ratings:complete", () => submitVote());
   elements.ratingPanel.addEventListener("ratings:skip", () => skipAsset());
+  elements.ratingPanel.addEventListener("ratings:progress", (event) => {
+    state.progressState.ratingCompleted = Number(event.detail?.completed || 0);
+    state.progressState.ratingTotal = Number(event.detail?.total || 3);
+    updateProgressBar();
+  });
 }
 
 async function submitVote() {
@@ -93,6 +116,7 @@ async function submitVote() {
       votedAssets: state.votedAssets,
       assetUuid: state.currentAsset.uuid,
     });
+    markViewedAsset(state.currentAsset.uuid);
     showToast("Vote recorded. Loading next asset...", "success");
     await loadNextAsset();
   } catch (error) {
@@ -131,6 +155,7 @@ async function loadNextAsset() {
     }
 
     updateTestMeta(data);
+    updateProgressMeta(data);
     displayAsset(data.asset);
   } catch (error) {
     showToast("Network error loading asset.", "error");
@@ -145,6 +170,7 @@ async function skipAsset() {
   }
   ratings.setEnabled(false);
   showToast("Skipped. Loading next asset...", "success");
+  markViewedAsset(state.currentAsset.uuid);
   await loadNextAsset();
   ratings.setEnabled(true);
 }
@@ -179,6 +205,7 @@ function displayAsset(asset) {
     viewer.applyZoomForMode({ showIndicator: false });
   };
   elements.assetImage.onerror = () => showToast("Unable to load image.", "error");
+  updateProgressBar();
 }
 
 function setLoading(isLoading) {
@@ -209,6 +236,8 @@ function showCompletion(data) {
   updateTestMeta(data);
   elements.completePanel.classList.remove("hidden");
   ratings.setEnabled(false);
+  updateProgressMeta(data);
+  updateProgressBar();
 }
 
 function resolveAssetName(asset) {
@@ -220,4 +249,91 @@ function resolveAssetName(asset) {
     asset?.asset_type ||
     "Art asset"
   );
+}
+
+function updateProgressMeta(data) {
+  const progress = data?.progress || {};
+  state.progressState.totalAssets = Number(progress.total_assets || 0);
+  state.progressState.remainingAssets = Number(progress.remaining_assets || 0);
+  state.progressState.minVotes = Number(progress.min_votes || 0);
+  updateProgressBar();
+}
+
+function markViewedAsset(assetUuid) {
+  state.viewedAssets = addAssetToHistory({
+    storageKey: viewedStorageKey,
+    assetUuids: state.viewedAssets,
+    assetUuid,
+  });
+  updateProgressBar();
+}
+
+function updateProgressBar() {
+  if (!elements.testerProgress || !elements.testerProgressTrack) {
+    return;
+  }
+  const totalAssets = Math.max(0, state.progressState.totalAssets || 0);
+  if (!totalAssets) {
+    elements.testerProgress.classList.add("hidden");
+    return;
+  }
+  elements.testerProgress.classList.remove("hidden");
+
+  if (state.progressDom.totalAssets !== totalAssets) {
+    renderProgressAssets(totalAssets);
+  }
+
+  const completedAssets = Math.min(state.viewedAssets.length, totalAssets);
+  const hasCurrentAsset = Boolean(state.currentAsset);
+  const currentIndex = hasCurrentAsset
+    ? Math.min(completedAssets, totalAssets - 1)
+    : totalAssets;
+  const ratingCompleted = Math.min(
+    Math.max(state.progressState.ratingCompleted || 0, 0),
+    3
+  );
+
+  state.progressDom.assetNodes.forEach((entry, index) => {
+    const { el, dots } = entry;
+    el.classList.toggle("is-complete", index < completedAssets);
+    el.classList.toggle("is-current", hasCurrentAsset && index === currentIndex);
+    el.classList.toggle(
+      "is-remaining",
+      index > completedAssets || (!hasCurrentAsset && index >= completedAssets)
+    );
+
+    dots.forEach((dot, dotIndex) => {
+      const shouldFill =
+        index < completedAssets ||
+        (hasCurrentAsset && index === currentIndex && dotIndex < ratingCompleted);
+      dot.classList.toggle("is-filled", shouldFill);
+    });
+  });
+
+  const progressRatio = totalAssets ? completedAssets / totalAssets : 0;
+  const hue = Math.round(140 - progressRatio * 90);
+  const fillColor = `hsl(${hue}, 92%, 58%)`;
+  elements.testerProgress.style.setProperty("--tester-progress-fill", fillColor);
+}
+
+function renderProgressAssets(totalAssets) {
+  elements.testerProgressTrack.innerHTML = "";
+  const assetNodes = [];
+  for (let i = 0; i < totalAssets; i += 1) {
+    const asset = document.createElement("div");
+    asset.className = "progress-asset";
+    if (i === totalAssets - 1) {
+      asset.classList.add("is-last");
+    }
+    const dots = [];
+    for (let d = 0; d < 3; d += 1) {
+      const dot = document.createElement("span");
+      dot.className = "progress-dot";
+      asset.appendChild(dot);
+      dots.push(dot);
+    }
+    elements.testerProgressTrack.appendChild(asset);
+    assetNodes.push({ el: asset, dots });
+  }
+  state.progressDom = { totalAssets, assetNodes };
 }
