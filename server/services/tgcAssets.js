@@ -84,12 +84,16 @@ export async function discoverGameAssets({ tgcGameId, sessionId }) {
       }
 
       if (isDeckItem(item, relationship.key)) {
-        const deckCards = await fetchDeckCards({ deckId: item.id, sessionId });
+        const { items: deckCards, deckIdentity } = await fetchDeckCards({
+          deckId: item.id,
+          sessionId,
+        });
         for (const card of deckCards) {
           const normalizedCards = await normalizeCardAssets({
             item: card,
             sessionId,
             fileCache,
+            deckIdentity,
           });
           normalizedCards.forEach((cardAsset) => assets.push(cardAsset));
         }
@@ -137,7 +141,7 @@ function isCardItem(item, relationshipKey) {
   return type.toLowerCase().includes("card");
 }
 
-async function normalizeCardAssets({ item, sessionId, fileCache }) {
+async function normalizeCardAssets({ item, sessionId, fileCache, deckIdentity = "" }) {
   const assets = [];
   const faceId = item.face_id || item.face?.id;
   const backId = item.back_id || item.back?.id;
@@ -147,6 +151,7 @@ async function normalizeCardAssets({ item, sessionId, fileCache }) {
     fileCache,
     fileId: faceId,
     side: "face",
+    deckIdentity,
   });
   if (faceAsset) {
     assets.push(faceAsset);
@@ -157,6 +162,7 @@ async function normalizeCardAssets({ item, sessionId, fileCache }) {
     fileCache,
     fileId: backId,
     side: "back",
+    deckIdentity,
   });
   if (backAsset) {
     assets.push(backAsset);
@@ -175,7 +181,7 @@ async function normalizeCardAssets({ item, sessionId, fileCache }) {
   return assets;
 }
 
-async function buildCardAsset({ item, sessionId, fileCache, fileId, side }) {
+async function buildCardAsset({ item, sessionId, fileCache, fileId, side, deckIdentity }) {
   if (!fileId) {
     return null;
   }
@@ -198,7 +204,10 @@ async function buildCardAsset({ item, sessionId, fileCache, fileId, side }) {
       side,
       file_ids: [fileId],
       files: [pickFileDetails(file)],
-      source: item,
+      source: {
+        ...item,
+        deck: deckIdentity ? { identity: deckIdentity } : item?.deck,
+      },
     },
   };
 }
@@ -210,6 +219,8 @@ async function fetchDeckCards({ deckId, sessionId }) {
   } catch (error) {
     deckResult = null;
   }
+  const deckIdentity =
+    String(deckResult?.item?.identity || deckResult?.identity || "").trim();
 
   const relationshipEntries = extractRelationshipEntries(deckResult || {});
   const cardsRel = relationshipEntries.find((entry) => entry.key === "cards");
@@ -237,7 +248,7 @@ async function fetchDeckCards({ deckId, sessionId }) {
     }
   }
 
-  return items;
+  return { items, deckIdentity };
 }
 
 async function normalizeAsset({ relationship, item, sessionId, fileCache }) {
