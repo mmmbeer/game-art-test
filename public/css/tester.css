@@ -8,6 +8,8 @@
   --tester-accent: #f2c94c;
   --tester-border: rgba(246, 241, 232, 0.2);
   --tester-progress-fill: #4fffe0;
+  --tester-progress-step: #7aa9ff;
+  --tester-progress-complete: #2fd06a;
   --tester-progress-dim: rgba(246, 241, 232, 0.35);
   --tester-progress-height: 4px;
   --tester-star-off: rgba(246, 241, 232, 0.45);
@@ -612,21 +614,26 @@ body {
 .progress-segment {
   flex: 1 1 0;
   height: 100%;
-  background: var(--tester-progress-dim);
-  opacity: 0.7;
+  background: var(--tester-progress-step);
+  opacity: 0.6;
 }
 
 .progress-asset.is-complete {
-  border-left-color: var(--tester-progress-fill);
+  border-left-color: var(--tester-progress-complete);
 }
 
 .progress-asset.is-complete.is-last {
-  border-right-color: var(--tester-progress-fill);
+  border-right-color: var(--tester-progress-complete);
 }
 
 .progress-asset.is-complete .progress-segment,
 .progress-asset.is-current .progress-segment.is-filled {
   background: var(--tester-progress-fill);
+  opacity: 1;
+}
+
+.progress-asset.is-complete .progress-segment {
+  background: var(--tester-progress-complete);
   opacity: 1;
 }
 
