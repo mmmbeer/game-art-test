@@ -146,8 +146,9 @@ function renderGames() {
         ${
           imageUrl
             ? `<img data-src="${imageUrl}" alt="${game.name}" loading="lazy" decoding="async">`
-            : "<span>IMG</span>"
+            : "<span class=\"game-thumb-placeholder\">PLACEHOLDER</span>"
         }
+        ${renderTestStars(game)}
       </div>
       <div class="game-body">
         <div class="game-top">
@@ -181,46 +182,36 @@ function resolveDesignerName(designerUuid) {
 
 function renderPills(game) {
   const pills = [];
-  const totalCount = Number(game.asset_count) || 0;
-  pills.push(`<span class="pill">${totalCount} assets</span>`);
-
-  const activeTests = Number(game.active_test_count) || 0;
-  const totalTests = Number(game.test_count) || 0;
-  if (activeTests > 0) {
-    pills.push(`<span class="pill pill-accent">${activeTests} active test</span>`);
-  } else if (totalTests > 0) {
-    pills.push(`<span class="pill pill-muted">Has past tests</span>`);
-  }
-
   const counts = game.asset_type_counts || {};
   const entries = Object.entries(counts)
     .filter(([, count]) => Number(count) > 0)
     .sort((a, b) => b[1] - a[1]);
 
-  const maxShown = 5;
-  entries.slice(0, maxShown).forEach(([type, count]) => {
-    pills.push(`<span class="pill pill-muted">${type}: ${count}</span>`);
-  });
-  if (entries.length > maxShown) {
-    pills.push(`<span class="pill pill-muted">+${entries.length - maxShown} more</span>`);
+  if (!entries.length) {
+    pills.push("<span class=\"pill pill-muted\">No assets yet</span>");
+  } else {
+    entries.forEach(([type, count]) => {
+      pills.push(`<span class="pill pill-muted">${type}: ${count}</span>`);
+    });
   }
   return pills.join("");
 }
 
 function renderActiveTestLinks(game) {
-  const activeTests = Array.isArray(game.active_tests) ? game.active_tests : [];
+  const tests = getGameTests(game);
+  const activeTests = tests.filter((test) => (test.status || "active") === "active");
   if (!activeTests.length) {
     return "";
   }
-  const links = activeTests.slice(0, 2).map((test, index) => {
-    const label = activeTests.length > 1 ? `Public link ${index + 1}` : "Public link";
-    return `<a class="btn btn-outline-light btn-sm" href="${test.public_url}" target="_blank" rel="noopener">${label}</a>`;
-  });
-  const overflow =
-    activeTests.length > 2
-      ? `<span class="text-muted small">+${activeTests.length - 2} more</span>`
-      : "";
-  return `<div class="game-test-links">${links.join("")}${overflow}</div>`;
+  const newest = sortTestsByDate(activeTests)[0];
+  return `
+    <div class="game-test-links">
+      <a class="btn btn-outline-light btn-sm" href="${newest.public_url}" target="_blank" rel="noopener">
+        Public test
+      </a>
+      ${activeTests.length > 1 ? `<span class="text-muted small">+${activeTests.length - 1} more</span>` : ""}
+    </div>
+  `;
 }
 
 function debounce(fn, delay) {
@@ -231,4 +222,39 @@ function debounce(fn, delay) {
     }
     timer = window.setTimeout(() => fn(...args), delay);
   };
+}
+
+function getGameTests(game) {
+  if (Array.isArray(game.tests) && game.tests.length) {
+    return game.tests;
+  }
+  return Array.isArray(game.active_tests) ? game.active_tests : [];
+}
+
+function sortTestsByDate(tests) {
+  return tests.slice().sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return bTime - aTime;
+  });
+}
+
+function renderTestStars(game) {
+  const tests = getGameTests(game);
+  if (!tests.length) {
+    return "";
+  }
+  const stars = sortTestsByDate(tests).map((test) => {
+    const status = test.status || "active";
+    const isCompleted = status === "completed";
+    const icon = isCompleted ? "assets/icons/star-solid.svg" : "assets/icons/star-outline.svg";
+    const label = isCompleted ? "Completed test" : status === "paused" ? "Paused test" : "In progress test";
+    const href = `?view=dashboard&test=${test.uuid}`;
+    return `
+      <a class="game-test-star ${isCompleted ? "is-complete" : "is-active"}" href="${href}" aria-label="${label}">
+        <img src="${icon}" alt="">
+      </a>
+    `;
+  });
+  return `<div class="game-test-stars">${stars.join("")}</div>`;
 }

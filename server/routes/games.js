@@ -13,7 +13,12 @@ import { getGameByUuidForUser, getGamesByUserId, syncGamesForUser } from "../db/
 import { discoverGameAssets } from "../services/tgcAssets.js";
 import { getAssetSummaryByUserId, getAssetsByGameId, upsertAssetsForGame } from "../db/assets.js";
 import env from "../config/env.js";
-import { getActiveTestsByUserId, getTestSummaryByUserId, getTestsWithProgressForGame } from "../db/tests.js";
+import {
+  getActiveTestsByUserId,
+  getTestSummaryByUserId,
+  getTestsOverviewByUserId,
+  getTestsWithProgressForGame,
+} from "../db/tests.js";
 import { createDeterministicUuid } from "../utils/uuid.js";
 import { buildPublicTestUrl } from "../utils/publicUrls.js";
 
@@ -188,6 +193,17 @@ router.get("/", requireAuth, async (req, res) => {
     const assetSummary = await getAssetSummaryByUserId(user.id);
     const testSummary = await getTestSummaryByUserId(user.id);
     const activeTestsByGame = await getActiveTestsByUserId(user.id);
+    const testsOverview = await getTestsOverviewByUserId({
+      userId: user.id,
+      minVotes: env.tester.minVotesPerAsset,
+    });
+    const testsByGameId = new Map();
+    testsOverview.forEach((test) => {
+      if (!testsByGameId.has(test.game_id)) {
+        testsByGameId.set(test.game_id, []);
+      }
+      testsByGameId.get(test.game_id).push(test);
+    });
     const gameDesignerMap = new Map(
       Array.from(combinedMap.values()).map((game) => [game.id, game.designer_id || null])
     );
@@ -208,6 +224,7 @@ router.get("/", requireAuth, async (req, res) => {
       games: storedGames.map((game) => {
         const testInfo = testSummary.get(game.id) || { testCount: 0, activeCount: 0 };
         const activeTests = activeTestsByGame.get(game.id) || [];
+        const testsForGame = testsByGameId.get(game.id) || [];
         return {
           uuid: game.uuid,
           name: game.name,
@@ -219,6 +236,12 @@ router.get("/", requireAuth, async (req, res) => {
           active_test_count: testInfo.activeCount,
           active_tests: activeTests.map((test) => ({
             uuid: test.uuid,
+            created_at: test.created_at,
+            public_url: buildPublicTestUrl(req, test.uuid),
+          })),
+          tests: testsForGame.map((test) => ({
+            uuid: test.uuid,
+            status: test.status,
             created_at: test.created_at,
             public_url: buildPublicTestUrl(req, test.uuid),
           })),

@@ -73,6 +73,7 @@ let resultsData = null;
 let showAllComments = false;
 let commentMarksModal = null;
 let commentMarkTooltips = [];
+let pendingSelectUuid = "";
 const commentMarksState = {
   map: new Map(),
   assetsByUuid: new Map(),
@@ -268,6 +269,7 @@ export function initDashboardView({ onAuthLost }) {
 
   return {
     loadOverview: () => loadOverview(onAuthLost),
+    selectTestByUuid: (uuid) => selectTestByUuid(uuid, onAuthLost),
   };
 }
 
@@ -329,6 +331,9 @@ async function loadOverview(onAuthLost) {
   renderSummary();
   renderGameFilter();
   renderTestSelect();
+  if (pendingSelectUuid) {
+    selectTestByUuid(pendingSelectUuid, onAuthLost);
+  }
 
   if (selectedTest) {
     const updated = tests.find((test) => test.uuid === selectedTest.uuid);
@@ -338,6 +343,22 @@ async function loadOverview(onAuthLost) {
       clearSelection();
     }
   }
+}
+
+function selectTestByUuid(uuid, onAuthLost) {
+  if (!uuid) {
+    return;
+  }
+  pendingSelectUuid = uuid;
+  if (!tests.length) {
+    return;
+  }
+  const match = tests.find((test) => test.uuid === uuid);
+  if (!match) {
+    return;
+  }
+  pendingSelectUuid = "";
+  selectTest(match, onAuthLost);
 }
 
 function renderSummary() {

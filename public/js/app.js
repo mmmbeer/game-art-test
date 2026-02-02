@@ -123,7 +123,10 @@ setView(
   if (urlState.view === "dashboard") {
     setView("dashboard");
     updateUrlForView("dashboard");
-    dashboardViewApi.loadOverview();
+    await dashboardViewApi.loadOverview();
+    if (urlState.testUuid) {
+      dashboardViewApi.selectTestByUuid(urlState.testUuid);
+    }
     return;
   }
 
@@ -145,9 +148,11 @@ function getViewStateFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view");
   const game = params.get("game");
+  const test = params.get("test");
   return {
     view: view || "",
     gameUuid: view === "assets" && game ? game : "",
+    testUuid: view === "dashboard" && test ? test : "",
   };
 }
 

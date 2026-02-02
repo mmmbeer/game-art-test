@@ -27,19 +27,19 @@
 
 .games-list {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   margin-top: 16px;
+  grid-template-columns: 1fr;
 }
 
 .game-item {
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
   text-align: left;
-  padding: 14px 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
+  overflow: hidden;
   width: 100%;
   transition: transform var(--transition), box-shadow var(--transition);
 }
@@ -56,19 +56,16 @@
 }
 
 .game-thumb {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-md);
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 0;
   background: var(--color-surface);
-  border: 1px dashed var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+  position: relative;
 }
 
 .game-thumb img {
@@ -78,10 +75,51 @@
   display: block;
 }
 
+.game-thumb-placeholder {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.game-test-stars {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.game-test-star {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.game-test-star img {
+  width: 16px;
+  height: 16px;
+  filter: var(--icon-filter);
+}
+
+.game-test-star:hover,
+.game-test-star:focus {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
 .game-body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 12px 14px 14px;
 }
 
 .game-top {
@@ -98,6 +136,7 @@
 .game-name {
   font-weight: 600;
   margin-bottom: 4px;
+  font-size: 1rem;
 }
 
 .game-meta {
@@ -121,4 +160,10 @@
 
 .games-actions {
   margin: 12px 0 6px;
+}
+
+@media (min-width: 720px) {
+  .games-list {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
 }
