@@ -28,6 +28,7 @@ export function getElements() {
     commentInput: byId("commentInput"),
     commentMarksToggle: byId("commentMarksToggle"),
     commentSubmit: byId("commentSubmit"),
+    commentHint: byId("commentHint"),
     testerProgress: byId("testerProgress"),
     testerProgressTrack: byId("testerProgressTrack"),
     completePanel: byId("completePanel"),

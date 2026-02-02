@@ -1,11 +1,16 @@
 export function createRatings({ elements, state }) {
   const { ratingState } = state;
-  const { ratingPanel, voteTrack, voteSkip, commentInput, commentSubmit } = elements;
+  const { ratingPanel, voteTrack, voteSkip, commentInput, commentSubmit, commentHint } =
+    elements;
   const slides = Array.from(ratingPanel.querySelectorAll(".vote-slide"));
   const metricOrder = slides.map((slide) => slide.dataset.metric);
   const progressMetrics = metricOrder.filter((metric) => metric !== "comment");
   let currentIndex = 0;
   let isEnabled = true;
+  const desktopQuery =
+    typeof window !== "undefined" && window.matchMedia
+      ? window.matchMedia("(min-width: 1024px)")
+      : null;
   ratingPanel.style.setProperty("--slide-count", slides.length);
   setActiveSlide(0);
   emitProgress();
@@ -84,6 +89,14 @@ export function createRatings({ elements, state }) {
           commentInput.value = trimmed;
         }
       });
+    }
+
+    if (desktopQuery) {
+      if (desktopQuery.addEventListener) {
+        desktopQuery.addEventListener("change", () => emitProgress());
+      } else if (desktopQuery.addListener) {
+        desktopQuery.addListener(() => emitProgress());
+      }
     }
   }
 
@@ -166,6 +179,7 @@ export function createRatings({ elements, state }) {
 
   function emitProgress() {
     const completed = progressMetrics.filter((metric) => ratingState[metric]).length;
+    updateSubmitState(completed, progressMetrics.length);
     ratingPanel.dispatchEvent(
       new CustomEvent("ratings:progress", {
         bubbles: true,
@@ -192,6 +206,20 @@ export function createRatings({ elements, state }) {
     }
     if (commentSubmit) {
       commentSubmit.disabled = !enabled;
+    }
+    emitProgress();
+  }
+
+  function updateSubmitState(completed, total) {
+    if (!commentSubmit) {
+      return;
+    }
+    const isDesktop = desktopQuery?.matches;
+    const allowSubmit = !isDesktop || completed >= total;
+    commentSubmit.disabled = !isEnabled || !allowSubmit;
+    if (commentHint) {
+      const shouldShow = isDesktop && !allowSubmit && isEnabled;
+      commentHint.classList.toggle("is-visible", shouldShow);
     }
   }
 

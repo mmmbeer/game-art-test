@@ -12,6 +12,11 @@ import {
 import { completeTestIfSatisfied } from "../db/tests.js";
 import { resolveOverlayUrl } from "../services/overlay.js";
 import { isDownloadableAsset } from "../services/assetRules.js";
+import {
+  filterCandidatesForTester,
+  hasTesterVoted,
+  registerTesterVote,
+} from "../services/testerVoteRegistry.js";
 
 const router = Router();
 const publicFile = path.resolve(process.cwd(), "public", "tester.html");
@@ -30,6 +35,7 @@ router.post("/:uuid/next", async (req, res) => {
 router.post("/:uuid/vote", async (req, res) => {
   const testUuid = String(req.params.uuid || "");
   const assetUuid = String(req.body?.asset_uuid || "");
+  const testerUuid = getTesterUuid(req);
   const professionalism = Number.parseInt(req.body?.professionalism, 10);
   const appeal = Number.parseInt(req.body?.appeal, 10);
   const understandability = Number.parseInt(req.body?.understandability, 10);
@@ -42,6 +48,9 @@ router.post("/:uuid/vote", async (req, res) => {
 
   if (![professionalism, appeal, understandability].every((value) => value >= 1 && value <= 5)) {
     return res.status(400).json({ error: "Ratings must be between 1 and 5." });
+  }
+  if (!testerUuid) {
+    return res.status(400).json({ error: "Tester identity is required." });
   }
 
   try {
@@ -56,6 +65,9 @@ router.post("/:uuid/vote", async (req, res) => {
     const testAssetId = await getTestAssetId({ testUuid, assetUuid });
     if (!testAssetId) {
       return res.status(404).json({ error: "Asset not found in this test." });
+    }
+    if (hasTesterVoted(testAssetId, testerUuid)) {
+      return res.status(409).json({ error: "You already voted on this asset." });
     }
 
     const minVotes = env.tester.minVotesPerAsset;
@@ -72,6 +84,7 @@ router.post("/:uuid/vote", async (req, res) => {
       comment,
       commentMarks,
     });
+    registerTesterVote(testAssetId, testerUuid);
 
     await completeTestIfSatisfied({ testId: test.id, minVotes });
 
@@ -95,6 +108,7 @@ export default router;
 
 async function handleNextAsset(req, res, excludeAssetUuids) {
   const testUuid = String(req.params.uuid || "");
+  const testerUuid = getTesterUuid(req);
   if (!testUuid) {
     return res.status(400).json({ error: "Test is required." });
   }
@@ -114,9 +128,10 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
       (asset) => !isDownloadableAsset(asset)
     );
     const totalAssets = await getTestAssetTotals(testUuid);
-    const filtered = eligibleCandidates.filter(
+    const filteredCandidates = eligibleCandidates.filter(
       (asset) => !excludeAssetUuids.includes(asset.asset_uuid)
     );
+    const filtered = filterCandidatesForTester(filteredCandidates, testerUuid);
 
     if (!filtered.length) {
       return res.status(200).json({
@@ -192,4 +207,20 @@ function normalizeCommentMarks(input, comment) {
         mark.color.length > 0
     )
     .slice(0, 40);
+}
+
+function getTesterUuid(req) {
+  const headerValue = req.header("x-tester-id");
+  const bodyValue = typeof req.body?.tester_uuid === "string" ? req.body.tester_uuid : "";
+  return normalizeUuid(headerValue) || normalizeUuid(bodyValue);
+}
+
+function normalizeUuid(value) {
+  if (typeof value !== "string") {
+    return "";
+  }
+  const candidate = value.trim();
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidPattern.test(candidate) ? candidate : "";
 }

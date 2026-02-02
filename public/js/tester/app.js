@@ -5,6 +5,7 @@ import {
   addVoteToHistory,
   loadAssetHistory,
   addAssetToHistory,
+  getTesterId,
 } from "./storage.js";
 import { createViewer } from "./viewer.js";
 import { createRatings } from "./ratings.js";
@@ -14,6 +15,8 @@ const elements = getElements();
 const testUuid = getTestUuidFromPath();
 const storageKey = `tgc_tester_votes_${testUuid}`;
 const viewedStorageKey = `tgc_tester_viewed_${testUuid}`;
+const testerStorageKey = "tgc_tester_id";
+const testerUuid = getTesterId(testerStorageKey);
 
 const state = {
   currentAsset: null,
@@ -93,6 +96,16 @@ async function submitVote() {
   if (!state.currentAsset) {
     return;
   }
+  if (state.votedAssets.includes(state.currentAsset.uuid)) {
+    showToast("You already voted on this asset.", "error");
+    markViewedAsset(state.currentAsset.uuid);
+    await loadNextAsset();
+    return;
+  }
+  if (!testerUuid) {
+    showToast("Unable to identify this device. Please refresh.", "error");
+    return;
+  }
   ratings.setEnabled(false);
   const payload = {
     asset_uuid: state.currentAsset.uuid,
@@ -101,12 +114,16 @@ async function submitVote() {
     understandability: state.ratingState.understandability,
     comment: elements.commentInput?.value.trim() || "",
     comment_marks: marks.getMarks(),
+    tester_uuid: testerUuid,
   };
 
   try {
     const response = await fetch(`${getBasePath()}/vote`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Tester-Id": testerUuid,
+      },
       body: JSON.stringify(payload),
     });
     const data = await response.json().catch(() => ({}));
@@ -139,10 +156,13 @@ async function loadNextAsset() {
       state.votedAssets.length > 0
         ? {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "X-Tester-Id": testerUuid,
+            },
             body: JSON.stringify({ exclude_asset_uuids: state.votedAssets }),
           }
-        : {};
+        : { headers: { "X-Tester-Id": testerUuid } };
     const response = await fetch(url, options);
     const data = await response.json().catch(() => ({}));
 

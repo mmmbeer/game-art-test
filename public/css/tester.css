@@ -435,6 +435,22 @@ body {
   color: var(--tester-muted);
 }
 
+.comment-hint {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--tester-muted);
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.comment-hint.is-visible {
+  opacity: 1;
+  height: auto;
+}
+
 .vote-stars {
   display: flex;
   width: min(100%, 420px);
