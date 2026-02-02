@@ -74,6 +74,7 @@ body.app-body {
   width: var(--icon-sm-size);
   height: var(--icon-sm-size);
   margin-right: 8px;
+  filter: var(--icon-filter);
 }
 
 .pill {

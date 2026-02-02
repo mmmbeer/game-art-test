@@ -20,4 +20,5 @@
   --color-overlay-soft: rgba(255, 255, 255, 0.06);
   --color-spinner-track: rgba(255, 255, 255, 0.2);
   --color-on-primary: #111111;
+  --icon-filter: invert(1);
 }

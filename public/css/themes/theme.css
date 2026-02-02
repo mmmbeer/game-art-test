@@ -8,6 +8,7 @@
   --form-border: var(--color-border);
   --form-placeholder: var(--color-muted);
   --form-focus: var(--color-primary);
+  --icon-filter: none;
   --action-shot-toolbar-bg: rgba(20, 26, 40, 0.9);
   --action-shot-toolbar-border: rgba(255, 255, 255, 0.08);
   --action-shot-toolbar-text: #f6f7fb;

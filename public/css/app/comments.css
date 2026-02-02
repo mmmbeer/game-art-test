@@ -57,6 +57,7 @@
 .comment-mark-trigger img {
   width: 16px;
   height: 16px;
+  filter: var(--icon-filter);
 }
 
 .comment-marks-grid {

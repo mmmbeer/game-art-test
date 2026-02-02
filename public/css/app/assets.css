@@ -26,6 +26,7 @@
 .asset-status {
   font-size: 0.9rem;
   margin-top: 8px;
+  color: var(--color-muted);
 }
 
 .asset-grid {

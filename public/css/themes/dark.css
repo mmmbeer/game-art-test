@@ -20,4 +20,5 @@
   --color-focus-ring: rgba(111, 211, 192, 0.45);
   --action-shot-toolbar-border: rgba(255, 255, 255, 0.12);
   --color-on-primary: #111111;
+  --icon-filter: invert(1);
 }

@@ -40,6 +40,7 @@
 .app-menu-btn img {
   width: 20px;
   height: 20px;
+  filter: var(--icon-filter);
 }
 
 .app-menu-panel {
@@ -86,4 +87,5 @@
 .icon-button img {
   width: 16px;
   height: 16px;
+  filter: var(--icon-filter);
 }
