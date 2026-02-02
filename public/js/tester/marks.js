@@ -28,6 +28,10 @@ export function createMarks({ elements, state }) {
     hasComment: false,
     overrideActive: false,
   };
+  const desktopQuery =
+    typeof window !== "undefined" && window.matchMedia
+      ? window.matchMedia("(min-width: 1024px)")
+      : null;
 
   function bindMarkEvents() {
     if (!assetFrame || !assetBounds || !assetMarks) {
@@ -63,14 +67,23 @@ export function createMarks({ elements, state }) {
     }
     markState.isActive = ratingPanel?.dataset.activeMetric === "comment";
     markState.hasComment = Boolean(commentInput?.value?.trim());
+    syncDesktopOverride();
     syncToggleState();
     syncVisibility();
+    if (desktopQuery) {
+      if (desktopQuery.addEventListener) {
+        desktopQuery.addEventListener("change", syncDesktopOverride);
+      } else if (desktopQuery.addListener) {
+        desktopQuery.addListener(syncDesktopOverride);
+      }
+    }
   }
 
   function resetMarks() {
     markState.marks = [];
     markState.hasComment = Boolean(commentInput?.value?.trim());
     markState.overrideActive = false;
+    syncDesktopOverride();
     renderMarks();
     syncToggleState();
     syncVisibility();
@@ -174,6 +187,15 @@ export function createMarks({ elements, state }) {
 
   function isMarksEnabled() {
     return markState.hasComment && (markState.isActive || markState.overrideActive);
+  }
+
+  function syncDesktopOverride() {
+    if (!desktopQuery) {
+      return;
+    }
+    if (desktopQuery.matches) {
+      markState.overrideActive = true;
+    }
   }
 
   function syncToggleState() {
