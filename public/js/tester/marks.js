@@ -204,7 +204,7 @@ export function createMarks({ elements, state }) {
     }
     commentMarksToggle.classList.toggle("is-on", markState.overrideActive);
     commentMarksToggle.setAttribute("aria-pressed", String(markState.overrideActive));
-    commentMarksToggle.disabled = !markState.hasComment;
+    commentMarksToggle.setAttribute("aria-disabled", String(!markState.hasComment));
   }
 
   return {
