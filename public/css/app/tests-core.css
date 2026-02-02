@@ -1,6 +1,8 @@
 .game-tests {
   display: grid;
   gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
 }
 
 .game-tests-header {
@@ -51,6 +53,7 @@
 .test-builder {
   display: grid;
   gap: 16px;
+  margin-top: 16px;
   padding: 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
