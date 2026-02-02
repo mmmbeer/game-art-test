@@ -86,13 +86,22 @@ export async function insertVote({
   appeal,
   understandability,
   comment,
+  commentMarks,
 }) {
   const createdAt = new Date();
   await pool.query(
     `INSERT INTO votes
-      (test_asset_id, professionalism, appeal, understandability, comment, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [testAssetId, professionalism, appeal, understandability, comment || null, createdAt]
+      (test_asset_id, professionalism, appeal, understandability, comment, comment_marks, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      testAssetId,
+      professionalism,
+      appeal,
+      understandability,
+      comment || null,
+      commentMarks?.length ? JSON.stringify(commentMarks) : null,
+      createdAt,
+    ]
   );
   return { created_at: createdAt };
 }

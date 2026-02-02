@@ -146,6 +146,14 @@ export function createRatings({ elements, state }) {
       slide.classList.toggle("is-active", isActive);
       slide.setAttribute("aria-hidden", String(!isActive));
     });
+    const metric = slides[activeIndex]?.dataset.metric || "";
+    ratingPanel.dataset.activeMetric = metric;
+    ratingPanel.dispatchEvent(
+      new CustomEvent("ratings:slide", {
+        bubbles: true,
+        detail: { metric, index: activeIndex },
+      })
+    );
   }
 
   function handleAdvanceAfterVote(metric) {

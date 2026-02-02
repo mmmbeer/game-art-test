@@ -289,6 +289,33 @@ body {
   z-index: 2;
 }
 
+.asset-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 3;
+}
+
+.asset-marks.is-visible {
+  opacity: 1;
+}
+
+.asset-mark {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 3px solid var(--mark-color, #ff4f5a);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+}
+
+.asset-frame.is-marking {
+  cursor: crosshair;
+}
+
 .pulse-dot {
   width: 8px;
   height: 8px;

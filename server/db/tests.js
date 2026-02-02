@@ -257,6 +257,7 @@ export async function getTestVotesByTestId(testId) {
         votes.appeal,
         votes.understandability,
         votes.comment,
+        votes.comment_marks,
         votes.created_at
      FROM test_assets
      JOIN assets ON assets.id = test_assets.asset_id
@@ -271,6 +272,7 @@ export async function getTestVotesByTestId(testId) {
     appeal: Number(row.appeal || 0),
     understandability: Number(row.understandability || 0),
     comment: row.comment || "",
+    comment_marks: parseJsonArray(row.comment_marks),
     created_at: row.created_at,
   }));
 }
@@ -316,5 +318,20 @@ function parseMetadata(value) {
     return JSON.parse(value);
   } catch (error) {
     return {};
+  }
+}
+
+function parseJsonArray(value) {
+  if (!value) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value;
+  }
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
   }
 }

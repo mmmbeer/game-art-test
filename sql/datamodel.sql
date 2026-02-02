@@ -58,5 +58,6 @@ CREATE TABLE votes (
   appeal INT NOT NULL,
   understandability INT NOT NULL,
   comment TEXT NULL,
+  comment_marks JSON NULL,
   created_at DATETIME NOT NULL
 );

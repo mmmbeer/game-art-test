@@ -8,6 +8,7 @@ import {
 } from "./storage.js";
 import { createViewer } from "./viewer.js";
 import { createRatings } from "./ratings.js";
+import { createMarks } from "./marks.js";
 
 const elements = getElements();
 const testUuid = getTestUuidFromPath();
@@ -60,6 +61,7 @@ const viewer = createViewer({
   showToast,
 });
 const ratings = createRatings({ elements, state });
+const marks = createMarks({ elements, state });
 
 if (!testUuid) {
   elements.testTitle.textContent = "Invalid test link.";
@@ -67,6 +69,7 @@ if (!testUuid) {
 } else {
   ratings.bindRatingEvents();
   bindActionEvents();
+  marks.bindMarkEvents();
   viewer.bindZoomEvents();
   viewer.bindViewerControls();
   viewer.updateBackgroundMode();
@@ -97,6 +100,7 @@ async function submitVote() {
     appeal: state.ratingState.appeal,
     understandability: state.ratingState.understandability,
     comment: elements.commentInput?.value.trim() || "",
+    comment_marks: marks.getMarks(),
   };
 
   try {
@@ -187,6 +191,7 @@ function updateTestMeta(data) {
 function displayAsset(asset) {
   state.currentAsset = asset;
   ratings.resetRatings();
+  marks.resetMarks();
   elements.assetName.textContent = resolveAssetName(asset);
   elements.assetType.textContent = asset.asset_type || "Art asset";
   elements.assetImage.classList.remove("loaded");
@@ -231,6 +236,7 @@ function showCompletion(data) {
     elements.overlayImage.src = "";
     elements.overlayImage.classList.add("hidden");
   }
+  marks.resetMarks();
   elements.assetName.textContent = "No more assets";
   elements.assetType.textContent = "";
   updateTestMeta(data);

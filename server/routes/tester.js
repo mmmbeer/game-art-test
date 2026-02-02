@@ -34,6 +34,7 @@ router.post("/:uuid/vote", async (req, res) => {
   const appeal = Number.parseInt(req.body?.appeal, 10);
   const understandability = Number.parseInt(req.body?.understandability, 10);
   const comment = typeof req.body?.comment === "string" ? req.body.comment.trim() : "";
+  const commentMarks = normalizeCommentMarks(req.body?.comment_marks, comment);
 
   if (!testUuid || !assetUuid) {
     return res.status(400).json({ error: "Invalid vote request." });
@@ -69,6 +70,7 @@ router.post("/:uuid/vote", async (req, res) => {
       appeal,
       understandability,
       comment,
+      commentMarks,
     });
 
     await completeTestIfSatisfied({ testId: test.id, minVotes });
@@ -160,4 +162,34 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
   } catch (error) {
     return res.status(502).json({ error: error.message || "Unable to load asset." });
   }
+}
+
+function normalizeCommentMarks(input, comment) {
+  if (!comment) {
+    return [];
+  }
+  if (!Array.isArray(input)) {
+    return [];
+  }
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return input
+    .map((mark) => ({
+      id: typeof mark?.id === "string" ? mark.id : "",
+      x: Number(mark?.x),
+      y: Number(mark?.y),
+      color: typeof mark?.color === "string" ? mark.color : "",
+    }))
+    .filter(
+      (mark) =>
+        uuidPattern.test(mark.id) &&
+        Number.isFinite(mark.x) &&
+        Number.isFinite(mark.y) &&
+        mark.x >= 0 &&
+        mark.x <= 1 &&
+        mark.y >= 0 &&
+        mark.y <= 1 &&
+        mark.color.length > 0
+    )
+    .slice(0, 40);
 }

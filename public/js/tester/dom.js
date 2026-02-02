@@ -10,6 +10,7 @@ export function getElements() {
     assetBounds: byId("assetBounds"),
     assetDriftCrop: byId("assetDriftCrop"),
     assetTransform: byId("assetTransform"),
+    assetMarks: byId("assetMarks"),
     overlayImage: byId("overlayImage"),
     zoomIndicator: byId("zoomIndicator"),
     assetLoading: byId("assetLoading"),
