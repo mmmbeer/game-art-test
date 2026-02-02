@@ -38,6 +38,11 @@ body.app-body {
   margin-bottom: 0;
 }
 
+.text-muted {
+  color: var(--color-muted) !important;
+  opacity: 1;
+}
+
 .dropdown-menu {
   background: var(--color-surface);
   border-color: var(--color-border);

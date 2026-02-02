@@ -9,6 +9,11 @@
   display: grid;
   gap: 12px;
   margin: 16px 0;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(160px, 1fr);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-gutter: stable;
 }
 
 .summary-card {
@@ -185,10 +190,6 @@
 }
 
 @media (min-width: 768px) {
-  .dashboard-summary {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   .dashboard-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
