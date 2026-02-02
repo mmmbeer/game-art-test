@@ -77,8 +77,8 @@ export function initGamesView({ onBrowseAssets, onOpenDashboard, onAuthLost }) {
         games = Array.isArray(data.games) ? data.games : [];
         designers = Array.isArray(data.designers) ? data.designers : [];
         userDisplay.textContent = data.user?.display_name
-          ? `Signed in as ${data.user.display_name}`
-          : "Signed in";
+          ? `Logged in as ${data.user.display_name}`
+          : "Logged in";
         renderDesignerFilter();
         renderGames();
         return true;

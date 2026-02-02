@@ -27,6 +27,17 @@ body.app-body {
   background: transparent;
 }
 
+.app-main > .app-card {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.app-main > .app-card .card-body {
+  padding: 0;
+  background: transparent;
+}
+
 .card-title {
   font-family: var(--font-display);
   font-size: 1.3rem;
@@ -118,6 +129,17 @@ body.app-body {
 
   .app-card .card-body {
     padding: 20px;
+    background: transparent;
+  }
+
+  .app-main > .app-card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .app-main > .app-card .card-body {
+    padding: 0;
     background: transparent;
   }
 }
