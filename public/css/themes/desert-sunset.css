@@ -1,0 +1,23 @@
+:root[data-theme="desert-sunset"] {
+  color-scheme: dark;
+  --color-bg: #1a0f0a;
+  --color-surface: #24140d;
+  --color-surface-alt: #2c1a12;
+  --color-text: #fff7ed;
+  --color-muted: #c7b7a8;
+  --color-primary: #fb923c;
+  --color-primary-dark: #d67225;
+  --color-primary-soft: rgba(251, 146, 60, 0.2);
+  --color-primary-outline: rgba(251, 146, 60, 0.5);
+  --color-focus-ring: rgba(251, 146, 60, 0.45);
+  --color-secondary: #f97316;
+  --color-accent: #fde68a;
+  --color-border: #3a2419;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-surface-sheen: rgba(255, 255, 255, 0.08);
+  --color-overlay-soft: rgba(255, 255, 255, 0.06);
+  --color-spinner-track: rgba(255, 255, 255, 0.2);
+  --color-on-primary: #1a0f0a;
+}

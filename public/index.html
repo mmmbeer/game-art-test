@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="tgc-lime-ink">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,7 +37,9 @@
               <img src="assets/icons/person.svg" alt="User menu">
             </button>
             <div class="dropdown-menu dropdown-menu-end app-menu-panel">
-              <button class="dropdown-item" id="themeToggle" type="button">Toggle theme</button>
+              <button class="dropdown-item" id="themeToggle" type="button" data-bs-toggle="modal" data-bs-target="#themeModal">
+                Theme selection
+              </button>
               <a class="dropdown-item" href="auth/tgc/sso/start">Sign in</a>
               <a class="dropdown-item" href="auth/tgc/logout">Sign out</a>
             </div>
@@ -536,6 +538,152 @@
       </div>
         </section>
       </main>
+    </div>
+
+    <div class="modal fade theme-modal" id="themeModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content app-card">
+          <div class="modal-header">
+            <h5 class="modal-title">Choose a theme</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted mb-0">Pick a look for the command center.</p>
+            <div class="theme-grid" id="themeList">
+              <button class="theme-card" type="button" data-theme-value="tgc-lime-ink">
+                <div>
+                  <p class="theme-card-title">The Game Crafter Lime &amp; Ink</p>
+                  <p class="theme-card-subtitle">Brand-inspired</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #0b0d0e;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #14181b;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #b7d51a;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #2c343a;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #ffffff;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="midnight-neon">
+                <div>
+                  <p class="theme-card-title">Midnight Neon</p>
+                  <p class="theme-card-subtitle">High-energy</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #070a12;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #0f172a;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #22d3ee;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #a78bfa;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #f472b6;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="parchment-brass">
+                <div>
+                  <p class="theme-card-title">Parchment &amp; Brass</p>
+                  <p class="theme-card-subtitle">Rulebook vibe</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #f6f1e7;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #ffffff;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #b08d57;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #2f3437;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #1f6f8b;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="candy-pop">
+                <div>
+                  <p class="theme-card-title">Candy Pop</p>
+                  <p class="theme-card-subtitle">Playful contrast</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #fff7fb;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #ffffff;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #ff3d81;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #3b82f6;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #fbbf24;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="ocean-slate">
+                <div>
+                  <p class="theme-card-title">Ocean Slate</p>
+                  <p class="theme-card-subtitle">Modern tool</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #0b1220;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #111b2e;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #1d4ed8;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #0ea5a4;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #e2e8f0;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="desert-sunset">
+                <div>
+                  <p class="theme-card-title">Desert Sunset</p>
+                  <p class="theme-card-subtitle">Cinematic warmth</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #1a0f0a;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #24140d;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #fb923c;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #f97316;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #fde68a;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="monochrome-minimal">
+                <div>
+                  <p class="theme-card-title">Monochrome Minimal</p>
+                  <p class="theme-card-subtitle">Art-first neutral</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #0a0a0a;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #121212;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #e5e7eb;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #4b5563;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #ffffff;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="cozy-cabin">
+                <div>
+                  <p class="theme-card-title">Cozy Cabin</p>
+                  <p class="theme-card-subtitle">Table night warmth</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #1b1a17;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #23211d;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #d97706;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #7c3aed;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #fde68a;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="cyber-purple">
+                <div>
+                  <p class="theme-card-title">Cyber Purple</p>
+                  <p class="theme-card-subtitle">Futuristic depth</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #060313;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #120a2a;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #8b5cf6;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #22c55e;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #f0abfc;"></span>
+                </div>
+              </button>
+              <button class="theme-card" type="button" data-theme-value="pastel-lab">
+                <div>
+                  <p class="theme-card-title">Pastel Lab</p>
+                  <p class="theme-card-subtitle">Gallery review</p>
+                </div>
+                <div class="theme-swatches">
+                  <span class="theme-swatch" style="--swatch-color: #f7fafc;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #ffffff;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #60a5fa;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #34d399;"></span>
+                  <span class="theme-swatch" style="--swatch-color: #fca5a5;"></span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="modal fade" id="assetPreviewModal" tabindex="-1" aria-hidden="true">

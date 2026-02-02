@@ -10,4 +10,10 @@
   --color-primary-soft: rgba(28, 107, 94, 0.18);
   --color-primary-outline: rgba(28, 107, 94, 0.4);
   --color-focus-ring: rgba(28, 107, 94, 0.35);
+  --color-secondary: #1c6b5e;
+  --color-accent: #ffffff;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-on-primary: #111111;
 }

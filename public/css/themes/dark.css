@@ -6,10 +6,18 @@
   --color-muted: #b6a894;
   --color-primary: #6fd3c0;
   --color-primary-dark: #4bb6a1;
+  --color-primary-soft: rgba(111, 211, 192, 0.2);
+  --color-primary-outline: rgba(111, 211, 192, 0.5);
   --color-border: #3a352f;
+  --color-secondary: #6fd3c0;
+  --color-accent: #f3efe8;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
   --color-surface-sheen: rgba(255, 255, 255, 0.08);
   --color-overlay-soft: rgba(255, 255, 255, 0.06);
   --color-spinner-track: rgba(255, 255, 255, 0.2);
   --color-focus-ring: rgba(111, 211, 192, 0.45);
   --action-shot-toolbar-border: rgba(255, 255, 255, 0.12);
+  --color-on-primary: #111111;
 }

@@ -1,0 +1,20 @@
+:root[data-theme="pastel-lab"] {
+  color-scheme: light;
+  --color-bg: #f7fafc;
+  --color-surface: #ffffff;
+  --color-surface-alt: #eef3f9;
+  --color-text: #0f172a;
+  --color-muted: #64748b;
+  --color-primary: #60a5fa;
+  --color-primary-dark: #3b82f6;
+  --color-primary-soft: rgba(96, 165, 250, 0.2);
+  --color-primary-outline: rgba(96, 165, 250, 0.45);
+  --color-focus-ring: rgba(96, 165, 250, 0.35);
+  --color-secondary: #34d399;
+  --color-accent: #fca5a5;
+  --color-border: #e2e8f0;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-on-primary: #111111;
+}

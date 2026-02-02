@@ -14,6 +14,7 @@ CSS import structure
   - app/tests-core.css
   - app/tests-preview.css
   - app/action-shot.css
+  - app/theme-picker.css
   - app/dashboard-core.css
   - app/dashboard-results.css
   - app/comments.css
@@ -29,6 +30,7 @@ CSS import structure
 @import url("./app/tests-core.css");
 @import url("./app/tests-preview.css");
 @import url("./app/action-shot.css");
+@import url("./app/theme-picker.css");
 @import url("./app/dashboard-core.css");
 @import url("./app/dashboard-results.css");
 @import url("./app/comments.css");

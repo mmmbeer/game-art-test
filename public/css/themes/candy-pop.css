@@ -1,0 +1,20 @@
+:root[data-theme="candy-pop"] {
+  color-scheme: light;
+  --color-bg: #fff7fb;
+  --color-surface: #ffffff;
+  --color-surface-alt: #fbe6f1;
+  --color-text: #111827;
+  --color-muted: #6b7280;
+  --color-primary: #ff3d81;
+  --color-primary-dark: #c72962;
+  --color-primary-soft: rgba(255, 61, 129, 0.18);
+  --color-primary-outline: rgba(255, 61, 129, 0.45);
+  --color-focus-ring: rgba(255, 61, 129, 0.35);
+  --color-secondary: #3b82f6;
+  --color-accent: #fbbf24;
+  --color-border: #f2d5e3;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-on-primary: #111111;
+}

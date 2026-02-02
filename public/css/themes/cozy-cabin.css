@@ -1,0 +1,23 @@
+:root[data-theme="cozy-cabin"] {
+  color-scheme: dark;
+  --color-bg: #1b1a17;
+  --color-surface: #23211d;
+  --color-surface-alt: #2c2924;
+  --color-text: #fafaf9;
+  --color-muted: #b6b0a6;
+  --color-primary: #d97706;
+  --color-primary-dark: #b65e00;
+  --color-primary-soft: rgba(217, 119, 6, 0.2);
+  --color-primary-outline: rgba(217, 119, 6, 0.5);
+  --color-focus-ring: rgba(217, 119, 6, 0.45);
+  --color-secondary: #7c3aed;
+  --color-accent: #fde68a;
+  --color-border: #3a342a;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-surface-sheen: rgba(255, 255, 255, 0.08);
+  --color-overlay-soft: rgba(255, 255, 255, 0.06);
+  --color-spinner-track: rgba(255, 255, 255, 0.2);
+  --color-on-primary: #111111;
+}

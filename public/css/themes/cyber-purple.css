@@ -1,0 +1,23 @@
+:root[data-theme="cyber-purple"] {
+  color-scheme: dark;
+  --color-bg: #060313;
+  --color-surface: #120a2a;
+  --color-surface-alt: #1a0f3a;
+  --color-text: #f5f3ff;
+  --color-muted: #bdb4d8;
+  --color-primary: #8b5cf6;
+  --color-primary-dark: #6d3ce0;
+  --color-primary-soft: rgba(139, 92, 246, 0.2);
+  --color-primary-outline: rgba(139, 92, 246, 0.5);
+  --color-focus-ring: rgba(139, 92, 246, 0.45);
+  --color-secondary: #22c55e;
+  --color-accent: #f0abfc;
+  --color-border: #24114a;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f43f5e;
+  --color-surface-sheen: rgba(255, 255, 255, 0.08);
+  --color-overlay-soft: rgba(255, 255, 255, 0.06);
+  --color-spinner-track: rgba(255, 255, 255, 0.2);
+  --color-on-primary: #111111;
+}

@@ -1,0 +1,23 @@
+:root[data-theme="ocean-slate"] {
+  color-scheme: dark;
+  --color-bg: #0b1220;
+  --color-surface: #111b2e;
+  --color-surface-alt: #16233a;
+  --color-text: #f1f5f9;
+  --color-muted: #94a3b8;
+  --color-primary: #1d4ed8;
+  --color-primary-dark: #163b9f;
+  --color-primary-soft: rgba(29, 78, 216, 0.2);
+  --color-primary-outline: rgba(29, 78, 216, 0.5);
+  --color-focus-ring: rgba(29, 78, 216, 0.45);
+  --color-secondary: #0ea5a4;
+  --color-accent: #e2e8f0;
+  --color-border: #20304d;
+  --color-success: #22c55e;
+  --color-warning: #fbbf24;
+  --color-danger: #f43f5e;
+  --color-surface-sheen: rgba(255, 255, 255, 0.08);
+  --color-overlay-soft: rgba(255, 255, 255, 0.06);
+  --color-spinner-track: rgba(255, 255, 255, 0.2);
+  --color-on-primary: #f1f5f9;
+}

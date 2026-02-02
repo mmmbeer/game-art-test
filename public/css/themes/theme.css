@@ -2,9 +2,6 @@
   --color-surface-sheen: rgba(255, 255, 255, 0.6);
   --color-overlay-soft: rgba(0, 0, 0, 0.04);
   --color-spinner-track: rgba(0, 0, 0, 0.12);
-  --color-primary-soft: rgba(111, 211, 192, 0.2);
-  --color-primary-outline: rgba(111, 211, 192, 0.5);
-  --color-focus-ring: rgba(111, 211, 192, 0.4);
   --color-on-primary: #111111;
   --action-shot-toolbar-bg: rgba(20, 26, 40, 0.9);
   --action-shot-toolbar-border: rgba(255, 255, 255, 0.08);

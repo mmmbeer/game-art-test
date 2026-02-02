@@ -1,0 +1,23 @@
+:root[data-theme="tgc-lime-ink"] {
+  color-scheme: dark;
+  --color-bg: #0b0d0e;
+  --color-surface: #14181b;
+  --color-surface-alt: #1b2126;
+  --color-text: #e9eef2;
+  --color-muted: #aab4bc;
+  --color-primary: #b7d51a;
+  --color-primary-dark: #8aa713;
+  --color-primary-soft: rgba(183, 213, 26, 0.2);
+  --color-primary-outline: rgba(183, 213, 26, 0.5);
+  --color-focus-ring: rgba(183, 213, 26, 0.4);
+  --color-secondary: #2c343a;
+  --color-accent: #ffffff;
+  --color-border: #263037;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-surface-sheen: rgba(255, 255, 255, 0.08);
+  --color-overlay-soft: rgba(255, 255, 255, 0.06);
+  --color-spinner-track: rgba(255, 255, 255, 0.2);
+  --color-on-primary: #111111;
+}

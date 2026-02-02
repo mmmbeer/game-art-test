@@ -1,11 +1,17 @@
 @import url("./themes/theme.css");
+@import url("./themes/tgc-lime-ink.css");
+@import url("./themes/midnight-neon.css");
+@import url("./themes/parchment-brass.css");
+@import url("./themes/candy-pop.css");
+@import url("./themes/ocean-slate.css");
+@import url("./themes/desert-sunset.css");
+@import url("./themes/monochrome-minimal.css");
+@import url("./themes/cozy-cabin.css");
+@import url("./themes/cyber-purple.css");
+@import url("./themes/pastel-lab.css");
 @import url("./themes/light.css");
 @import url("./themes/dark.css");
 
 :root {
   color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
 }
