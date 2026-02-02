@@ -1,0 +1,8 @@
+.form-control {
+  border-radius: var(--radius-md);
+  border-color: var(--color-border);
+}
+
+.input-group-text .icon-sm {
+  margin-right: 6px;
+}

@@ -7,4 +7,7 @@
   --color-primary: #1c6b5e;
   --color-primary-dark: #164f45;
   --color-border: #ddd3c6;
+  --color-primary-soft: rgba(28, 107, 94, 0.18);
+  --color-primary-outline: rgba(28, 107, 94, 0.4);
+  --color-focus-ring: rgba(28, 107, 94, 0.35);
 }

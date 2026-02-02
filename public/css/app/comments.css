@@ -1,0 +1,164 @@
+.comment-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.comment-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.comment-tag {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.75rem;
+}
+
+.comment-list {
+  display: grid;
+  gap: 8px;
+}
+
+.comment-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 10px;
+}
+
+.comment-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.comment-meta {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-bottom: 4px;
+}
+
+.comment-mark-trigger {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.comment-mark-trigger img {
+  width: 16px;
+  height: 16px;
+}
+
+.comment-marks-grid {
+  display: grid;
+  gap: 16px;
+}
+
+#commentMarksModal .modal-content.app-card {
+  max-height: 92vh;
+  height: 100%;
+}
+
+#commentMarksModal .modal-dialog {
+  height: 92vh;
+}
+
+#commentMarksModal .modal-content.app-card .modal-body {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-marks-note {
+  display: grid;
+  gap: 10px;
+}
+
+.comment-marks-meta {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.comment-marks-text {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
+.comment-marks-art {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.comment-marks-stage {
+  position: relative;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  overflow: hidden;
+}
+
+.comment-marks-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.comment-marks-viewport {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
+.comment-marks-canvas {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.comment-marks-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.comment-mark {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 3px solid var(--mark-color, #ff4f5a);
+  background: var(--comment-mark-fill);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+@media (min-width: 900px) {
+  .comment-marks-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: start;
+    height: 100%;
+  }
+
+  .comment-marks-note {
+    max-height: 100%;
+    overflow: auto;
+  }
+}

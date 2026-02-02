@@ -1,0 +1,41 @@
+.filter-bar {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.filter-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.filter-primary {
+  display: grid;
+  gap: 10px;
+}
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.filter-toggle .chevron-icon {
+  margin-right: 0;
+  transition: transform var(--transition);
+}
+
+.filter-toggle.is-open .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.filter-panel {
+  display: none;
+  gap: 10px;
+}
+
+.filter-panel.is-open {
+  display: grid;
+}

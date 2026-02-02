@@ -1,0 +1,213 @@
+.action-shot-modal .modal-content {
+  height: min(86vh, 780px);
+}
+
+.action-shot-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.action-shot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.action-shot-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.action-shot-studio {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.action-shot-stage {
+  position: relative;
+  overflow: visible;
+  height: clamp(320px, 60vh, 640px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.action-shot-surface {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: var(--action-shot-aspect, 4 / 3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-shot-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+.action-shot-canvas:active {
+  cursor: grabbing;
+}
+
+.action-shot-toolbar {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: stretch;
+}
+
+.action-shot-toolbar-inner {
+  pointer-events: auto;
+  width: 240px;
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--action-shot-toolbar-bg);
+  border: 1px solid var(--action-shot-toolbar-border);
+  color: var(--action-shot-toolbar-text);
+  display: grid;
+  gap: 12px;
+  transform: translateX(-18px);
+  opacity: 0;
+  transition: transform var(--transition), opacity var(--transition);
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+}
+
+.action-shot-stage:hover .action-shot-toolbar-inner,
+.action-shot-stage:focus-within .action-shot-toolbar-inner {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.action-shot-toolbar-group {
+  display: grid;
+  gap: 8px;
+}
+
+.action-shot-toolbar-group .form-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--action-shot-toolbar-muted);
+  margin-bottom: 0;
+}
+
+.action-shot-toolbar-group .form-select,
+.action-shot-toolbar-group .form-control,
+.action-shot-toolbar-group .form-range {
+  background: var(--action-shot-toolbar-field-bg);
+  border-color: var(--action-shot-toolbar-field-border);
+  color: var(--action-shot-toolbar-text);
+}
+
+.action-shot-inline {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.action-shot-assets {
+  display: grid;
+  gap: 8px;
+}
+
+.action-shot-assets-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+}
+
+.action-shot-assets-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.action-shot-card {
+  display: grid;
+  gap: 6px;
+  min-width: 120px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.action-shot-card:hover,
+.action-shot-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.action-shot-card.is-active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.action-shot-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-border);
+  background: var(--color-surface-alt);
+  overflow: hidden;
+}
+
+.action-shot-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.action-shot-card-name {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.action-shot-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.action-shot-footer-meta {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.action-shot-trigger {
+  display: none;
+}
+
+@media (min-width: 1024px) and (min-height: 700px) {
+  .action-shot-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+}

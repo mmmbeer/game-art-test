@@ -1,0 +1,101 @@
+.dashboard-results-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.dashboard-scorecards {
+  display: grid;
+  gap: 10px;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(160px, 1fr);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-gutter: stable;
+  grid-column: 1 / -1;
+}
+
+.dashboard-chart-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dashboard-card-settings {
+  display: none;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.dashboard-card-settings.is-open {
+  display: grid;
+}
+
+.dashboard-chart-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.dashboard-heatmap {
+  display: grid;
+  gap: 6px;
+}
+
+.heatmap-row {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  align-items: center;
+}
+
+.heatmap-cell {
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-border);
+}
+
+.heatmap-label {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-export {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .dashboard-results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-card-settings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-card-settings .form-check {
+    grid-column: 1 / -1;
+  }
+}
