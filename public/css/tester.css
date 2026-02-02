@@ -150,9 +150,9 @@ body {
   min-height: 0;
   display: grid;
   place-items: center;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
-  touch-action: none;
+  touch-action: pan-x pan-y;
   --drift-crop: 0px;
   width: 100%;
   max-width: 100%;
@@ -163,8 +163,8 @@ body {
 }
 
 .asset-stage {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  inset: auto;
   display: flex;
   align-items: center;
   justify-content: center;

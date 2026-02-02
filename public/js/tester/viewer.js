@@ -269,6 +269,48 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     const height = Math.max(1, Math.round(assetImage.naturalHeight * zoomState.scale));
     assetBounds.style.width = `${width}px`;
     assetBounds.style.height = `${height}px`;
+    updateStageSize(width, height);
+  }
+
+  function updateStageSize(boundsWidth, boundsHeight) {
+    if (!assetStage || !assetFrame) {
+      return;
+    }
+    const frameWidth = assetFrame.clientWidth || 1;
+    const frameHeight = assetFrame.clientHeight || 1;
+    const contentWidth = Math.max(frameWidth, boundsWidth);
+    const contentHeight = Math.max(frameHeight, boundsHeight);
+    const prevWidth = zoomState.contentWidth || contentWidth;
+    const prevHeight = zoomState.contentHeight || contentHeight;
+    const sizeChanged = contentWidth !== prevWidth || contentHeight !== prevHeight;
+
+    assetStage.style.width = `${contentWidth}px`;
+    assetStage.style.height = `${contentHeight}px`;
+    zoomState.contentWidth = contentWidth;
+    zoomState.contentHeight = contentHeight;
+
+    if (!sizeChanged) {
+      return;
+    }
+
+    const centerRatioX = prevWidth
+      ? (assetFrame.scrollLeft + frameWidth / 2) / prevWidth
+      : 0.5;
+    const centerRatioY = prevHeight
+      ? (assetFrame.scrollTop + frameHeight / 2) / prevHeight
+      : 0.5;
+    const maxScrollLeft = Math.max(0, contentWidth - frameWidth);
+    const maxScrollTop = Math.max(0, contentHeight - frameHeight);
+    assetFrame.scrollLeft = clamp(
+      centerRatioX * contentWidth - frameWidth / 2,
+      0,
+      maxScrollLeft
+    );
+    assetFrame.scrollTop = clamp(
+      centerRatioY * contentHeight - frameHeight / 2,
+      0,
+      maxScrollTop
+    );
   }
 
   function resetViewState({
