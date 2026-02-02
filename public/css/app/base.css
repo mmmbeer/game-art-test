@@ -30,11 +30,32 @@ body.app-body {
 .card-title {
   font-family: var(--font-display);
   font-size: 1.3rem;
+  color: var(--color-text);
 }
 
 .card-subtitle {
   color: var(--color-muted);
   margin-bottom: 0;
+}
+
+.dropdown-menu {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dropdown-item {
+  color: var(--color-text);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  color: var(--color-text);
+  background: var(--color-surface-alt);
+}
+
+.dropdown-item:active {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
 }
 
 .section-divider {
