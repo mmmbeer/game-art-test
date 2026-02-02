@@ -278,8 +278,9 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     }
     const frameWidth = assetFrame.clientWidth || 1;
     const frameHeight = assetFrame.clientHeight || 1;
-    const contentWidth = Math.max(frameWidth, boundsWidth);
-    const contentHeight = Math.max(frameHeight, boundsHeight);
+    const shouldScroll = boundsWidth > frameWidth || boundsHeight > frameHeight;
+    const contentWidth = boundsWidth > frameWidth ? boundsWidth : frameWidth;
+    const contentHeight = boundsHeight > frameHeight ? boundsHeight : frameHeight;
     const prevWidth = zoomState.contentWidth || contentWidth;
     const prevHeight = zoomState.contentHeight || contentHeight;
     const sizeChanged = contentWidth !== prevWidth || contentHeight !== prevHeight;
@@ -288,6 +289,7 @@ export function createViewer({ elements, state, getCurrentAsset, showToast }) {
     assetStage.style.height = `${contentHeight}px`;
     zoomState.contentWidth = contentWidth;
     zoomState.contentHeight = contentHeight;
+    assetFrame.classList.toggle("is-zoomed", shouldScroll);
 
     if (!sizeChanged) {
       return;
