@@ -10,7 +10,7 @@
   --transition: 180ms ease;
   --app-shell-max: 720px;
   --app-shell-max-wide: 1200px;
-  --app-shell-padding-mobile: 10px 12px 40px;
+  --app-shell-padding-mobile: 10px 12px;
   --app-shell-padding-desktop: 0;
   --app-header-blur: 12px;
   --app-header-z: 20;
