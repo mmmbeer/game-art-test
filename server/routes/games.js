@@ -233,6 +233,7 @@ router.get("/", requireAuth, async (req, res) => {
 router.get("/:uuid/assets", requireAuth, async (req, res) => {
   const { tgcSessionId, user } = req.auth;
   const gameUuid = req.params.uuid;
+  const forceRefresh = String(req.query.refresh || "").toLowerCase() === "1";
 
   try {
     const game = await getGameByUuidForUser({ userId: user.id, gameUuid });
@@ -240,13 +241,15 @@ router.get("/:uuid/assets", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Game not found" });
     }
 
-    const discoveredAssets = await discoverGameAssets({
-      tgcGameId: game.tgc_game_id,
-      sessionId: tgcSessionId,
-    });
-    await upsertAssetsForGame(game.id, discoveredAssets);
-
-    const storedAssets = await getAssetsByGameId(game.id);
+    let storedAssets = await getAssetsByGameId(game.id);
+    if (forceRefresh || storedAssets.length === 0) {
+      const discoveredAssets = await discoverGameAssets({
+        tgcGameId: game.tgc_game_id,
+        sessionId: tgcSessionId,
+      });
+      await upsertAssetsForGame(game.id, discoveredAssets);
+      storedAssets = await getAssetsByGameId(game.id);
+    }
     const grouped = groupAssetsByType(storedAssets);
     const deckCardsByAssetUuid = getDeckCardsByAssetUuid(storedAssets);
     const tests = await getTestsWithProgressForGame({

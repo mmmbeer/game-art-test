@@ -145,11 +145,14 @@ async function normalizeCardAssets({ item, sessionId, fileCache, deckIdentity = 
   const assets = [];
   const faceId = item.face_id || item.face?.id;
   const backId = item.back_id || item.back?.id;
+  const embeddedFace = item.face && typeof item.face === "object" ? item.face : null;
+  const embeddedBack = item.back && typeof item.back === "object" ? item.back : null;
   const faceAsset = await buildCardAsset({
     item,
     sessionId,
     fileCache,
     fileId: faceId,
+    embeddedFile: embeddedFace,
     side: "face",
     deckIdentity,
   });
@@ -161,6 +164,7 @@ async function normalizeCardAssets({ item, sessionId, fileCache, deckIdentity = 
     sessionId,
     fileCache,
     fileId: backId,
+    embeddedFile: embeddedBack,
     side: "back",
     deckIdentity,
   });
@@ -181,15 +185,30 @@ async function normalizeCardAssets({ item, sessionId, fileCache, deckIdentity = 
   return assets;
 }
 
-async function buildCardAsset({ item, sessionId, fileCache, fileId, side, deckIdentity }) {
-  if (!fileId) {
-    return null;
+async function buildCardAsset({
+  item,
+  sessionId,
+  fileCache,
+  fileId,
+  embeddedFile,
+  side,
+  deckIdentity,
+}) {
+  let file = embeddedFile || null;
+  if (!file && fileId) {
+    file = await getFile({ fileId, sessionId, fileCache });
   }
-  const file = await getFile({ fileId, sessionId, fileCache });
   if (!file) {
     return null;
   }
-  const imageUrl = file.file_uri || file.preview_uri || "";
+  let imageUrl = file.file_uri || file.preview_uri || "";
+  if (!imageUrl && fileId && (!file.id || file.id === fileId)) {
+    const fetched = await getFile({ fileId, sessionId, fileCache });
+    if (fetched) {
+      file = fetched;
+      imageUrl = file.file_uri || file.preview_uri || "";
+    }
+  }
   if (!imageUrl) {
     return null;
   }
@@ -256,23 +275,29 @@ async function normalizeAsset({ relationship, item, sessionId, fileCache }) {
     return null;
   }
 
-  const { fileIds, directUrls, previews } = extractFileReferences(item);
-  const fileDetails = [];
+  const { fileIds, directUrls, previews, fileDetails } = extractFileReferences(item);
   const imageUrls = new Set(directUrls);
   const previewUrls = new Set(previews);
 
-  for (const fileId of fileIds) {
-    const file = await getFile({ fileId, sessionId, fileCache });
-    if (!file) {
-      continue;
+  const needsFileFetch =
+    imageUrls.size === 0 &&
+    previewUrls.size === 0 &&
+    fileDetails.every((detail) => !detail.file_uri && !detail.preview_uri);
+
+  if (needsFileFetch) {
+    for (const fileId of fileIds) {
+      const file = await getFile({ fileId, sessionId, fileCache });
+      if (!file) {
+        continue;
+      }
+      if (file.file_uri) {
+        imageUrls.add(file.file_uri);
+      }
+      if (file.preview_uri) {
+        previewUrls.add(file.preview_uri);
+      }
+      fileDetails.push(pickFileDetails(file));
     }
-    if (file.file_uri) {
-      imageUrls.add(file.file_uri);
-    }
-    if (file.preview_uri) {
-      previewUrls.add(file.preview_uri);
-    }
-    fileDetails.push(pickFileDetails(file));
   }
 
   if (imageUrls.size === 0 && previewUrls.size === 0) {
@@ -302,6 +327,7 @@ function extractFileReferences(item) {
   const fileIds = new Set();
   const directUrls = new Set();
   const previews = new Set();
+  const fileDetails = [];
 
   for (const [key, value] of Object.entries(item)) {
     if (typeof value === "string") {
@@ -315,20 +341,20 @@ function extractFileReferences(item) {
 
     if (Array.isArray(value)) {
       for (const entry of value) {
-        collectFileFromObject(entry, fileIds, directUrls, previews);
+        collectFileFromObject(entry, fileIds, directUrls, previews, fileDetails);
       }
       continue;
     }
 
     if (value && typeof value === "object") {
-      collectFileFromObject(value, fileIds, directUrls, previews);
+      collectFileFromObject(value, fileIds, directUrls, previews, fileDetails);
     }
   }
 
-  return { fileIds, directUrls, previews };
+  return { fileIds, directUrls, previews, fileDetails };
 }
 
-function collectFileFromObject(value, fileIds, directUrls, previews) {
+function collectFileFromObject(value, fileIds, directUrls, previews, fileDetails) {
   if (!value || typeof value !== "object") {
     return;
   }
@@ -340,6 +366,7 @@ function collectFileFromObject(value, fileIds, directUrls, previews) {
   }
   if (typeof value.id === "string" && value.object_type === "file") {
     fileIds.add(value.id);
+    fileDetails.push(pickFileDetails(value));
   }
 }
 
