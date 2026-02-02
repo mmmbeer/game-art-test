@@ -1,6 +1,31 @@
 .form-control {
   border-radius: var(--radius-md);
-  border-color: var(--color-border);
+  border-color: var(--form-border);
+  background-color: var(--form-bg);
+  color: var(--form-text);
+}
+
+.form-control::placeholder {
+  color: var(--form-placeholder);
+}
+
+.form-select {
+  border-radius: var(--radius-md);
+  border-color: var(--form-border);
+  background-color: var(--form-bg);
+  color: var(--form-text);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--form-focus);
+  box-shadow: 0 0 0 0.2rem var(--color-focus-ring);
+}
+
+.input-group-text {
+  background-color: var(--form-bg);
+  color: var(--form-text);
+  border-color: var(--form-border);
 }
 
 .input-group-text .icon-sm {

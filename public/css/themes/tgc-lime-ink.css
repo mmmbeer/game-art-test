@@ -2,9 +2,9 @@
   color-scheme: dark;
   --color-bg: #0b0d0e;
   --color-surface: #14181b;
-  --color-surface-alt: #1b2126;
+  --color-surface-alt: #20282e;
   --color-text: #e9eef2;
-  --color-muted: #aab4bc;
+  --color-muted: #c0c8cf;
   --color-primary: #b7d51a;
   --color-primary-dark: #8aa713;
   --color-primary-soft: rgba(183, 213, 26, 0.2);
@@ -12,7 +12,7 @@
   --color-focus-ring: rgba(183, 213, 26, 0.4);
   --color-secondary: #2c343a;
   --color-accent: #ffffff;
-  --color-border: #263037;
+  --color-border: #303c44;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
