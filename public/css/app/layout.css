@@ -8,9 +8,9 @@
   position: sticky;
   top: 0;
   z-index: var(--app-header-z);
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  padding: 4px 0 6px;
+  width: 100%;
+  margin-left: 0;
+  padding: 4px var(--app-shell-padding-mobile) 6px;
   backdrop-filter: blur(var(--app-header-blur));
   background-color: var(--color-bg);
   background: linear-gradient(180deg, var(--color-bg) 0%, rgba(0, 0, 0, 0) 100%);
@@ -128,6 +128,10 @@
 @media (min-width: 768px) {
   .app-shell {
     padding: var(--app-shell-padding-desktop);
+  }
+
+  .app-header {
+    padding-inline: var(--app-shell-padding-desktop);
   }
 
   .app-title {

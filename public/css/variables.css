@@ -11,7 +11,7 @@
   --app-shell-max: 720px;
   --app-shell-max-wide: 1200px;
   --app-shell-padding-mobile: 10px 12px 40px;
-  --app-shell-padding-desktop: 24px 24px 64px;
+  --app-shell-padding-desktop: 24px;
   --app-header-blur: 12px;
   --app-header-z: 20;
   --icon-sm-size: 16px;
