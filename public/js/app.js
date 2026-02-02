@@ -3,6 +3,7 @@ import { initGamesView } from "./views/games.js";
 import { initAssetsView } from "./views/assets.js";
 import { initDashboardView } from "./views/dashboard.js";
 import { getSelectedGameUuid, setSelectedGameUuid } from "./state.js";
+import { fetchJson } from "./api.js";
 
 const landingView = document.getElementById("landingView");
 const gamesView = document.getElementById("gamesView");
@@ -12,12 +13,35 @@ const appPageTitle = document.getElementById("appPageTitle");
 const appSubpageTitle = document.getElementById("appSubpageTitle");
 const appTitleSep = document.getElementById("appTitleSep");
 const appBackButton = document.getElementById("appBackButton");
+const appTitleButton = document.getElementById("appTitleButton");
+const appTestsButton = document.getElementById("appTestsButton");
+const appTestsMenu = document.getElementById("appTestsMenu");
+const appTestsDropdown = document.getElementById("appTestsDropdown");
 
 let activeBackAction = null;
 let currentView = "";
+let titleExpandTimer = null;
 
 appBackButton?.addEventListener("click", () => {
   activeBackAction?.();
+});
+
+appTitleButton?.addEventListener("click", () => {
+  appTitleButton.classList.add("is-expanded");
+  if (titleExpandTimer) {
+    window.clearTimeout(titleExpandTimer);
+  }
+  titleExpandTimer = window.setTimeout(() => {
+    appTitleButton.classList.remove("is-expanded");
+  }, 2400);
+});
+
+appTitleButton?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+  event.preventDefault();
+  appTitleButton.click();
 });
 
 function setView(view) {
@@ -175,6 +199,7 @@ function setPageTitle(title) {
   if (appPageTitle) {
     appPageTitle.textContent = title;
   }
+  updateTitleTooltip();
 }
 
 function setSubpageTitle(title) {
@@ -184,6 +209,7 @@ function setSubpageTitle(title) {
   if (appTitleSep) {
     appTitleSep.classList.toggle("is-hidden", !title);
   }
+  updateTitleTooltip();
 }
 
 function setBackVisible(visible) {
@@ -214,3 +240,97 @@ document.addEventListener("app:set-subpage", (event) => {
 });
 
 initFilterToggles();
+initHeaderTests();
+
+function updateTitleTooltip() {
+  if (!appTitleButton) {
+    return;
+  }
+  const title = appPageTitle?.textContent?.trim() || "";
+  const subpage = appSubpageTitle?.textContent?.trim() || "";
+  const fullTitle = subpage ? `${title}: ${subpage}` : title;
+  appTitleButton.setAttribute("title", fullTitle);
+  appTitleButton.setAttribute("aria-label", fullTitle);
+}
+
+function initHeaderTests() {
+  if (!appTestsButton || !appTestsMenu || !appTestsDropdown) {
+    return;
+  }
+
+  const dropdown = window.bootstrap?.Dropdown?.getOrCreateInstance?.(appTestsButton);
+
+  appTestsButton.addEventListener("show.bs.dropdown", () => {
+    refreshHeaderTests();
+  });
+
+  if (dropdown && window.matchMedia?.("(hover: hover) and (pointer: fine)")?.matches) {
+    appTestsDropdown.addEventListener("mouseenter", () => {
+      dropdown.show();
+    });
+    appTestsDropdown.addEventListener("mouseleave", () => {
+      dropdown.hide();
+    });
+  }
+}
+
+async function refreshHeaderTests() {
+  if (!appTestsMenu) {
+    return;
+  }
+  appTestsMenu.innerHTML = "<span class=\"dropdown-item-text text-muted\">Loading tests...</span>";
+  try {
+    const { response, data } = await fetchJson("tests/overview");
+    if (response.status === 401) {
+      appTestsMenu.innerHTML = "<span class=\"dropdown-item-text text-muted\">Sign in to see active tests.</span>";
+      return;
+    }
+    if (!response.ok) {
+      appTestsMenu.innerHTML = "<span class=\"dropdown-item-text text-muted\">Unable to load tests.</span>";
+      return;
+    }
+    const tests = Array.isArray(data.tests) ? data.tests : [];
+    const active = tests.filter((test) => (test.status || "active") === "active");
+    renderHeaderTests(active);
+  } catch (error) {
+    appTestsMenu.innerHTML = "<span class=\"dropdown-item-text text-muted\">Unable to load tests.</span>";
+  }
+}
+
+function renderHeaderTests(activeTests) {
+  if (!appTestsMenu) {
+    return;
+  }
+  appTestsMenu.innerHTML = "";
+  if (!activeTests.length) {
+    appTestsMenu.innerHTML = "<span class=\"dropdown-item-text text-muted\">No active tests.</span>";
+    return;
+  }
+
+  const header = document.createElement("div");
+  header.className = "dropdown-header";
+  header.textContent = "Active tests";
+  appTestsMenu.appendChild(header);
+
+  activeTests.forEach((test) => {
+    const link = document.createElement("a");
+    link.className = "dropdown-item";
+    link.href = `?view=dashboard&test=${test.uuid}`;
+
+    const item = document.createElement("div");
+    item.className = "app-tests-item";
+
+    const title = document.createElement("div");
+    title.className = "app-tests-title";
+    title.textContent = test.game?.name || "Untitled game";
+
+    const meta = document.createElement("div");
+    meta.className = "app-tests-meta";
+    meta.textContent = `Test ${test.uuid.slice(0, 8)}...`;
+
+    item.appendChild(title);
+    item.appendChild(meta);
+    link.appendChild(item);
+    appTestsMenu.appendChild(link);
+  });
+}

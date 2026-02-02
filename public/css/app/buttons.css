@@ -1,6 +1,6 @@
 .app-back-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 10px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -12,6 +12,12 @@
   padding: 0;
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.app-back-btn img {
+  width: 16px;
+  height: 16px;
+  filter: var(--icon-filter);
 }
 
 .app-back-btn:hover,
@@ -35,6 +41,31 @@
   place-items: center;
   padding: 0;
   cursor: pointer;
+}
+
+.app-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.app-icon-btn:hover,
+.app-icon-btn:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.app-icon-btn img {
+  width: 18px;
+  height: 18px;
+  filter: var(--icon-filter);
 }
 
 .app-menu-btn img {

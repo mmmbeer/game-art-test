@@ -19,29 +19,39 @@
         <div class="app-topbar">
           <div class="app-left">
             <button class="app-back-btn is-hidden" id="appBackButton" type="button" aria-label="Back">
-              <span aria-hidden="true">&lt;</span>
+              <img src="assets/icons/chevron-left.svg" alt="" aria-hidden="true">
             </button>
-            <div class="app-logo">
-              <img src="favicon.png" alt="TGC logo">
-            </div>
           </div>
           <div class="app-title-wrap">
-            <h1 class="app-title">
+            <h1 class="app-title" id="appTitleButton" role="button" tabindex="0">
               <span id="appPageTitle">TGC Art Test Platform</span>
               <span class="app-title-sep is-hidden" id="appTitleSep">:</span>
               <span id="appSubpageTitle"></span>
             </h1>
           </div>
-          <div class="app-menu dropdown">
-            <button class="app-menu-btn" id="appMenuButton" data-bs-toggle="dropdown" type="button" aria-expanded="false" aria-label="User menu">
-              <img src="assets/icons/person.svg" alt="User menu">
-            </button>
-            <div class="dropdown-menu dropdown-menu-end app-menu-panel">
-              <button class="dropdown-item" id="themeToggle" type="button" data-bs-toggle="modal" data-bs-target="#themeModal">
-                Theme selection
+          <div class="app-actions">
+            <div class="dropdown app-tests" id="appTestsDropdown">
+              <button class="app-icon-btn" id="appTestsButton" data-bs-toggle="dropdown" type="button" aria-expanded="false" aria-label="Active tests">
+                <img src="assets/icons/tests.svg" alt="">
               </button>
-              <a class="dropdown-item" href="auth/tgc/sso/start">Sign in</a>
-              <a class="dropdown-item" href="auth/tgc/logout">Sign out</a>
+              <div class="dropdown-menu dropdown-menu-end app-menu-panel app-tests-menu" id="appTestsMenu">
+                <span class="dropdown-item-text text-muted">Loading tests...</span>
+              </div>
+            </div>
+            <a class="app-icon-btn" id="appCommandCenterLink" href="?view=dashboard" aria-label="Command center">
+              <img src="assets/icons/command-center.svg" alt="">
+            </a>
+            <div class="app-menu dropdown">
+              <button class="app-menu-btn" id="appMenuButton" data-bs-toggle="dropdown" type="button" aria-expanded="false" aria-label="User menu">
+                <img src="assets/icons/person.svg" alt="User menu">
+              </button>
+              <div class="dropdown-menu dropdown-menu-end app-menu-panel">
+                <button class="dropdown-item" id="themeToggle" type="button" data-bs-toggle="modal" data-bs-target="#themeModal">
+                  Theme selection
+                </button>
+                <a class="dropdown-item" href="auth/tgc/sso/start">Sign in</a>
+                <a class="dropdown-item" href="auth/tgc/logout">Sign out</a>
+              </div>
             </div>
           </div>
         </div>
