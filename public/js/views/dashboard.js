@@ -47,6 +47,12 @@ const typeIncludeIncomplete = document.getElementById("typeIncludeIncomplete");
 const heatmapLimit = document.getElementById("heatmapLimit");
 const heatmapIncludeIncomplete = document.getElementById("heatmapIncludeIncomplete");
 const commentDefaultView = document.getElementById("commentDefaultView");
+const commentMarksModalEl = document.getElementById("commentMarksModal");
+const commentMarksMeta = document.getElementById("commentMarksMeta");
+const commentMarksText = document.getElementById("commentMarksText");
+const commentMarksImage = document.getElementById("commentMarksImage");
+const commentMarksOverlay = document.getElementById("commentMarksOverlay");
+const commentMarksEmpty = document.getElementById("commentMarksEmpty");
 
 const chartIds = {
   radar: "resultsRadarChart",
@@ -63,6 +69,11 @@ let selectedTest = null;
 let statusData = null;
 let resultsData = null;
 let showAllComments = false;
+let commentMarksModal = null;
+const commentMarksState = {
+  map: new Map(),
+  assetsByUuid: new Map(),
+};
 
 const filterState = {
   query: "",
@@ -115,6 +126,7 @@ export function initDashboardView({ onAuthLost }) {
   });
 
   initCardToggles();
+  initCommentMarksModal();
 
   assetsGroupBy?.addEventListener("change", renderAssetsList);
   assetsSort?.addEventListener("change", renderAssetsList);
@@ -249,6 +261,24 @@ export function initDashboardView({ onAuthLost }) {
   return {
     loadOverview: () => loadOverview(onAuthLost),
   };
+}
+
+function initCommentMarksModal() {
+  if (commentMarksModalEl && window.bootstrap?.Modal) {
+    commentMarksModal = window.bootstrap.Modal.getOrCreateInstance(commentMarksModalEl);
+  }
+  commentList?.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-comment-mark-id]");
+    if (!trigger) {
+      return;
+    }
+    const commentId = trigger.dataset.commentMarkId || "";
+    const comment = commentMarksState.map.get(commentId);
+    if (!comment) {
+      return;
+    }
+    openCommentMarksModal(comment);
+  });
 }
 
 function initCardToggles() {
@@ -604,7 +634,12 @@ function buildStats(data) {
     entry.ratings.appeal[vote.appeal - 1] += 1;
     entry.ratings.understandability[vote.understandability - 1] += 1;
     if (vote.comment) {
-      entry.comments.push({ text: vote.comment, created_at: vote.created_at, asset_uuid: vote.asset_uuid });
+      entry.comments.push({
+        text: vote.comment,
+        created_at: vote.created_at,
+        asset_uuid: vote.asset_uuid,
+        comment_marks: Array.isArray(vote.comment_marks) ? vote.comment_marks : [],
+      });
     }
   });
 
@@ -991,18 +1026,32 @@ function renderComments(stats) {
   if (!resolvedStats) {
     return;
   }
+  commentMarksState.assetsByUuid = new Map(
+    (resolvedStats.assets || []).map((asset) => [asset.uuid, asset])
+  );
   const query = commentSearch.value.trim().toLowerCase();
   const filtered = query
     ? resolvedStats.comments.filter((comment) => comment.text.toLowerCase().includes(query))
     : resolvedStats.comments.slice();
   const display = showAllComments ? filtered : filtered.slice(0, 6);
+  commentMarksState.map.clear();
   commentList.innerHTML = display.length
     ? display
-        .map((comment) => {
+        .map((comment, index) => {
           const date = comment.created_at ? new Date(comment.created_at).toLocaleDateString() : "";
+          const hasMarks = Array.isArray(comment.comment_marks) && comment.comment_marks.length > 0;
+          const commentId = `${comment.asset_uuid}-${index}`;
+          commentMarksState.map.set(commentId, comment);
           return `
             <div class="comment-card">
-              <p class="comment-meta">${comment.asset_uuid.slice(0, 8)}... | ${date}</p>
+              <div class="comment-card-header">
+                <p class="comment-meta">${comment.asset_uuid.slice(0, 8)}... | ${date}</p>
+                ${hasMarks ? `
+                  <button class="comment-mark-trigger" type="button" data-comment-mark-id="${commentId}" aria-label="View marks">
+                    <img src="assets/icons/notes.svg" alt="">
+                  </button>
+                ` : ""}
+              </div>
               <p class="mb-0">${escapeHtml(comment.text)}</p>
             </div>
           `;
@@ -1011,6 +1060,46 @@ function renderComments(stats) {
     : "<p class=\"text-muted mb-0\">No comments yet.</p>";
 
   renderCommentCloud(filtered);
+}
+
+function openCommentMarksModal(comment) {
+  if (!commentMarksModalEl || !commentMarksOverlay) {
+    return;
+  }
+  const asset = commentMarksState.assetsByUuid.get(comment.asset_uuid);
+  const title = formatAssetLabel(asset || {});
+  const date = comment.created_at ? new Date(comment.created_at).toLocaleDateString() : "";
+  if (commentMarksMeta) {
+    commentMarksMeta.textContent = `${title} | ${comment.asset_uuid.slice(0, 8)}... | ${date}`;
+  }
+  if (commentMarksText) {
+    commentMarksText.textContent = comment.text || "";
+  }
+  if (commentMarksImage) {
+    commentMarksImage.src = asset?.image_url || "assets/icons/asset.svg";
+    commentMarksImage.alt = title;
+  }
+  renderCommentMarks(comment.comment_marks);
+  commentMarksModal?.show();
+}
+
+function renderCommentMarks(marks) {
+  if (!commentMarksOverlay) {
+    return;
+  }
+  commentMarksOverlay.innerHTML = "";
+  const list = Array.isArray(marks) ? marks : [];
+  const hasMarks = list.length > 0;
+  commentMarksEmpty?.classList.toggle("d-none", hasMarks);
+  commentMarksOverlay.classList.toggle("d-none", !hasMarks);
+  list.forEach((mark) => {
+    const node = document.createElement("span");
+    node.className = "comment-mark";
+    node.style.left = `${mark.x * 100}%`;
+    node.style.top = `${mark.y * 100}%`;
+    node.style.setProperty("--mark-color", mark.color || "#ff4f5a");
+    commentMarksOverlay.appendChild(node);
+  });
 }
 
 function renderCommentCloud(comments) {
