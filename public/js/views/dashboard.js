@@ -53,6 +53,8 @@ const commentMarksText = document.getElementById("commentMarksText");
 const commentMarksImage = document.getElementById("commentMarksImage");
 const commentMarksOverlay = document.getElementById("commentMarksOverlay");
 const commentMarksEmpty = document.getElementById("commentMarksEmpty");
+const commentMarksViewport = document.getElementById("commentMarksViewport");
+const commentMarksCanvas = document.getElementById("commentMarksCanvas");
 
 const chartIds = {
   radar: "resultsRadarChart",
@@ -70,9 +72,15 @@ let statusData = null;
 let resultsData = null;
 let showAllComments = false;
 let commentMarksModal = null;
+let commentMarkTooltips = [];
 const commentMarksState = {
   map: new Map(),
   assetsByUuid: new Map(),
+  zoom: 1,
+  minZoom: 0.2,
+  maxZoom: 4,
+  baseWidth: 0,
+  baseHeight: 0,
 };
 
 const filterState = {
@@ -279,6 +287,7 @@ function initCommentMarksModal() {
     }
     openCommentMarksModal(comment);
   });
+  commentMarksViewport?.addEventListener("wheel", handleCommentMarksWheel, { passive: false });
 }
 
 function initCardToggles() {
@@ -1040,6 +1049,7 @@ function renderComments(stats) {
         .map((comment, index) => {
           const date = comment.created_at ? new Date(comment.created_at).toLocaleDateString() : "";
           const hasMarks = Array.isArray(comment.comment_marks) && comment.comment_marks.length > 0;
+          const markCount = hasMarks ? comment.comment_marks.length : 0;
           const commentId = `${comment.asset_uuid}-${index}`;
           commentMarksState.map.set(commentId, comment);
           return `
@@ -1047,7 +1057,7 @@ function renderComments(stats) {
               <div class="comment-card-header">
                 <p class="comment-meta">${comment.asset_uuid.slice(0, 8)}... | ${date}</p>
                 ${hasMarks ? `
-                  <button class="comment-mark-trigger" type="button" data-comment-mark-id="${commentId}" aria-label="View marks">
+                  <button class="comment-mark-trigger" type="button" data-comment-mark-id="${commentId}" data-bs-toggle="tooltip" title="Comment includes ${markCount} marks" aria-label="View marks">
                     <img src="assets/icons/notes.svg" alt="">
                   </button>
                 ` : ""}
@@ -1060,6 +1070,7 @@ function renderComments(stats) {
     : "<p class=\"text-muted mb-0\">No comments yet.</p>";
 
   renderCommentCloud(filtered);
+  initCommentMarkTooltips();
 }
 
 function openCommentMarksModal(comment) {
@@ -1080,6 +1091,7 @@ function openCommentMarksModal(comment) {
     commentMarksImage.alt = title;
   }
   renderCommentMarks(comment.comment_marks);
+  setCommentMarksZoomToFit();
   commentMarksModal?.show();
 }
 
@@ -1100,6 +1112,88 @@ function renderCommentMarks(marks) {
     node.style.setProperty("--mark-color", mark.color || "#ff4f5a");
     commentMarksOverlay.appendChild(node);
   });
+}
+
+function initCommentMarkTooltips() {
+  if (!window.bootstrap?.Tooltip) {
+    return;
+  }
+  commentMarkTooltips.forEach((tooltip) => tooltip.dispose());
+  commentMarkTooltips = [];
+  document.querySelectorAll(".comment-mark-trigger[data-bs-toggle=\"tooltip\"]").forEach((node) => {
+    commentMarkTooltips.push(new window.bootstrap.Tooltip(node));
+  });
+}
+
+function setCommentMarksZoomToFit() {
+  if (!commentMarksImage || !commentMarksViewport || !commentMarksCanvas) {
+    return;
+  }
+  const setZoom = () => {
+    const baseWidth = commentMarksImage.naturalWidth || commentMarksViewport.clientWidth;
+    const baseHeight = commentMarksImage.naturalHeight || commentMarksViewport.clientHeight;
+    commentMarksState.baseWidth = baseWidth;
+    commentMarksState.baseHeight = baseHeight;
+    const fitScale = Math.min(
+      commentMarksViewport.clientWidth / baseWidth,
+      commentMarksViewport.clientHeight / baseHeight,
+      1
+    );
+    updateCommentMarksZoom(fitScale, { center: true });
+  };
+  if (commentMarksImage.complete) {
+    setZoom();
+    return;
+  }
+  commentMarksImage.addEventListener("load", setZoom, { once: true });
+}
+
+function updateCommentMarksZoom(nextZoom, { center = false, focus } = {}) {
+  if (!commentMarksViewport || !commentMarksCanvas) {
+    return;
+  }
+  const clamped = Math.max(commentMarksState.minZoom, Math.min(commentMarksState.maxZoom, nextZoom));
+  const prevZoom = commentMarksState.zoom;
+  if (clamped === prevZoom) {
+    return;
+  }
+  const viewport = commentMarksViewport;
+  let focusX = viewport.clientWidth / 2;
+  let focusY = viewport.clientHeight / 2;
+  if (focus) {
+    focusX = focus.x;
+    focusY = focus.y;
+  }
+  const contentX = (viewport.scrollLeft + focusX) / prevZoom;
+  const contentY = (viewport.scrollTop + focusY) / prevZoom;
+  commentMarksState.zoom = clamped;
+  const width = commentMarksState.baseWidth * clamped;
+  const height = commentMarksState.baseHeight * clamped;
+  commentMarksCanvas.style.width = `${width}px`;
+  commentMarksCanvas.style.height = `${height}px`;
+  if (center) {
+    viewport.scrollLeft = Math.max(0, (width - viewport.clientWidth) / 2);
+    viewport.scrollTop = Math.max(0, (height - viewport.clientHeight) / 2);
+  } else {
+    viewport.scrollLeft = contentX * clamped - focusX;
+    viewport.scrollTop = contentY * clamped - focusY;
+  }
+}
+
+function handleCommentMarksWheel(event) {
+  if (!commentMarksViewport) {
+    return;
+  }
+  if (!event.ctrlKey && !event.metaKey && !event.shiftKey && event.deltaY !== 0) {
+    event.preventDefault();
+  }
+  const rect = commentMarksViewport.getBoundingClientRect();
+  const focus = {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top,
+  };
+  const delta = Math.sign(event.deltaY) * -0.08;
+  updateCommentMarksZoom(commentMarksState.zoom + delta, { focus });
 }
 
 function renderCommentCloud(comments) {
