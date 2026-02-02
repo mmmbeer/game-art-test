@@ -13,12 +13,20 @@ const RAINBOW_COLORS = [
 const DEFAULT_RADIUS = 16;
 
 export function createMarks({ elements, state }) {
-  const { assetFrame, assetBounds, assetMarks, ratingPanel, commentInput } = elements;
+  const {
+    assetFrame,
+    assetBounds,
+    assetMarks,
+    ratingPanel,
+    commentInput,
+    commentMarksToggle,
+  } = elements;
   const { viewState } = state;
   const markState = {
     marks: [],
     isActive: false,
     hasComment: false,
+    overrideActive: false,
   };
 
   function bindMarkEvents() {
@@ -38,23 +46,38 @@ export function createMarks({ elements, state }) {
         if (!markState.hasComment) {
           resetMarks();
         }
+        syncToggleState();
+        syncVisibility();
+      });
+    }
+    if (commentMarksToggle) {
+      commentMarksToggle.addEventListener("click", () => {
+        if (!markState.hasComment) {
+          commentInput?.focus();
+          return;
+        }
+        markState.overrideActive = !markState.overrideActive;
+        syncToggleState();
         syncVisibility();
       });
     }
     markState.isActive = ratingPanel?.dataset.activeMetric === "comment";
     markState.hasComment = Boolean(commentInput?.value?.trim());
+    syncToggleState();
     syncVisibility();
   }
 
   function resetMarks() {
     markState.marks = [];
     markState.hasComment = Boolean(commentInput?.value?.trim());
+    markState.overrideActive = false;
     renderMarks();
+    syncToggleState();
     syncVisibility();
   }
 
   function handleFrameClick(event) {
-    if (!markState.isActive || !markState.hasComment) {
+    if (!isMarksEnabled()) {
       return;
     }
     const point = getNormalizedPoint(event);
@@ -144,9 +167,22 @@ export function createMarks({ elements, state }) {
     if (!assetMarks || !assetFrame) {
       return;
     }
-    const isVisible = markState.isActive && markState.hasComment;
+    const isVisible = isMarksEnabled();
     assetMarks.classList.toggle("is-visible", isVisible);
     assetFrame.classList.toggle("is-marking", isVisible);
+  }
+
+  function isMarksEnabled() {
+    return markState.hasComment && (markState.isActive || markState.overrideActive);
+  }
+
+  function syncToggleState() {
+    if (!commentMarksToggle) {
+      return;
+    }
+    commentMarksToggle.classList.toggle("is-on", markState.overrideActive);
+    commentMarksToggle.setAttribute("aria-pressed", String(markState.overrideActive));
+    commentMarksToggle.disabled = !markState.hasComment;
   }
 
   return {

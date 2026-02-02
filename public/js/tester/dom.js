@@ -26,6 +26,7 @@ export function getElements() {
     voteSkip: byId("voteSkip"),
     voteLoading: byId("voteLoading"),
     commentInput: byId("commentInput"),
+    commentMarksToggle: byId("commentMarksToggle"),
     commentSubmit: byId("commentSubmit"),
     testerProgress: byId("testerProgress"),
     testerProgressTrack: byId("testerProgressTrack"),
