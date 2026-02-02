@@ -274,6 +274,9 @@ export function initDashboardView({ onAuthLost }) {
 function initCommentMarksModal() {
   if (commentMarksModalEl && window.bootstrap?.Modal) {
     commentMarksModal = window.bootstrap.Modal.getOrCreateInstance(commentMarksModalEl);
+    commentMarksModalEl.addEventListener("shown.bs.modal", () => {
+      setCommentMarksZoomToFit();
+    });
   }
   commentList?.addEventListener("click", (event) => {
     const trigger = event.target.closest("[data-comment-mark-id]");
@@ -1091,7 +1094,6 @@ function openCommentMarksModal(comment) {
     commentMarksImage.alt = title;
   }
   renderCommentMarks(comment.comment_marks);
-  setCommentMarksZoomToFit();
   commentMarksModal?.show();
 }
 

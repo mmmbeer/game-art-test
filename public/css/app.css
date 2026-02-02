@@ -1397,10 +1397,17 @@ body.app-body {
 
 #commentMarksModal .modal-content.app-card {
   max-height: 92vh;
+  height: 100%;
+}
+
+#commentMarksModal .modal-dialog {
+  height: 92vh;
 }
 
 #commentMarksModal .modal-content.app-card .modal-body {
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .comment-marks-note {
@@ -1419,6 +1426,12 @@ body.app-body {
   background: var(--color-surface-alt);
   padding: 12px;
   white-space: pre-wrap;
+}
+
+.comment-marks-art {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .comment-marks-stage {
@@ -1440,7 +1453,9 @@ body.app-body {
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
   overflow: auto;
-  max-height: 60vh;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
 }
 
 .comment-marks-canvas {
@@ -1470,9 +1485,11 @@ body.app-body {
   .comment-marks-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     align-items: start;
+    height: 100%;
   }
-  .comment-marks-viewport {
-    max-height: 65vh;
+  .comment-marks-note {
+    max-height: 100%;
+    overflow: auto;
   }
 }
 
