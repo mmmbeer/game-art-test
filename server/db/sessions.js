@@ -22,3 +22,7 @@ export async function getSessionByUuid(sessionUuid) {
 export async function touchSession(sessionUuid) {
   await pool.query("UPDATE user_sessions SET last_seen_at = NOW() WHERE uuid = ?", [sessionUuid]);
 }
+
+export async function deleteSession(sessionUuid) {
+  await pool.query("DELETE FROM user_sessions WHERE uuid = ?", [sessionUuid]);
+}

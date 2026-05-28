@@ -2,7 +2,7 @@ import { Router } from "express";
 import env from "../config/env.js";
 import { createSessionFromSso, fetchUser } from "../services/tgcClient.js";
 import { createUser, findUserByTgcId, updateUserDisplayName } from "../db/users.js";
-import { createSession as createLocalSession } from "../db/sessions.js";
+import { createSession as createLocalSession, deleteSession } from "../db/sessions.js";
 
 const router = Router();
 
@@ -62,13 +62,27 @@ router.get("/sso/callback", async (req, res) => {
   }
 });
 
+router.get("/logout", async (req, res) => {
+  const sessionUuid = req.cookies?.[env.session.cookieName];
+  if (sessionUuid) {
+    await deleteSession(sessionUuid);
+  }
+  res.clearCookie(env.session.cookieName, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: env.nodeEnv === "production",
+  });
+  return res.redirect(resolveAppRoot());
+});
+
 export default router;
 
 function resolveAppRoot() {
-  if (!env.app.basePath || env.app.basePath === "/") {
+  const basePath = normalizeBasePath(env.app.basePath);
+  if (!basePath) {
     return "/";
   }
-  return `${env.app.basePath}/`;
+  return `${basePath}/`;
 }
 
 function buildPostbackUrl(req) {
@@ -76,7 +90,7 @@ function buildPostbackUrl(req) {
   if (!base) {
     return "";
   }
-  return `${base}${env.app.basePath || ""}/auth/tgc/sso/callback`;
+  return `${base}${normalizeBasePath(env.app.basePath)}/auth/tgc/sso/callback`;
 }
 
 function inferRequestOrigin(req) {
@@ -86,4 +100,18 @@ function inferRequestOrigin(req) {
   }
   const proto = req.get("x-forwarded-proto") || req.protocol || "https";
   return `${proto}://${host}`;
+}
+
+function normalizeBasePath(input) {
+  if (!input || input === "/") {
+    return "";
+  }
+  let base = input.trim();
+  if (!base.startsWith("/")) {
+    base = `/${base}`;
+  }
+  if (base.length > 1 && base.endsWith("/")) {
+    base = base.slice(0, -1);
+  }
+  return base;
 }
