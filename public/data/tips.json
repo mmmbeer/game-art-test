@@ -1,0 +1,317 @@
+[
+  {
+    "designer": "Mark Rosewater",
+    "knownFor": ["Magic: The Gathering"],
+    "tip": "Use constraints deliberately because restrictions force sharper, more creative card and system design.",
+    "sourceTitle": "Twenty Years, Twenty Lessons—Part 3",
+    "sourceUrl": "https://magic.wizards.com/en/news/making-magic/twenty-years-twenty-lessons-part-3-2016-06-13"
+  },
+  {
+    "designer": "Reiner Knizia",
+    "knownFor": ["Modern Art", "Ra", "Tigris & Euphrates"],
+    "tip": "Do not rely on one fixed method or one personal strength because overusing it can turn it into a weakness.",
+    "sourceTitle": "How Reiner Knizia makes games",
+    "sourceUrl": "https://andhegames.com/how-reiner-knizia-makes-games/"
+  },
+  {
+    "designer": "Richard Garfield",
+    "knownFor": ["Magic: The Gathering", "RoboRally", "King of Tokyo"],
+    "tip": "Treat luck as uncertainty in outcome, then decide where that uncertainty makes the game more interesting.",
+    "sourceTitle": "Luck vs Skill with Richard Garfield",
+    "sourceUrl": "https://boardgamedesignlab.com/luck-vs-skill-with-richard-garfield/"
+  },
+  {
+    "designer": "Jamey Stegmaier",
+    "knownFor": ["Scythe", "Viticulture", "Wingspan publisher"],
+    "tip": "Prototype quickly, playtest often, and use notes from real sessions instead of relying on memory.",
+    "sourceTitle": "Tabletop Game Prototyping, Playtesting, and Development",
+    "sourceUrl": "https://stonemaiergames.com/tabletop-game-prototyping-playtesting-and-development/"
+  },
+  {
+    "designer": "Jamey Stegmaier",
+    "knownFor": ["Scythe", "Viticulture", "Charterstone"],
+    "tip": "Minimize unnecessary frustration because tension is useful but avoidable annoyance erodes the experience.",
+    "sourceTitle": "The Top 10 Things I Learned About Game Design in 2013",
+    "sourceUrl": "https://stonemaiergames.com/the-top-10-things-i-learned-about-game-design-in-2013/"
+  },
+  {
+    "designer": "Bruno Cathala",
+    "knownFor": ["Kingdomino", "Five Tribes", "7 Wonders Duel"],
+    "tip": "Give players small but crucial choices that feel simple to understand and painful to optimize.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #8 – Bruno Cathala",
+    "sourceUrl": "https://opinionatedgamers.com/2011/06/28/the-art-of-design-interviews-to-game-designers-8-bruno-cathala/"
+  },
+  {
+    "designer": "Bruno Cathala",
+    "knownFor": ["Kingdomino", "Mr. Jack", "Cyclades"],
+    "tip": "Start by designing a game you would actually want to play yourself.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #8 – Bruno Cathala",
+    "sourceUrl": "https://opinionatedgamers.com/2011/06/28/the-art-of-design-interviews-to-game-designers-8-bruno-cathala/"
+  },
+  {
+    "designer": "Uwe Rosenberg",
+    "knownFor": ["Agricola", "A Feast for Odin", "Bohnanza"],
+    "tip": "Before endless playtesting, try multiple ideas yourself and learn why each failed.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #16 – Uwe Rosenberg",
+    "sourceUrl": "https://opinionatedgamers.com/2012/02/02/the-art-of-design-interviews-to-game-designers-16-uwe-rosenberg/"
+  },
+  {
+    "designer": "Matt Leacock",
+    "knownFor": ["Pandemic", "Forbidden Island", "Daybreak"],
+    "tip": "In cooperative games, tune the emotional rhythm so players cycle between hope, fear, recovery, and crisis.",
+    "sourceTitle": "Games of Emotion: Interview with Game Designer Matt Leacock",
+    "sourceUrl": "https://www.leagueofgamemakers.com/games-of-emotion-interview-with-game-designer-matt-leacock/"
+  },
+  {
+    "designer": "Matt Leacock",
+    "knownFor": ["Pandemic", "Forbidden Desert", "Fate of the Fellowship"],
+    "tip": "Use difficulty options or feedback loops so the challenge can match the players’ skill level.",
+    "sourceTitle": "Games of Emotion: Interview with Game Designer Matt Leacock",
+    "sourceUrl": "https://www.leagueofgamemakers.com/games-of-emotion-interview-with-game-designer-matt-leacock/"
+  },
+  {
+    "designer": "Rob Daviau",
+    "knownFor": ["Risk Legacy", "Pandemic Legacy", "Betrayal Legacy"],
+    "tip": "For campaign or legacy games, give players reasons to care about what will happen at the next session.",
+    "sourceTitle": "Rob Daviau — Innovating Legacy Gameplay, Revitalizing Classics, and Designing a Sequel to Clank",
+    "sourceUrl": "https://justingarydesign.substack.com/p/think-like-a-game-designer-23-rob-409"
+  },
+  {
+    "designer": "Donald X. Vaccarino",
+    "knownFor": ["Dominion", "Kingdom Builder"],
+    "tip": "Think of a game as mechanics, flavor, and data, then make sure the card set or component mix supports the core loop.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #19 – Donald X. Vaccarino",
+    "sourceUrl": "https://opinionatedgamers.com/2012/05/11/the-art-of-design-interviews-to-game-designers-19-donald-x-vaccarino/"
+  },
+  {
+    "designer": "Donald X. Vaccarino",
+    "knownFor": ["Dominion"],
+    "tip": "Variable setup can preserve replayability when the core action structure is intentionally simple.",
+    "sourceTitle": "Meaningful Decisions: Donald X. Vaccarino on Design",
+    "sourceUrl": "https://cardboardedison.com/blog/meaningful-decisions-donald-x-vaccarino-dominion"
+  },
+  {
+    "designer": "Elizabeth Hargrave",
+    "knownFor": ["Wingspan", "The Fox Experiment", "Mariposas"],
+    "tip": "A distinctive theme can open design space when the mechanics express what is interesting about that subject.",
+    "sourceTitle": "Interview with Elizabeth Hargrave, Designer of Wingspan and The Fox Experiment",
+    "sourceUrl": "https://www.boardgamequest.com/interview-with-elizabeth-hargrave-designer-of-wingspan-and-now-the-fox-experiment/"
+  },
+  {
+    "designer": "Vlaada Chvátil",
+    "knownFor": ["Codenames", "Galaxy Trucker", "Through the Ages"],
+    "tip": "Design for the kind of joy or surprise you want players to feel, not just for mechanical novelty.",
+    "sourceTitle": "Vlaada Chvátil — Designing for Joy, Building Great Games, and the Magic of Codenames",
+    "sourceUrl": "https://justingarydesign.substack.com/p/vlaada-chvatil-designing-for-joy"
+  },
+  {
+    "designer": "Eric M. Lang",
+    "knownFor": ["Blood Rage", "Rising Sun", "Ankh", "XCOM: The Board Game"],
+    "tip": "Design around the player emotion you want, then make every mechanism serve that emotional arc.",
+    "sourceTitle": "Eric Lang’s Best Advice",
+    "sourceUrl": "https://boardgamedesignlab.com/game-design/"
+  },
+  {
+    "designer": "Antoine Bauza",
+    "knownFor": ["7 Wonders", "Hanabi", "Takenoko"],
+    "tip": "Keep the core decision easy to understand, then let replayability come from timing, interaction, and context.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #17 – Antoine Bauza",
+    "sourceUrl": "https://opinionatedgamers.com/2012/04/11/the-art-of-design-interviews-to-game-designers-17-antoine-bauza/"
+  },
+  {
+    "designer": "Stefan Feld",
+    "knownFor": ["The Castles of Burgundy", "Trajan", "Bora Bora"],
+    "tip": "Let players feel clever by giving them several useful actions, not one obviously correct move.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #10 – Stefan Feld",
+    "sourceUrl": "https://opinionatedgamers.com/2011/10/03/the-art-of-design-interviews-to-game-designers-10-stefan-feld/"
+  },
+  {
+    "designer": "Friedemann Friese",
+    "knownFor": ["Power Grid", "Friday", "Fabled Fruit"],
+    "tip": "Use artificial restrictions as a creative tool when a design has too many possible directions.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #12 – Friedemann Friese",
+    "sourceUrl": "https://opinionatedgamers.com/2011/10/16/the-art-of-design-interviews-to-game-designers-12-friedemann-friese/"
+  },
+  {
+    "designer": "Wolfgang Kramer",
+    "knownFor": ["El Grande", "Tikal", "The Princes of Florence"],
+    "tip": "A strong co-designer can expose the flaws you are too close to see.",
+    "sourceTitle": "The Art of Design: Interviews to game designers #7 – Wolfgang Kramer",
+    "sourceUrl": "https://opinionatedgamers.com/2011/06/10/the-art-of-design-interviews-to-game-designers-7-wolfgang-kramer/"
+  },
+  {
+    "designer": "Vlaada Chvátil",
+    "knownFor": ["Codenames", "Galaxy Trucker", "Mage Knight"],
+    "tip": "A funny or chaotic game still needs a disciplined structure underneath the jokes.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #15 – Vlaada Chvatil",
+    "sourceUrl": "https://opinionatedgamers.com/2011/12/06/the-art-of-design-interviews-to-game-designers-15-vlaada-chvatil/"
+  },
+  {
+    "designer": "Richard Garfield",
+    "knownFor": ["Magic: The Gathering", "RoboRally", "King of Tokyo"],
+    "tip": "Make uncertainty useful by letting players plan around risk instead of merely suffer from randomness.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #20 – Richard Garfield",
+    "sourceUrl": "https://opinionatedgamers.com/2012/07/02/the-art-of-design-interviews-to-game-designers-20-richard-garfield/"
+  },
+  {
+    "designer": "Sébastien Pauchon",
+    "knownFor": ["Jaipur", "Yspahan", "The River"],
+    "tip": "Trim the design until the game’s central pleasure is visible without explanation.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #13 – Sebastièn Pauchon",
+    "sourceUrl": "https://opinionatedgamers.com/2011/11/10/the-art-of-design-interviews-to-game-designers-13-sebastien-pauchon/"
+  },
+  {
+    "designer": "Rüdiger Dorn",
+    "knownFor": ["Goa", "Istanbul", "Las Vegas"],
+    "tip": "Clean mechanisms work best when the game gives players constant pressure to prioritize.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #22 – Rudiger Dorn",
+    "sourceUrl": "https://opinionatedgamers.com/2012/08/27/the-art-of-design-interviews-to-game-designers-21-rudiger-dorn/"
+  },
+  {
+    "designer": "Uwe Rosenberg",
+    "knownFor": ["Agricola", "Bohnanza", "A Feast for Odin"],
+    "tip": "Test many internal variations before asking playtesters to solve problems you can already identify yourself.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #16 – Uwe Rosenberg",
+    "sourceUrl": "https://opinionatedgamers.com/2012/02/02/the-art-of-design-interviews-to-game-designers-16-uwe-rosenberg/"
+  },
+  {
+    "designer": "Donald X. Vaccarino",
+    "knownFor": ["Dominion", "Kingdom Builder"],
+    "tip": "Separate mechanics, flavor, and data so you can fix the broken part without rewriting the whole game.",
+    "sourceTitle": "The Art of Design: Interviews to Game Designers #19 – Donald X. Vaccarino",
+    "sourceUrl": "https://opinionatedgamers.com/2012/05/11/the-art-of-design-interviews-to-game-designers-19-donald-x-vaccarino/"
+  },
+  {
+    "designer": "Cole Wehrle",
+    "knownFor": ["Root", "Pax Pamir", "John Company"],
+    "tip": "Be ruthless enough to throw away good work when it no longer serves the game.",
+    "sourceTitle": "How Cole Wehrle Makes Games",
+    "sourceUrl": "https://andhegames.com/how-cole-wehrle-makes-games/"
+  },
+  {
+    "designer": "Nikki Valens",
+    "knownFor": ["Mansions of Madness Second Edition", "Quirky Circuits", "Legacy of Dragonholt"],
+    "tip": "In narrative games, let mechanisms reveal story instead of pausing the game to deliver story.",
+    "sourceTitle": "Designing a Narrative Driven Game with Nikki Valens",
+    "sourceUrl": "https://boardgamedesignlab.com/designing-a-narrative-driven-game-with-nikki-valens/"
+  },
+  {
+    "designer": "Corey Konieczka",
+    "knownFor": ["Battlestar Galactica", "Star Wars: Rebellion", "The Initiative"],
+    "tip": "Build from a strong experiential hook before polishing subsystems around it.",
+    "sourceTitle": "The Design Process of Corey Konieczka",
+    "sourceUrl": "https://boardgamedesignlab.com/the-design-process-of-corey-konieczka/"
+  },
+  {
+    "designer": "Vital Lacerda",
+    "knownFor": ["Vinhos", "Kanban EV", "The Gallerist", "On Mars"],
+    "tip": "Do not start with a theme you do not care about because complexity needs passion to survive development.",
+    "sourceTitle": "Interview with Vital Lacerda | Cardboard Fire Interviews",
+    "sourceUrl": "https://boardgamegeek.com/blog/9770/blogpost/108864/interview-with-vital-lacerda"
+  },
+  {
+    "designer": "Vital Lacerda",
+    "knownFor": ["Lisboa", "Weather Machine", "Inventions"],
+    "tip": "For heavy games, design for the second play as much as the first because depth needs room to unfold.",
+    "sourceTitle": "Be Patient: An Interview With Vital Lacerda",
+    "sourceUrl": "https://www.cardboardrepublic.com/articles/interviews/be-patient-an-interview-with-vital-lacerda"
+  },
+  {
+    "designer": "Elizabeth Hargrave",
+    "knownFor": ["Wingspan", "Mariposas", "The Fox Experiment"],
+    "tip": "Layer engine-building concepts gradually so players can see how early choices become later momentum.",
+    "sourceTitle": "Designing Engine-Building Games with Elizabeth Hargrave",
+    "sourceUrl": "https://boardgamedesignlab.com/category/podcast/"
+  },
+  {
+    "designer": "Ignacy Trzewiczek",
+    "knownFor": ["Robinson Crusoe", "Imperial Settlers", "Detective"],
+    "tip": "Design stories players retell after the game rather than only stories printed in the rulebook.",
+    "sourceTitle": "Designing Games that Tell Stories with Ignacy Trzewiczek",
+    "sourceUrl": "https://boardgamedesignlab.com/category/podcast/"
+  },
+  {
+    "designer": "Matt Leacock",
+    "knownFor": ["Pandemic", "Forbidden Island", "Daybreak"],
+    "tip": "Cooperative tension works when players can see the crisis coming but still argue over how to stop it.",
+    "sourceTitle": "Crafting the Player Experience with Matt Leacock",
+    "sourceUrl": "https://boardgamedesignlab.com/game-design/"
+  },
+  {
+    "designer": "Rob Daviau",
+    "knownFor": ["Risk Legacy", "Pandemic Legacy", "Betrayal Legacy"],
+    "tip": "In legacy games, make consequences visible enough that players feel ownership of the changed board.",
+    "sourceTitle": "How Board Game Designer Rob Daviau Built His Creepiest Game Yet",
+    "sourceUrl": "https://www.wired.com/story/board-game-design-betrayal-legacy-rob-daviau"
+  },
+  {
+    "designer": "Justin Gary",
+    "knownFor": ["Ascension", "SolForge", "Shards of Infinity"],
+    "tip": "Prototype the smallest playable version of the core loop before investing in content volume.",
+    "sourceTitle": "How to Design and Publish Games with Justin Gary",
+    "sourceUrl": "https://boardgamedesignlab.com/category/game-design-basics/"
+  },
+  {
+    "designer": "Jason Tagmire",
+    "knownFor": ["Button Shy Games", "Sprawlopolis", "Tussie Mussie publisher"],
+    "tip": "Small component counts force every card to do real work.",
+    "sourceTitle": "Designing Small Games that Pack a Big Punch with Jason Tagmire",
+    "sourceUrl": "https://boardgamedesignlab.com/category/game-design-basics/"
+  },
+  {
+    "designer": "Gil Hova",
+    "knownFor": ["The Networks", "Wordsy", "High Rise"],
+    "tip": "Control scope through abstraction because a literal simulation usually becomes too large to finish.",
+    "sourceTitle": "Keeping a Design from Getting out of Hand with Gil Hova",
+    "sourceUrl": "https://boardgamedesignlab.com/category/game-design-basics/"
+  },
+  {
+    "designer": "Hermann Luttmann",
+    "knownFor": ["Dawn of the Zeds", "In Magnificent Style", "The Plum Island Horror"],
+    "tip": "Solo games need an opponent system that creates pressure without making the player do accounting.",
+    "sourceTitle": "How to Design a Solo Game with Hermann Luttmann",
+    "sourceUrl": "https://boardgamedesignlab.com/category/game-design-basics/"
+  },
+  {
+    "designer": "Leslie Scott",
+    "knownFor": ["Jenga"],
+    "tip": "Mass-market games need a physical or social hook that people understand before the rules explanation ends.",
+    "sourceTitle": "How to Design Games for the Mass Market with Leslie Scott and Freddie Scott Vollrath",
+    "sourceUrl": "https://boardgamedesignlab.com/category/game-design-basics/"
+  },
+  {
+    "designer": "Daryl Andrews",
+    "knownFor": ["Sagrada", "The Tea Dragon Society Card Game", "Kodama 3D"],
+    "tip": "When designing for licensed IP, make the game feel like the property rather than just decorating a mechanism with it.",
+    "sourceTitle": "Designing Games Based on a Licensed IP with Daryl Andrews",
+    "sourceUrl": "https://boardgamedesignlab.com/category/game-design-basics/"
+  },
+  {
+    "designer": "Nikki Valens",
+    "knownFor": ["Mansions of Madness Second Edition", "Arkham Horror", "Quirky Circuits"],
+    "tip": "Use app integration only where it reduces friction, hides upkeep, or enables experiences cardboard cannot handle cleanly.",
+    "sourceTitle": "Mansions of Madness Q&A",
+    "sourceUrl": "https://www.therewillbe.games/articles-interviews/5641-mansions-of-madness-q-a/amp"
+  },
+  {
+    "designer": "Carla Kopp",
+    "knownFor": ["Stellar Leap", "Weird Giraffe Games"],
+    "tip": "Run playtests with a clear question so feedback solves the current design problem instead of becoming noise.",
+    "sourceTitle": "Carla Kopp on How to Run an Effective Playtest",
+    "sourceUrl": "https://boardgamedesignlab.com/category/bonus/"
+  },
+  {
+    "designer": "Reiner Knizia",
+    "knownFor": ["Ra", "Modern Art", "Lost Cities", "Tigris & Euphrates"],
+    "tip": "A game is strongest when the rules are simple but the decisions remain rich.",
+    "sourceTitle": "Designer Interview: Reiner Knizia",
+    "sourceUrl": "https://boardgamegeek.com/blog/4429/blogpost/42393/designer-interview-reiner-knizia"
+  },
+  {
+    "designer": "Amabel Holland",
+    "knownFor": ["This Guilty Land", "The Vote", "Endurance"],
+    "tip": "Do not assume every game must be conventionally fun; games can explore discomfort, politics, memory, and grief.",
+    "sourceTitle": "The Personal, Political Art of Board-Game Design",
+    "sourceUrl": "https://www.newyorker.com/culture/annals-of-inquiry/the-personal-political-art-of-board-game-design"
+  }
+]

@@ -1,5 +1,5 @@
 import { getElements } from "./dom.js";
-import { getBasePath, getTestUuidFromPath, showToast } from "./utils.js";
+import { getTestEndpointUrl, getTestUuidFromPath, showToast } from "./utils.js";
 import {
   loadVoteHistory,
   addVoteToHistory,
@@ -118,7 +118,7 @@ async function submitVote() {
   };
 
   try {
-    const response = await fetch(`${getBasePath()}/vote`, {
+    const response = await fetch(getTestEndpointUrl("vote"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -151,7 +151,7 @@ async function loadNextAsset() {
   elements.completePanel.classList.add("hidden");
 
   try {
-    const url = `${getBasePath()}/next`;
+    const url = getTestEndpointUrl("next");
     const options =
       state.votedAssets.length > 0
         ? {

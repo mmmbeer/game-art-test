@@ -26,9 +26,25 @@ export function showToast(message, variant) {
 
 export function getTestUuidFromPath() {
   const parts = window.location.pathname.split("/").filter(Boolean);
+  const testRouteIndex = parts.lastIndexOf("t");
+  if (testRouteIndex >= 0) {
+    return parts[testRouteIndex + 1] || "";
+  }
   return parts[parts.length - 1] || "";
 }
 
-export function getBasePath() {
-  return window.location.pathname.replace(/\/$/, "");
+export function getTestEndpointUrl(endpoint) {
+  const cleanEndpoint = String(endpoint || "").replace(/^\/+/, "");
+  const baseUrl = new URL(window.location.href);
+  const parts = baseUrl.pathname.split("/").filter(Boolean);
+  const testRouteIndex = parts.lastIndexOf("t");
+
+  if (testRouteIndex >= 0 && parts[testRouteIndex + 1]) {
+    baseUrl.pathname = `/${parts.slice(0, testRouteIndex + 2).join("/")}/${cleanEndpoint}`;
+  } else {
+    baseUrl.pathname = `${baseUrl.pathname.replace(/\/$/, "")}/${cleanEndpoint}`;
+  }
+  baseUrl.search = "";
+  baseUrl.hash = "";
+  return baseUrl.toString();
 }
