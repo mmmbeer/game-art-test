@@ -4,6 +4,7 @@ import { initAssetsView } from "./views/assets.js";
 import { initDashboardView } from "./views/dashboard.js";
 import { getSelectedGameUuid, setSelectedGameUuid } from "./state.js";
 import { fetchJson } from "./api.js";
+import { getFallbackTips, loadLoadingTips, renderLoadingTip } from "./loadingTips.js";
 
 const landingView = document.getElementById("landingView");
 const loadingView = document.getElementById("loadingView");
@@ -388,37 +389,13 @@ function stopLoadingTips() {
   }
 }
 
-async function loadLoadingTips() {
-  try {
-    const response = await fetch("data/tips.json", { credentials: "same-origin" });
-    if (!response.ok) {
-      return getFallbackTips();
-    }
-    const data = await response.json();
-    const tips = Array.isArray(data)
-      ? data.map((entry) => String(entry?.tip || "").trim()).filter(Boolean)
-      : [];
-    return tips.length ? tips : getFallbackTips();
-  } catch (error) {
-    return getFallbackTips();
-  }
-}
-
 function showNextLoadingTip() {
   if (!loadingTip) {
     return;
   }
   const tips = loadingTips.length ? loadingTips : getFallbackTips();
-  loadingTip.textContent = tips[loadingTipIndex % tips.length];
+  renderLoadingTip(loadingTip, tips[loadingTipIndex % tips.length]);
   loadingTipIndex += 1;
-}
-
-function getFallbackTips() {
-  return [
-    "Good game art makes decisions easier to read.",
-    "A focused playtest question produces cleaner feedback.",
-    "Group related assets when you need apples-to-apples comparisons.",
-  ];
 }
 
 async function loadPublicTests() {

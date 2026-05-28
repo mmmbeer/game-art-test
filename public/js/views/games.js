@@ -7,6 +7,7 @@ const userDisplay = document.getElementById("userDisplay");
 const gamesList = document.getElementById("gamesList");
 const gameSearch = document.getElementById("gameSearch");
 const designerFilter = document.getElementById("designerFilter");
+const hideGamesWithoutThumb = document.getElementById("hideGamesWithoutThumb");
 const clearFilters = document.getElementById("clearFilters");
 const gamesLoading = document.getElementById("gamesLoading");
 const openDashboard = document.getElementById("openDashboard");
@@ -16,6 +17,7 @@ let designers = [];
 let currentFilter = {
   query: "",
   designerUuid: "",
+  hideThumbnailless: true,
 };
 
 export function initGamesView({ onBrowseAssets, onOpenDashboard, onAuthLost }) {
@@ -45,10 +47,18 @@ export function initGamesView({ onBrowseAssets, onOpenDashboard, onAuthLost }) {
     renderGames();
   });
 
+  hideGamesWithoutThumb?.addEventListener("change", (event) => {
+    currentFilter.hideThumbnailless = event.target.checked;
+    renderGames();
+  });
+
   clearFilters.addEventListener("click", () => {
     gameSearch.value = "";
     designerFilter.value = "";
-    currentFilter = { query: "", designerUuid: "" };
+    if (hideGamesWithoutThumb) {
+      hideGamesWithoutThumb.checked = true;
+    }
+    currentFilter = { query: "", designerUuid: "", hideThumbnailless: true };
     renderGames();
   });
 
@@ -119,7 +129,10 @@ function renderGames() {
     const matchesDesigner = currentFilter.designerUuid
       ? game.designer_uuid === currentFilter.designerUuid
       : true;
-    return matchesQuery && matchesDesigner;
+    const matchesThumbnail = currentFilter.hideThumbnailless
+      ? Boolean(game.shop_image_url)
+      : true;
+    return matchesQuery && matchesDesigner && matchesThumbnail;
   });
   filtered.sort((a, b) => {
     if (a.uuid === selected && b.uuid !== selected) {

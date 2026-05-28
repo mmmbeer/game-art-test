@@ -1,5 +1,6 @@
 import { fetchJson } from "../api.js";
 import { showToast } from "../toast.js";
+import { getFallbackTips, loadLoadingTips, renderLoadingTip } from "../loadingTips.js";
 import { initTestBuilder } from "./testBuilder/index.js";
 
 const assetGameDesigner = document.getElementById("assetGameDesigner");
@@ -7,12 +8,16 @@ const assetMetrics = document.getElementById("assetMetrics");
 const refreshAssets = document.getElementById("refreshAssets");
 const assetStatus = document.getElementById("assetStatus");
 const assetsLoading = document.getElementById("assetsLoading");
+const assetsLoadingTip = document.getElementById("assetsLoadingTip");
 const gameTestsList = document.getElementById("gameTestsList");
 
 let activeGame = null;
 let groupedAssets = [];
 let assetsByType = {};
 let testBuilderApi = null;
+let assetsLoadingTips = [];
+let assetsLoadingTipIndex = 0;
+let assetsLoadingTipTimer = null;
 
 export function initAssetsView({ onAuthLost }) {
   if (!testBuilderApi) {
@@ -47,6 +52,7 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
     : "";
   assetStatus.textContent = "Loading assets...";
   assetsLoading.classList.remove("d-none");
+  startAssetLoadingTips();
   if (gameTestsList) {
     gameTestsList.innerHTML = "<p class=\"text-muted mb-0\">Loading tests...</p>";
   }
@@ -82,6 +88,7 @@ async function loadAssets(game, { showToastOnSuccess, onAuthLost }) {
     }
   } finally {
     assetsLoading.classList.add("d-none");
+    stopAssetLoadingTips();
   }
 }
 
@@ -95,6 +102,33 @@ function clearAssetsView() {
     gameTestsList.innerHTML = "<p class=\"text-muted mb-0\">No tests created for this game yet.</p>";
   }
   testBuilderApi?.reset?.();
+}
+
+async function startAssetLoadingTips() {
+  if (!assetsLoadingTips.length) {
+    assetsLoadingTips = await loadLoadingTips();
+    assetsLoadingTipIndex = Math.floor(Math.random() * Math.max(assetsLoadingTips.length, 1));
+    if (assetsLoading?.classList.contains("d-none")) {
+      return;
+    }
+  }
+  showNextAssetLoadingTip();
+  if (!assetsLoadingTipTimer) {
+    assetsLoadingTipTimer = window.setInterval(showNextAssetLoadingTip, 4800);
+  }
+}
+
+function stopAssetLoadingTips() {
+  if (assetsLoadingTipTimer) {
+    window.clearInterval(assetsLoadingTipTimer);
+    assetsLoadingTipTimer = null;
+  }
+}
+
+function showNextAssetLoadingTip() {
+  const tips = assetsLoadingTips.length ? assetsLoadingTips : getFallbackTips();
+  renderLoadingTip(assetsLoadingTip, tips[assetsLoadingTipIndex % tips.length]);
+  assetsLoadingTipIndex += 1;
 }
 
 function setHeaderSubpage(title) {

@@ -148,6 +148,12 @@
                     Open Test Command Center
                   </button>
                 </div>
+                <div class="sidebar-section">
+                  <label class="form-check game-thumbnail-filter">
+                    <input class="form-check-input" id="hideGamesWithoutThumb" type="checkbox" checked>
+                    <span class="form-check-label">Hide games without thumbnails</span>
+                  </label>
+                </div>
                 <div class="filter-stack" data-filter-group="games">
                   <div class="filter-primary">
                     <div class="input-group">
@@ -222,9 +228,14 @@
                 </button>
               </div>
             </div>
-            <div class="loading-row d-none" id="assetsLoading" aria-live="polite">
-              <span class="loading-spinner" aria-hidden="true"></span>
-              <span>Loading assets...</span>
+            <div class="app-loading-panel asset-loading-panel d-none" id="assetsLoading" aria-live="polite">
+              <p class="app-eyebrow">Loading game assets</p>
+              <h2>Fetching artwork from TGC</h2>
+              <div class="app-loading-progress" role="progressbar" aria-label="Loading assets">
+                <span></span>
+              </div>
+              <p class="app-loading-status">Inspecting printable components...</p>
+              <p class="app-loading-tip" id="assetsLoadingTip">"A game is strongest when the rules are simple but the decisions remain rich."</p>
             </div>
             <div class="asset-status text-muted" id="assetStatus"></div>
             <section class="game-tests" id="gameTests">

@@ -104,12 +104,50 @@
 }
 
 .app-loading-tip {
+  display: grid;
+  gap: 6px;
   min-height: 3.2em;
-  padding-top: 10px;
-  border-top: 1px solid var(--color-border);
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 48%),
+    var(--color-surface-alt);
   color: var(--color-text);
   font-size: 1rem;
   line-height: 1.45;
+}
+
+.loading-tip-quote {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+}
+
+.loading-tip-meta {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.loading-tip-meta a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.loading-tip-meta a:hover,
+.loading-tip-meta a:focus {
+  text-decoration: underline;
+}
+
+.asset-loading-panel {
+  width: 100%;
+  margin: 14px 0;
+}
+
+.asset-loading-panel h2 {
+  font-size: 1.45rem;
 }
 
 @keyframes loading-progress {
