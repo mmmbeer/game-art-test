@@ -1,7 +1,7 @@
 .landing-page {
   position: relative;
   display: grid;
-  gap: 18px;
+  gap: 0;
   min-height: calc(100vh - 70px);
   padding-bottom: 24px;
 }
@@ -77,7 +77,9 @@
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 520px;
+  min-height: 560px;
+  margin-top: -34px;
+  padding: 84px 16px 28px;
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid var(--color-border);
@@ -151,45 +153,117 @@
 
 .landing-login-modal {
   position: relative;
+  justify-self: center;
   z-index: 2;
   width: min(420px, calc(100% - 32px));
+  margin-top: -36px;
   padding: 24px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(17, 17, 17, 0.24);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
-  backdrop-filter: blur(16px);
+  background: var(--color-primary);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
 }
 
 .landing-login-modal h3 {
   margin: 0 0 10px;
-  color: var(--color-text);
+  color: var(--color-on-primary);
   font-family: var(--font-display);
   font-size: 1.7rem;
   line-height: 1.05;
 }
 
+.landing-login-modal .app-eyebrow,
 .landing-login-modal p {
-  color: var(--color-muted);
+  color: rgba(17, 17, 17, 0.78);
 }
 
-.landing-public-note {
+.landing-login-button {
+  background: var(--color-surface);
+  border-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.landing-login-button:hover,
+.landing-login-button:focus {
+  background: var(--color-surface-alt);
+  border-color: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.landing-public-tests {
+  position: relative;
+  z-index: 1;
   display: grid;
-  gap: 4px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border);
+  gap: 14px;
+  width: min(620px, 100%);
+  max-height: 380px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.36);
 }
 
-.landing-public-note p {
+.landing-public-tests-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.landing-public-tests-header h3 {
   margin: 0;
-  font-size: 0.9rem;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.landing-public-tests-header span {
+  flex: 0 0 auto;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.landing-public-tests-list {
+  display: grid;
+  gap: 10px;
+  max-height: 272px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.landing-public-test {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-alt);
+}
+
+.landing-public-test-title {
+  margin: 0 0 4px;
+  color: var(--color-text);
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.landing-public-test-meta {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.landing-public-test .btn {
+  white-space: nowrap;
 }
 
 @media (max-width: 767px) {
   .landing-page {
     min-height: calc(100vh - 58px);
-    gap: 12px;
   }
 
   .landing-banner,
@@ -207,7 +281,14 @@
   }
 
   .landing-stage {
-    min-height: 620px;
+    min-height: 650px;
+    margin-top: -22px;
+    padding: 78px 12px 22px;
+  }
+
+  .landing-login-modal {
+    margin-top: -28px;
+    padding: 20px;
   }
 
   .landing-feature-card {
@@ -248,6 +329,15 @@
   .card-progress {
     right: -28px;
     bottom: 50px;
+  }
+
+  .landing-public-tests {
+    max-height: 440px;
+    padding: 14px;
+  }
+
+  .landing-public-test {
+    grid-template-columns: 1fr;
   }
 }
 

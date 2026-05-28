@@ -75,6 +75,15 @@
             </div>
           </div>
 
+          <div class="landing-login-modal" role="dialog" aria-labelledby="landingLoginTitle">
+            <p class="app-eyebrow">Creator login</p>
+            <h3 id="landingLoginTitle">Start managing art tests</h3>
+            <p>
+              Sign in with The Game Crafter to choose assets, create test links, and review results.
+            </p>
+            <a class="btn landing-login-button w-100" href="auth/tgc/sso/start">Sign in with TGC</a>
+          </div>
+
           <div class="landing-stage">
             <div class="landing-card-cloud" aria-hidden="true">
               <article class="landing-feature-card card-custom-tests">
@@ -103,16 +112,16 @@
               </article>
             </div>
 
-            <div class="landing-login-modal" role="dialog" aria-labelledby="landingLoginTitle">
-              <p class="app-eyebrow">Creator login</p>
-              <h3 id="landingLoginTitle">Start managing art tests</h3>
-              <p>
-                Sign in with The Game Crafter to choose assets, create test links, and review results.
-              </p>
-              <a class="btn btn-primary w-100" href="auth/tgc/sso/start">Sign in with TGC</a>
-              <div class="landing-public-note">
-                <p>Public art tests do not require a TGC account.</p>
-                <p>Follow the link you were given to vote.</p>
+            <div class="landing-public-tests">
+              <div class="landing-public-tests-header">
+                <div>
+                  <p class="app-eyebrow">Open tests</p>
+                  <h3>Public art tests</h3>
+                </div>
+                <span id="publicTestsStatus">Loading...</span>
+              </div>
+              <div class="landing-public-tests-list" id="publicTestsList">
+                <p class="text-muted mb-0">Loading public art tests...</p>
               </div>
             </div>
           </div>

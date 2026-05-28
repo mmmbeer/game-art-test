@@ -151,6 +151,46 @@ export async function getTestsOverviewByUserId({ userId, minVotes }) {
   }));
 }
 
+export async function getPublicActiveTests({ minVotes, limit = 30 }) {
+  const [rows] = await pool.query(
+    `SELECT
+        tests.uuid,
+        tests.status,
+        tests.created_at,
+        games.name AS game_name,
+        users.display_name AS designer_name,
+        COUNT(test_assets.id) AS total_assets,
+        SUM(CASE WHEN COALESCE(vote_counts.vote_count, 0) >= ? THEN 1 ELSE 0 END) AS completed_assets,
+        SUM(COALESCE(vote_counts.vote_count, 0)) AS total_votes
+     FROM tests
+     JOIN games ON games.id = tests.game_id
+     JOIN users ON users.id = tests.user_id
+     LEFT JOIN test_assets ON test_assets.test_id = tests.id
+     LEFT JOIN (
+        SELECT test_assets.id AS test_asset_id, COUNT(votes.id) AS vote_count
+        FROM test_assets
+        LEFT JOIN votes ON votes.test_asset_id = test_assets.id
+        GROUP BY test_assets.id
+     ) vote_counts ON vote_counts.test_asset_id = test_assets.id
+     WHERE tests.status = 'active'
+     GROUP BY tests.id
+     ORDER BY tests.created_at DESC
+     LIMIT ?`,
+    [minVotes, limit]
+  );
+
+  return rows.map((row) => ({
+    uuid: row.uuid,
+    status: row.status,
+    created_at: row.created_at,
+    game_name: row.game_name,
+    designer_name: row.designer_name,
+    total_assets: Number(row.total_assets || 0),
+    completed_assets: Number(row.completed_assets || 0),
+    total_votes: Number(row.total_votes || 0),
+  }));
+}
+
 export async function getTestByUuidForUser({ userId, testUuid }) {
   const [rows] = await pool.query(
     `SELECT tests.id,

@@ -12,6 +12,7 @@ import {
   getTestAssetProgressByTestId,
   getTestAssetsByTestId,
   getTestVotesByTestId,
+  getPublicActiveTests,
 } from "../db/tests.js";
 import {
   buildTestPool,
@@ -22,6 +23,30 @@ import { buildPublicTestUrl } from "../utils/publicUrls.js";
 import env from "../config/env.js";
 
 const router = Router();
+
+router.get("/public", async (req, res) => {
+  try {
+    const tests = await getPublicActiveTests({
+      minVotes: env.tester.minVotesPerAsset,
+      limit: 30,
+    });
+    return res.status(200).json({
+      tests: tests.map((test) => ({
+        uuid: test.uuid,
+        status: test.status,
+        created_at: test.created_at,
+        game_name: test.game_name,
+        designer_name: test.designer_name,
+        total_assets: test.total_assets,
+        completed_assets: test.completed_assets,
+        total_votes: test.total_votes,
+        public_url: buildPublicTestUrl(req, test.uuid),
+      })),
+    });
+  } catch (error) {
+    return res.status(502).json({ error: error.message || "Unable to load public tests." });
+  }
+});
 
 router.post("/preview", requireAuth, async (req, res) => {
   const gameUuid = String(req.body?.game_uuid || "");

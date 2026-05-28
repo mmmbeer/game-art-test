@@ -20,6 +20,8 @@ const appTestsMenu = document.getElementById("appTestsMenu");
 const appTestsDropdown = document.getElementById("appTestsDropdown");
 const loadingTip = document.getElementById("loadingTip");
 const loadingStatus = document.getElementById("loadingStatus");
+const publicTestsList = document.getElementById("publicTestsList");
+const publicTestsStatus = document.getElementById("publicTestsStatus");
 
 let activeBackAction = null;
 let currentView = "";
@@ -27,6 +29,7 @@ let titleExpandTimer = null;
 let loadingTipTimer = null;
 let loadingTips = [];
 let loadingTipIndex = 0;
+let publicTestsLoaded = false;
 
 appBackButton?.addEventListener("click", () => {
   activeBackAction?.();
@@ -101,6 +104,7 @@ function setView(view) {
     assetsView.classList.add("d-none");
     dashboardView.classList.add("d-none");
     stopLoadingTips();
+    loadPublicTests();
     setPageTitle("TGC Art Test Platform");
     setSubpageTitle("");
     setBackVisible(false);
@@ -415,4 +419,70 @@ function getFallbackTips() {
     "A focused playtest question produces cleaner feedback.",
     "Group related assets when you need apples-to-apples comparisons.",
   ];
+}
+
+async function loadPublicTests() {
+  if (publicTestsLoaded || !publicTestsList) {
+    return;
+  }
+  publicTestsLoaded = true;
+  if (publicTestsStatus) {
+    publicTestsStatus.textContent = "Loading...";
+  }
+  publicTestsList.innerHTML = "<p class=\"text-muted mb-0\">Loading public art tests...</p>";
+
+  try {
+    const { response, data } = await fetchJson("tests/public");
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to load public tests.");
+    }
+    renderPublicTests(Array.isArray(data.tests) ? data.tests : []);
+  } catch (error) {
+    publicTestsLoaded = false;
+    if (publicTestsStatus) {
+      publicTestsStatus.textContent = "Unavailable";
+    }
+    publicTestsList.innerHTML = "<p class=\"text-muted mb-0\">Public tests are unavailable right now.</p>";
+  }
+}
+
+function renderPublicTests(tests) {
+  publicTestsList.innerHTML = "";
+  if (publicTestsStatus) {
+    publicTestsStatus.textContent = tests.length ? `${tests.length} open` : "None open";
+  }
+  if (!tests.length) {
+    publicTestsList.innerHTML = "<p class=\"text-muted mb-0\">No public art tests are open right now.</p>";
+    return;
+  }
+
+  tests.forEach((test) => {
+    const row = document.createElement("article");
+    row.className = "landing-public-test";
+
+    const body = document.createElement("div");
+    const title = document.createElement("p");
+    title.className = "landing-public-test-title";
+    title.textContent = test.game_name || "Untitled game";
+
+    const meta = document.createElement("p");
+    meta.className = "landing-public-test-meta";
+    const totalAssets = Number(test.total_assets || 0);
+    const totalVotes = Number(test.total_votes || 0);
+    const designer = test.designer_name || "Designer unavailable";
+    meta.textContent = `${designer} · ${totalAssets} assets · ${totalVotes} votes`;
+
+    const link = document.createElement("a");
+    link.className = "btn btn-outline-light btn-sm";
+    link.href = test.public_url || `t/${test.uuid}/`;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "Open test";
+
+    body.appendChild(title);
+    body.appendChild(meta);
+    row.appendChild(body);
+    row.appendChild(link);
+    publicTestsList.appendChild(row);
+  });
 }
