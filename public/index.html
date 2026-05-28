@@ -59,20 +59,63 @@
       </header>
 
       <main class="app-main">
-        <section id="landingView" class="card app-card">
-          <div class="card-body">
-            <h2 class="card-title">Welcome to the art test platform</h2>
-            <p class="card-subtitle">Authenticate with The Game Crafter to manage your art tests.</p>
-            <div class="mt-4">
-              <a class="btn btn-primary w-100" href="auth/tgc/sso/start">Sign in with TGC</a>
+        <section id="landingView" class="landing-page">
+          <div class="landing-banner" aria-label="Art test preview placeholder">
+            <div class="landing-banner-grid" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
-            <div class="mt-3 text-muted">
-              <p class="mb-2">Public art tests do not require a TGC account.</p>
-              <p class="mb-0">Follow the link you were given to vote.</p>
+            <div class="landing-banner-copy">
+              <p class="app-eyebrow">TGC Art Test Platform</p>
+              <h2>Sharper playtester feedback for every piece of game art.</h2>
             </div>
           </div>
-        </div>
-      </div>
+
+          <div class="landing-stage">
+            <div class="landing-card-cloud" aria-hidden="true">
+              <article class="landing-feature-card card-custom-tests">
+                <span>Custom tests</span>
+                <strong>Build focused reviews for icons, cards, boards, tokens, and full asset sets.</strong>
+              </article>
+              <article class="landing-feature-card card-art-groups">
+                <span>Custom art groupings</span>
+                <strong>Group assets by game, component, collection, or question.</strong>
+              </article>
+              <article class="landing-feature-card card-feedback">
+                <span>Pinpoint feedback</span>
+                <strong>Collect ratings, comments, and visual notes exactly where art needs attention.</strong>
+              </article>
+              <article class="landing-feature-card card-analytics">
+                <span>Analytics</span>
+                <strong>See score averages, tester progress, and per-asset trends.</strong>
+              </article>
+              <article class="landing-feature-card card-charts">
+                <span>Charts and graphs</span>
+                <strong>Turn noisy opinions into readable score profiles and comparisons.</strong>
+              </article>
+              <article class="landing-feature-card card-progress">
+                <span>Review control</span>
+                <strong>Pause, resume, monitor, and share tests from a single command center.</strong>
+              </article>
+            </div>
+
+            <div class="landing-login-modal" role="dialog" aria-labelledby="landingLoginTitle">
+              <p class="app-eyebrow">Creator login</p>
+              <h3 id="landingLoginTitle">Start managing art tests</h3>
+              <p>
+                Sign in with The Game Crafter to choose assets, create test links, and review results.
+              </p>
+              <a class="btn btn-primary w-100" href="auth/tgc/sso/start">Sign in with TGC</a>
+              <div class="landing-public-note">
+                <p>Public art tests do not require a TGC account.</p>
+                <p>Follow the link you were given to vote.</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section id="gamesView" class="card app-card d-none">

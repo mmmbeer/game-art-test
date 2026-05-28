@@ -7,6 +7,7 @@ CSS import structure
   - app/layout.css
   - app/buttons.css
   - app/forms.css
+  - app/landing.css
   - app/filters.css
   - app/loading.css
   - app/games.css
@@ -23,6 +24,7 @@ CSS import structure
 @import url("./app/layout.css");
 @import url("./app/buttons.css");
 @import url("./app/forms.css");
+@import url("./app/landing.css");
 @import url("./app/filters.css");
 @import url("./app/loading.css");
 @import url("./app/games.css");
