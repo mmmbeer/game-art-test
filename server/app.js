@@ -20,15 +20,22 @@ const basePath = normalizeBasePath(env.app.basePath);
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 app.use(cookieParser());
-app.use(basePath, express.static(publicDir));
-app.use(`${basePath}/auth/tgc`, authRoutes);
-app.use(`${basePath}/games`, gamesRoutes);
-app.use(`${basePath}/tests`, testsRoutes);
-app.use(`${basePath}/t`, testerRoutes);
-app.use(basePath, imageProxyRoutes);
-app.use(basePath, healthRoutes);
+mountRoutes("");
+if (basePath) {
+  mountRoutes(basePath);
+}
 
 export default app;
+
+function mountRoutes(prefix) {
+  app.use(prefix, express.static(publicDir));
+  app.use(`${prefix}/auth/tgc`, authRoutes);
+  app.use(`${prefix}/games`, gamesRoutes);
+  app.use(`${prefix}/tests`, testsRoutes);
+  app.use(`${prefix}/t`, testerRoutes);
+  app.use(prefix, imageProxyRoutes);
+  app.use(prefix, healthRoutes);
+}
 
 function normalizeBasePath(input) {
   if (!input) {
