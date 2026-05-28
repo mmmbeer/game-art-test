@@ -6,6 +6,7 @@ import { getSelectedGameUuid, setSelectedGameUuid } from "./state.js";
 import { fetchJson } from "./api.js";
 
 const landingView = document.getElementById("landingView");
+const loadingView = document.getElementById("loadingView");
 const gamesView = document.getElementById("gamesView");
 const assetsView = document.getElementById("assetsView");
 const dashboardView = document.getElementById("dashboardView");
@@ -17,10 +18,15 @@ const appTitleButton = document.getElementById("appTitleButton");
 const appTestsButton = document.getElementById("appTestsButton");
 const appTestsMenu = document.getElementById("appTestsMenu");
 const appTestsDropdown = document.getElementById("appTestsDropdown");
+const loadingTip = document.getElementById("loadingTip");
+const loadingStatus = document.getElementById("loadingStatus");
 
 let activeBackAction = null;
 let currentView = "";
 let titleExpandTimer = null;
+let loadingTipTimer = null;
+let loadingTips = [];
+let loadingTipIndex = 0;
 
 appBackButton?.addEventListener("click", () => {
   activeBackAction?.();
@@ -50,33 +56,51 @@ function setView(view) {
   }
   if (view === "games") {
     landingView.classList.add("d-none");
+    loadingView.classList.add("d-none");
     gamesView.classList.remove("d-none");
     assetsView.classList.add("d-none");
     dashboardView.classList.add("d-none");
+    stopLoadingTips();
     setPageTitle("Select a Game");
     setSubpageTitle("");
     setBackVisible(false);
   } else if (view === "assets") {
     landingView.classList.add("d-none");
+    loadingView.classList.add("d-none");
     gamesView.classList.add("d-none");
     assetsView.classList.remove("d-none");
     dashboardView.classList.add("d-none");
+    stopLoadingTips();
     setPageTitle("Browse Assets");
     setSubpageTitle("");
     setBackVisible(true);
   } else if (view === "dashboard") {
     landingView.classList.add("d-none");
+    loadingView.classList.add("d-none");
     gamesView.classList.add("d-none");
     assetsView.classList.add("d-none");
     dashboardView.classList.remove("d-none");
+    stopLoadingTips();
     setPageTitle("Command Center");
     setSubpageTitle("");
     setBackVisible(true);
-  } else {
-    landingView.classList.remove("d-none");
+  } else if (view === "loading") {
+    landingView.classList.add("d-none");
+    loadingView.classList.remove("d-none");
     gamesView.classList.add("d-none");
     assetsView.classList.add("d-none");
     dashboardView.classList.add("d-none");
+    startLoadingTips();
+    setPageTitle("Loading Games");
+    setSubpageTitle("");
+    setBackVisible(false);
+  } else {
+    landingView.classList.remove("d-none");
+    loadingView.classList.add("d-none");
+    gamesView.classList.add("d-none");
+    assetsView.classList.add("d-none");
+    dashboardView.classList.add("d-none");
+    stopLoadingTips();
     setPageTitle("TGC Art Test Platform");
     setSubpageTitle("");
     setBackVisible(false);
@@ -139,6 +163,7 @@ setView(
 );
 
 (async () => {
+  setView("loading");
   const loaded = await gamesViewApi.loadGames();
   if (!loaded) {
     return;
@@ -333,4 +358,61 @@ function renderHeaderTests(activeTests) {
     link.appendChild(item);
     appTestsMenu.appendChild(link);
   });
+}
+
+async function startLoadingTips() {
+  if (loadingStatus) {
+    loadingStatus.textContent = "Contacting The Game Crafter...";
+  }
+  if (!loadingTips.length) {
+    loadingTips = await loadLoadingTips();
+    loadingTipIndex = Math.floor(Math.random() * Math.max(loadingTips.length, 1));
+    if (currentView !== "loading") {
+      return;
+    }
+  }
+  showNextLoadingTip();
+  if (!loadingTipTimer) {
+    loadingTipTimer = window.setInterval(showNextLoadingTip, 4800);
+  }
+}
+
+function stopLoadingTips() {
+  if (loadingTipTimer) {
+    window.clearInterval(loadingTipTimer);
+    loadingTipTimer = null;
+  }
+}
+
+async function loadLoadingTips() {
+  try {
+    const response = await fetch("data/tips.json", { credentials: "same-origin" });
+    if (!response.ok) {
+      return getFallbackTips();
+    }
+    const data = await response.json();
+    const tips = Array.isArray(data)
+      ? data.map((entry) => String(entry?.tip || "").trim()).filter(Boolean)
+      : [];
+    return tips.length ? tips : getFallbackTips();
+  } catch (error) {
+    return getFallbackTips();
+  }
+}
+
+function showNextLoadingTip() {
+  if (!loadingTip) {
+    return;
+  }
+  const tips = loadingTips.length ? loadingTips : getFallbackTips();
+  loadingTip.textContent = tips[loadingTipIndex % tips.length];
+  loadingTipIndex += 1;
+}
+
+function getFallbackTips() {
+  return [
+    "Good game art makes decisions easier to read.",
+    "A focused playtest question produces cleaner feedback.",
+    "Group related assets when you need apples-to-apples comparisons.",
+  ];
 }
