@@ -20,11 +20,15 @@ const basePath = normalizeBasePath(env.app.basePath);
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 app.use(cookieParser());
-mountRoutes(basePath);
+mountStatic(basePath);
+mountApiRoutes("");
+if (basePath) {
+  mountApiRoutes(basePath);
+}
 
 export default app;
 
-function mountRoutes(prefix) {
+function mountStatic(prefix) {
   app.use(
     prefix,
     express.static(publicDir, {
@@ -32,6 +36,9 @@ function mountRoutes(prefix) {
       maxAge: env.nodeEnv === "production" ? "1d" : 0,
     })
   );
+}
+
+function mountApiRoutes(prefix) {
   app.use(`${prefix}/auth/tgc`, authRoutes);
   app.use(`${prefix}/games`, gamesRoutes);
   app.use(`${prefix}/tests`, testsRoutes);
