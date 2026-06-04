@@ -54,10 +54,13 @@ CREATE TABLE test_assets (
 CREATE TABLE votes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   test_asset_id INT NOT NULL,
+  tester_uuid CHAR(36) NOT NULL,
   professionalism INT NOT NULL,
   appeal INT NOT NULL,
   understandability INT NOT NULL,
   comment TEXT NULL,
   comment_marks JSON NULL,
-  created_at DATETIME NOT NULL
+  created_at DATETIME NOT NULL,
+  UNIQUE KEY uq_votes_test_asset_tester (test_asset_id, tester_uuid),
+  INDEX idx_votes_test_asset (test_asset_id)
 );

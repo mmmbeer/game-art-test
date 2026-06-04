@@ -85,14 +85,16 @@ export async function getTestsWithProgressForGame({ userId, gameId, minVotes }) 
      LEFT JOIN test_assets ON test_assets.test_id = tests.id
      LEFT JOIN (
         SELECT test_assets.id AS test_asset_id, COUNT(votes.id) AS vote_count
-        FROM test_assets
+        FROM tests scoped_tests
+        JOIN test_assets ON test_assets.test_id = scoped_tests.id
         LEFT JOIN votes ON votes.test_asset_id = test_assets.id
+        WHERE scoped_tests.user_id = ? AND scoped_tests.game_id = ?
         GROUP BY test_assets.id
      ) vote_counts ON vote_counts.test_asset_id = test_assets.id
      WHERE tests.user_id = ? AND tests.game_id = ?
      GROUP BY tests.id
      ORDER BY tests.created_at DESC`,
-    [minVotes, userId, gameId]
+    [minVotes, userId, gameId, userId, gameId]
   );
 
   return rows.map((row) => ({
@@ -126,14 +128,16 @@ export async function getTestsOverviewByUserId({ userId, minVotes }) {
      LEFT JOIN test_assets ON test_assets.test_id = tests.id
      LEFT JOIN (
         SELECT test_assets.id AS test_asset_id, COUNT(votes.id) AS vote_count
-        FROM test_assets
+        FROM tests scoped_tests
+        JOIN test_assets ON test_assets.test_id = scoped_tests.id
         LEFT JOIN votes ON votes.test_asset_id = test_assets.id
+        WHERE scoped_tests.user_id = ?
         GROUP BY test_assets.id
      ) vote_counts ON vote_counts.test_asset_id = test_assets.id
      WHERE tests.user_id = ?
      GROUP BY tests.id
      ORDER BY tests.created_at DESC`,
-    [minVotes, userId]
+    [minVotes, userId, userId]
   );
 
   return rows.map((row) => ({
@@ -168,8 +172,10 @@ export async function getPublicActiveTests({ minVotes, limit = 30 }) {
      LEFT JOIN test_assets ON test_assets.test_id = tests.id
      LEFT JOIN (
         SELECT test_assets.id AS test_asset_id, COUNT(votes.id) AS vote_count
-        FROM test_assets
+        FROM tests scoped_tests
+        JOIN test_assets ON test_assets.test_id = scoped_tests.id
         LEFT JOIN votes ON votes.test_asset_id = test_assets.id
+        WHERE scoped_tests.status = 'active'
         GROUP BY test_assets.id
      ) vote_counts ON vote_counts.test_asset_id = test_assets.id
      WHERE tests.status = 'active'

@@ -11,7 +11,12 @@ import {
 } from "../services/tgcClient.js";
 import { getGameByUuidForUser, getGamesByUserId, syncGamesForUser } from "../db/games.js";
 import { discoverGameAssets } from "../services/tgcAssets.js";
-import { getAssetSummaryByUserId, getAssetsByGameId, upsertAssetsForGame } from "../db/assets.js";
+import {
+  getAssetPreviewByUserId,
+  getAssetSummaryByUserId,
+  getAssetsByGameId,
+  upsertAssetsForGame,
+} from "../db/assets.js";
 import env from "../config/env.js";
 import {
   getActiveTestsByUserId,
@@ -23,6 +28,8 @@ import { createDeterministicUuid } from "../utils/uuid.js";
 import { buildPublicTestUrl } from "../utils/publicUrls.js";
 
 const router = Router();
+const gameDashboardCache = new Map();
+const GAME_DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function extractRelationshipItems(userResult, key) {
   const relationships =
@@ -121,8 +128,23 @@ async function addMissingDesigners(designerMap, games, sessionId) {
 
 router.get("/", requireAuth, async (req, res) => {
   const { tgcSessionId, user } = req.auth;
+  const forceRefresh = String(req.query.refresh || "").toLowerCase() === "1";
 
   try {
+    const storedBeforeSync = await getGamesByUserId(user.id);
+    const shouldSync = forceRefresh || storedBeforeSync.length === 0;
+    if (!shouldSync) {
+      const cached = getCachedGameDashboard(user.id);
+      return res.status(200).json(
+        await buildStoredGamesResponse({
+          req,
+          user,
+          storedGames: storedBeforeSync,
+          cached,
+        })
+      );
+    }
+
     const userResult = await fetchUser({
       tgcUserId: user.tgcUserId,
       sessionId: tgcSessionId,
@@ -190,20 +212,6 @@ router.get("/", requireAuth, async (req, res) => {
     await syncGamesForUser(user.id, normalized);
 
     const storedGames = await getGamesByUserId(user.id);
-    const assetSummary = await getAssetSummaryByUserId(user.id);
-    const testSummary = await getTestSummaryByUserId(user.id);
-    const activeTestsByGame = await getActiveTestsByUserId(user.id);
-    const testsOverview = await getTestsOverviewByUserId({
-      userId: user.id,
-      minVotes: env.tester.minVotesPerAsset,
-    });
-    const testsByGameId = new Map();
-    testsOverview.forEach((test) => {
-      if (!testsByGameId.has(test.game_id)) {
-        testsByGameId.set(test.game_id, []);
-      }
-      testsByGameId.get(test.game_id).push(test);
-    });
     const gameDesignerMap = new Map(
       Array.from(combinedMap.values()).map((game) => [game.id, game.designer_id || null])
     );
@@ -211,43 +219,21 @@ router.get("/", requireAuth, async (req, res) => {
       a.name.localeCompare(b.name)
     );
     const gameImageMap = await buildGameImageMap(combinedMap, tgcSessionId);
-
-    return res.status(200).json({
-      user: {
-        uuid: user.uuid,
-        display_name: user.displayName,
-      },
-      designers: designersPayload.map((designer) => ({
-        uuid: designer.uuid,
-        name: designer.name,
-      })),
-      games: storedGames.map((game) => {
-        const testInfo = testSummary.get(game.id) || { testCount: 0, activeCount: 0 };
-        const activeTests = activeTestsByGame.get(game.id) || [];
-        const testsForGame = testsByGameId.get(game.id) || [];
-        return {
-          uuid: game.uuid,
-          name: game.name,
-          asset_count: assetSummary.get(game.id)?.assetCount || 0,
-          asset_type_counts: assetSummary.get(game.id)?.typeCounts || {},
-          shop_image_url: gameImageMap.get(game.tgc_game_id) || null,
-          designer_uuid: resolveDesignerUuid(gameGameDesignerId(game, gameDesignerMap), designerMap),
-          test_count: testInfo.testCount,
-          active_test_count: testInfo.activeCount,
-          active_tests: activeTests.map((test) => ({
-            uuid: test.uuid,
-            created_at: test.created_at,
-            public_url: buildPublicTestUrl(req, test.uuid),
-          })),
-          tests: testsForGame.map((test) => ({
-            uuid: test.uuid,
-            status: test.status,
-            created_at: test.created_at,
-            public_url: buildPublicTestUrl(req, test.uuid),
-          })),
-        };
-      }),
+    setCachedGameDashboard(user.id, {
+      designerMap,
+      designersPayload,
+      gameDesignerMap,
+      gameImageMap,
     });
+
+    return res.status(200).json(
+      await buildStoredGamesResponse({
+        req,
+        user,
+        storedGames,
+        cached: getCachedGameDashboard(user.id),
+      })
+    );
   } catch (error) {
     return res.status(502).json({ error: error.message || "Failed to fetch games" });
   }
@@ -460,4 +446,82 @@ function getDeckCardsByAssetUuid(assets) {
     }
   }
   return map;
+}
+
+async function buildStoredGamesResponse({ req, user, storedGames, cached }) {
+  const assetSummary = await getAssetSummaryByUserId(user.id);
+  const assetPreviewByGame = await getAssetPreviewByUserId(user.id);
+  const testSummary = await getTestSummaryByUserId(user.id);
+  const activeTestsByGame = await getActiveTestsByUserId(user.id);
+  const testsOverview = await getTestsOverviewByUserId({
+    userId: user.id,
+    minVotes: env.tester.minVotesPerAsset,
+  });
+  const testsByGameId = new Map();
+  testsOverview.forEach((test) => {
+    if (!testsByGameId.has(test.game_id)) {
+      testsByGameId.set(test.game_id, []);
+    }
+    testsByGameId.get(test.game_id).push(test);
+  });
+
+  return {
+    user: {
+      uuid: user.uuid,
+      display_name: user.displayName,
+    },
+    designers: (cached?.designersPayload || []).map((designer) => ({
+      uuid: designer.uuid,
+      name: designer.name,
+    })),
+    games: storedGames.map((game) => {
+      const testInfo = testSummary.get(game.id) || { testCount: 0, activeCount: 0 };
+      const activeTests = activeTestsByGame.get(game.id) || [];
+      const testsForGame = testsByGameId.get(game.id) || [];
+      const tgcDesignerId = cached?.gameDesignerMap
+        ? gameGameDesignerId(game, cached.gameDesignerMap)
+        : null;
+      return {
+        uuid: game.uuid,
+        name: game.name,
+        asset_count: assetSummary.get(game.id)?.assetCount || 0,
+        asset_type_counts: assetSummary.get(game.id)?.typeCounts || {},
+        shop_image_url:
+          cached?.gameImageMap?.get(game.tgc_game_id) || assetPreviewByGame.get(game.id) || null,
+        designer_uuid: cached?.designerMap
+          ? resolveDesignerUuid(tgcDesignerId, cached.designerMap)
+          : cached?.designersPayload?.find((designer) => designer.tgc_designer_id === tgcDesignerId)
+            ?.uuid || null,
+        test_count: testInfo.testCount,
+        active_test_count: testInfo.activeCount,
+        active_tests: activeTests.map((test) => ({
+          uuid: test.uuid,
+          created_at: test.created_at,
+          public_url: buildPublicTestUrl(req, test.uuid),
+        })),
+        tests: testsForGame.map((test) => ({
+          uuid: test.uuid,
+          status: test.status,
+          created_at: test.created_at,
+          public_url: buildPublicTestUrl(req, test.uuid),
+        })),
+      };
+    }),
+  };
+}
+
+function getCachedGameDashboard(userId) {
+  const entry = gameDashboardCache.get(userId);
+  if (!entry || Date.now() - entry.cachedAt > GAME_DASHBOARD_CACHE_TTL_MS) {
+    gameDashboardCache.delete(userId);
+    return null;
+  }
+  return entry.value;
+}
+
+function setCachedGameDashboard(userId, value) {
+  gameDashboardCache.set(userId, {
+    cachedAt: Date.now(),
+    value,
+  });
 }

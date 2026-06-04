@@ -7,16 +7,12 @@ import {
   getTestAssetCandidates,
   getTestAssetId,
   getVoteCountForTestAsset,
+  hasTesterVotedForTestAsset,
   insertVote,
 } from "../db/tester.js";
 import { completeTestIfSatisfied } from "../db/tests.js";
 import { resolveOverlayUrl } from "../services/overlay.js";
 import { isDownloadableAsset } from "../services/assetRules.js";
-import {
-  filterCandidatesForTester,
-  hasTesterVoted,
-  registerTesterVote,
-} from "../services/testerVoteRegistry.js";
 
 const router = Router();
 const publicFile = path.resolve(process.cwd(), "public", "tester.html");
@@ -66,7 +62,7 @@ router.post("/:uuid/vote", async (req, res) => {
     if (!testAssetId) {
       return res.status(404).json({ error: "Asset not found in this test." });
     }
-    if (hasTesterVoted(testAssetId, testerUuid)) {
+    if (await hasTesterVotedForTestAsset({ testAssetId, testerUuid })) {
       return res.status(409).json({ error: "You already voted on this asset." });
     }
 
@@ -78,13 +74,13 @@ router.post("/:uuid/vote", async (req, res) => {
 
     await insertVote({
       testAssetId,
+      testerUuid,
       professionalism,
       appeal,
       understandability,
       comment,
       commentMarks,
     });
-    registerTesterVote(testAssetId, testerUuid);
 
     await completeTestIfSatisfied({ testId: test.id, minVotes });
 
@@ -93,6 +89,9 @@ router.post("/:uuid/vote", async (req, res) => {
       next_vote_count: voteCount + 1,
     });
   } catch (error) {
+    if (isDuplicateVoteError(error)) {
+      return res.status(409).json({ error: "You already voted on this asset." });
+    }
     return res.status(502).json({ error: error.message || "Unable to record vote." });
   }
 });
@@ -123,7 +122,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
     }
 
     const minVotes = env.tester.minVotesPerAsset;
-    const candidates = await getTestAssetCandidates({ testUuid, minVotes });
+    const candidates = await getTestAssetCandidates({ testUuid, minVotes, testerUuid });
     const eligibleCandidates = candidates.filter(
       (asset) => !isDownloadableAsset(asset)
     );
@@ -131,7 +130,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
     const filteredCandidates = eligibleCandidates.filter(
       (asset) => !excludeAssetUuids.includes(asset.asset_uuid)
     );
-    const filtered = filterCandidatesForTester(filteredCandidates, testerUuid);
+    const filtered = filteredCandidates;
 
     if (!filtered.length) {
       return res.status(200).json({
@@ -223,4 +222,8 @@ function normalizeUuid(value) {
   const uuidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidPattern.test(candidate) ? candidate : "";
+}
+
+function isDuplicateVoteError(error) {
+  return error?.code === "ER_DUP_ENTRY" || Number(error?.errno) === 1062;
 }

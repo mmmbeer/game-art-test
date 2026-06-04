@@ -26,79 +26,95 @@ const EXCLUDED_ID_FIELDS = new Set([
   "webhook_id",
   "shipping_address_id",
 ]);
+const DISCOVERY_CONCURRENCY = 4;
 
 export async function discoverGameAssets({ tgcGameId, sessionId }) {
   const gameResult = await fetchGame({ gameId: tgcGameId, sessionId, includeRelationships: true });
   const relationshipEntries = extractRelationshipEntries(gameResult);
-  const assets = [];
-  const fileCache = new Map();
+  const context = {
+    sessionId,
+    fileCache: new Map(),
+    deckCache: new Map(),
+  };
 
-  for (const relationship of relationshipEntries) {
-    if (!relationship.key) {
-      continue;
-    }
-    let items = relationship.items || [];
-    let response;
-    try {
-      if (!items.length) {
-        response = relationship.href
-          ? await listRelationshipByUrl({
-              url: relationship.href,
-              sessionId,
-              includeRelationships: true,
-            })
-          : await listGameRelationship({
-              gameId: tgcGameId,
-              relationship: relationship.key,
-              sessionId,
-              includeRelationships: true,
-            });
-        items = extractItems(response);
-      }
-    } catch (error) {
-      const message = String(error?.message || "");
-      if (message.toLowerCase().includes("resource not found")) {
-        continue;
-      }
-      throw error;
-    }
+  const relationshipAssets = await mapWithConcurrency(
+    relationshipEntries.filter((relationship) => relationship.key),
+    DISCOVERY_CONCURRENCY,
+    (relationship) => discoverRelationshipAssets({ tgcGameId, relationship, context })
+  );
 
-    for (const item of items) {
-      if (isCardItem(item, relationship.key)) {
-        const normalizedCards = await normalizeCardAssets({
-          item,
-          sessionId,
-          fileCache,
-        });
-        normalizedCards.forEach((cardAsset) => assets.push(cardAsset));
-      } else {
-        const normalized = await normalizeAsset({
-          relationship: relationship.key,
-          item,
-          sessionId,
-          fileCache,
-        });
-        if (normalized) {
-          assets.push(normalized);
-        }
-      }
+  return relationshipAssets.flat();
+}
 
-      if (isDeckItem(item, relationship.key)) {
-        const { items: deckCards, deckIdentity } = await fetchDeckCards({
-          deckId: item.id,
-          sessionId,
-        });
-        for (const card of deckCards) {
-          const normalizedCards = await normalizeCardAssets({
-            item: card,
-            sessionId,
-            fileCache,
-            deckIdentity,
+async function discoverRelationshipAssets({ tgcGameId, relationship, context }) {
+  let items = relationship.items || [];
+  let response;
+  try {
+    if (!items.length) {
+      response = relationship.href
+        ? await listRelationshipByUrl({
+            url: relationship.href,
+            sessionId: context.sessionId,
+            includeRelationships: true,
+          })
+        : await listGameRelationship({
+            gameId: tgcGameId,
+            relationship: relationship.key,
+            sessionId: context.sessionId,
+            includeRelationships: true,
           });
-          normalizedCards.forEach((cardAsset) => assets.push(cardAsset));
-        }
-      }
+      items = extractItems(response);
     }
+  } catch (error) {
+    const message = String(error?.message || "");
+    if (message.toLowerCase().includes("resource not found")) {
+      return [];
+    }
+    throw error;
+  }
+
+  const itemAssets = await mapWithConcurrency(items, DISCOVERY_CONCURRENCY, (item) =>
+    normalizeRelationshipItem({ item, relationshipKey: relationship.key, context })
+  );
+  return itemAssets.flat();
+}
+
+async function normalizeRelationshipItem({ item, relationshipKey, context }) {
+  const assets = [];
+  if (isCardItem(item, relationshipKey)) {
+    const normalizedCards = await normalizeCardAssets({
+      item,
+      sessionId: context.sessionId,
+      fileCache: context.fileCache,
+    });
+    assets.push(...normalizedCards);
+  } else {
+    const normalized = await normalizeAsset({
+      relationship: relationshipKey,
+      item,
+      sessionId: context.sessionId,
+      fileCache: context.fileCache,
+    });
+    if (normalized) {
+      assets.push(normalized);
+    }
+  }
+
+  if (isDeckItem(item, relationshipKey)) {
+    const { items: deckCards, deckIdentity } = await fetchDeckCards({
+      deckId: item.id,
+      sessionId: context.sessionId,
+      deckCache: context.deckCache,
+    });
+    const cardAssets = await mapWithConcurrency(deckCards, DISCOVERY_CONCURRENCY, (card) =>
+      normalizeCardAssets({
+        item: card,
+        sessionId: context.sessionId,
+        fileCache: context.fileCache,
+        deckIdentity,
+      })
+    );
+    cardAssets.forEach((normalizedCards) => assets.push(...normalizedCards));
   }
 
   return assets;
@@ -231,7 +247,16 @@ async function buildCardAsset({
   };
 }
 
-async function fetchDeckCards({ deckId, sessionId }) {
+async function fetchDeckCards({ deckId, sessionId, deckCache }) {
+  if (deckCache?.has(deckId)) {
+    return deckCache.get(deckId);
+  }
+  const promise = loadDeckCards({ deckId, sessionId });
+  deckCache?.set(deckId, promise);
+  return promise;
+}
+
+async function loadDeckCards({ deckId, sessionId }) {
   let deckResult = null;
   try {
     deckResult = await fetchDeck({ deckId, sessionId, includeRelationships: true });
@@ -374,14 +399,11 @@ async function getFile({ fileId, sessionId, fileCache }) {
   if (fileCache.has(fileId)) {
     return fileCache.get(fileId);
   }
-  try {
-    const file = await fetchFile({ fileId, sessionId });
-    fileCache.set(fileId, file);
-    return file;
-  } catch (error) {
-    fileCache.set(fileId, null);
-    return null;
-  }
+  const promise = fetchFile({ fileId, sessionId }).catch(() => null);
+  fileCache.set(fileId, promise);
+  const file = await promise;
+  fileCache.set(fileId, file);
+  return file;
 }
 
 function pickFileDetails(file) {
@@ -412,4 +434,18 @@ function resolveDpi(fileDetails) {
     }
   }
   return null;
+}
+
+async function mapWithConcurrency(items, limit, iteratee) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await iteratee(items[currentIndex], currentIndex);
+    }
+  });
+  await Promise.all(workers);
+  return results;
 }

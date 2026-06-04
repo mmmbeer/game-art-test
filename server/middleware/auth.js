@@ -1,6 +1,8 @@
 import env from "../config/env.js";
 import { getSessionByUuid, touchSession } from "../db/sessions.js";
 
+const SESSION_TOUCH_INTERVAL_MS = 10 * 60 * 1000;
+
 export async function requireAuth(req, res, next) {
   const sessionUuid = req.cookies?.[env.session.cookieName];
   if (!sessionUuid) {
@@ -12,7 +14,9 @@ export async function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Invalid session" });
   }
 
-  await touchSession(sessionUuid);
+  if (shouldTouchSession(session.last_seen_at)) {
+    await touchSession(sessionUuid);
+  }
   req.auth = {
     sessionUuid,
     tgcSessionId: session.tgc_session_id,
@@ -25,4 +29,15 @@ export async function requireAuth(req, res, next) {
   };
 
   return next();
+}
+
+function shouldTouchSession(lastSeenAt) {
+  if (!lastSeenAt) {
+    return true;
+  }
+  const lastSeenTime = new Date(lastSeenAt).getTime();
+  if (!Number.isFinite(lastSeenTime)) {
+    return true;
+  }
+  return Date.now() - lastSeenTime >= SESSION_TOUCH_INTERVAL_MS;
 }

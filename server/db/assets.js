@@ -104,6 +104,18 @@ export async function getAssetSummaryByUserId(userId) {
   return summary;
 }
 
+export async function getAssetPreviewByUserId(userId) {
+  const [rows] = await pool.query(
+    `SELECT g.id AS game_id, MIN(a.image_url) AS image_url
+     FROM games g
+     JOIN assets a ON a.game_id = g.id
+     WHERE g.user_id = ?
+     GROUP BY g.id`,
+    [userId]
+  );
+  return new Map(rows.map((row) => [row.game_id, row.image_url || ""]));
+}
+
 function parseJson(value) {
   if (!value) {
     return {};

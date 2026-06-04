@@ -12,7 +12,7 @@ export async function createSession({ userId, tgcSessionId }) {
 
 export async function getSessionByUuid(sessionUuid) {
   const [rows] = await pool.query(
-    "SELECT us.uuid, us.tgc_session_id, u.id AS user_id, u.uuid AS user_uuid, u.tgc_user_id, u.display_name " +
+    "SELECT us.uuid, us.tgc_session_id, us.last_seen_at, u.id AS user_id, u.uuid AS user_uuid, u.tgc_user_id, u.display_name " +
       "FROM user_sessions us JOIN users u ON us.user_id = u.id WHERE us.uuid = ?",
     [sessionUuid]
   );
