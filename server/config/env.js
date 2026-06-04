@@ -10,6 +10,7 @@ const env = {
     name: process.env.DB_NAME || "",
     user: process.env.DB_USER || "",
     password: process.env.DB_PASSWORD || "",
+    connectionLimit: Number.parseInt(process.env.DB_CONNECTION_LIMIT || "5", 10),
   },
   tgc: {
     apiBaseUrl: process.env.TGC_API_BASE_URL || "https://www.thegamecrafter.com/api",

@@ -1,6 +1,8 @@
 import { randomUUID } from "crypto";
 import pool from "./pool.js";
 
+const UPSERT_BATCH_SIZE = 500;
+
 export async function getGamesByUserId(userId) {
   const [rows] = await pool.query(
     "SELECT id, uuid, tgc_game_id, name FROM games WHERE user_id = ? ORDER BY name",
@@ -18,22 +20,24 @@ export async function getGameByUuidForUser({ userId, gameUuid }) {
 }
 
 export async function syncGamesForUser(userId, games) {
-  const [existingRows] = await pool.query(
-    "SELECT id, tgc_game_id FROM games WHERE user_id = ?",
-    [userId]
-  );
-  const existingMap = new Map(existingRows.map((row) => [row.tgc_game_id, row.id]));
-
-  for (const game of games) {
-    const existingId = existingMap.get(game.tgc_game_id);
-    if (existingId) {
-      await pool.query("UPDATE games SET name = ? WHERE id = ?", [game.name, existingId]);
-      continue;
-    }
-
+  if (!Array.isArray(games) || games.length === 0) {
+    return;
+  }
+  const rows = games.map((game) => [randomUUID(), game.tgc_game_id, userId, game.name]);
+  for (const batch of chunk(rows, UPSERT_BATCH_SIZE)) {
     await pool.query(
-      "INSERT INTO games (uuid, tgc_game_id, user_id, name) VALUES (?, ?, ?, ?)",
-      [randomUUID(), game.tgc_game_id, userId, game.name]
+      `INSERT INTO games (uuid, tgc_game_id, user_id, name)
+       VALUES ?
+       ON DUPLICATE KEY UPDATE name = VALUES(name)`,
+      [batch]
     );
   }
+}
+
+function chunk(items, size) {
+  const batches = [];
+  for (let index = 0; index < items.length; index += size) {
+    batches.push(items.slice(index, index + size));
+  }
+  return batches;
 }

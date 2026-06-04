@@ -1,6 +1,8 @@
 import { randomUUID } from "crypto";
 import pool from "./pool.js";
 
+const UPSERT_BATCH_SIZE = 250;
+
 export async function getAssetsByGameId(gameId) {
   const [rows] = await pool.query(
     "SELECT uuid, tgc_asset_id, asset_type, image_url, dpi, metadata FROM assets WHERE game_id = ? ORDER BY asset_type, id",
@@ -42,37 +44,28 @@ export async function getAssetsByUuidsForGameId(gameId, uuids) {
 }
 
 export async function upsertAssetsForGame(gameId, assets) {
-  const [existingRows] = await pool.query(
-    "SELECT id, tgc_asset_id, asset_type FROM assets WHERE game_id = ?",
-    [gameId]
-  );
-  const existingMap = new Map(
-    existingRows.map((row) => [`${row.tgc_asset_id}:${row.asset_type}`, row.id])
-  );
-
-  for (const asset of assets) {
-    const key = `${asset.tgc_asset_id}:${asset.asset_type}`;
-    const existingId = existingMap.get(key);
-    const metadata = JSON.stringify(asset.metadata || {});
-    if (existingId) {
-      await pool.query(
-        "UPDATE assets SET image_url = ?, dpi = ?, metadata = ? WHERE id = ?",
-        [asset.image_url, asset.dpi, metadata, existingId]
-      );
-      continue;
-    }
-
+  if (!Array.isArray(assets) || assets.length === 0) {
+    return;
+  }
+  const rows = assets.map((asset) => [
+    randomUUID(),
+    asset.tgc_asset_id,
+    gameId,
+    asset.asset_type,
+    asset.image_url,
+    asset.dpi,
+    JSON.stringify(asset.metadata || {}),
+  ]);
+  for (const batch of chunk(rows, UPSERT_BATCH_SIZE)) {
     await pool.query(
-      "INSERT INTO assets (uuid, tgc_asset_id, game_id, asset_type, image_url, dpi, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [
-        randomUUID(),
-        asset.tgc_asset_id,
-        gameId,
-        asset.asset_type,
-        asset.image_url,
-        asset.dpi,
-        metadata,
-      ]
+      `INSERT INTO assets
+        (uuid, tgc_asset_id, game_id, asset_type, image_url, dpi, metadata)
+       VALUES ?
+       ON DUPLICATE KEY UPDATE
+         image_url = VALUES(image_url),
+         dpi = VALUES(dpi),
+         metadata = VALUES(metadata)`,
+      [batch]
     );
   }
 }
@@ -128,4 +121,12 @@ function parseJson(value) {
   } catch (error) {
     return {};
   }
+}
+
+function chunk(items, size) {
+  const batches = [];
+  for (let index = 0; index < items.length; index += size) {
+    batches.push(items.slice(index, index + size));
+  }
+  return batches;
 }

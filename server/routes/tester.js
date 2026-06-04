@@ -5,10 +5,9 @@ import {
   getTestByUuid,
   getTestAssetTotals,
   getTestAssetCandidates,
-  getTestAssetId,
-  getVoteCountForTestAsset,
-  hasTesterVotedForTestAsset,
-  insertVote,
+  getRemainingTestAssetCandidateCount,
+  getRandomTestAssetCandidates,
+  recordVoteIfEligible,
 } from "../db/tester.js";
 import { completeTestIfSatisfied } from "../db/tests.js";
 import { resolveOverlayUrl } from "../services/overlay.js";
@@ -58,35 +57,35 @@ router.post("/:uuid/vote", async (req, res) => {
       return res.status(409).json({ error: "This test is not accepting votes." });
     }
 
-    const testAssetId = await getTestAssetId({ testUuid, assetUuid });
-    if (!testAssetId) {
-      return res.status(404).json({ error: "Asset not found in this test." });
-    }
-    if (await hasTesterVotedForTestAsset({ testAssetId, testerUuid })) {
-      return res.status(409).json({ error: "You already voted on this asset." });
-    }
-
     const minVotes = env.tester.minVotesPerAsset;
-    const voteCount = await getVoteCountForTestAsset(testAssetId);
-    if (voteCount >= minVotes) {
-      return res.status(409).json({ error: "This asset already has enough votes." });
-    }
-
-    await insertVote({
-      testAssetId,
+    const voteResult = await recordVoteIfEligible({
+      testUuid,
+      assetUuid,
       testerUuid,
+      minVotes,
       professionalism,
       appeal,
       understandability,
       comment,
       commentMarks,
     });
+    if (voteResult.status === "missing") {
+      return res.status(404).json({ error: "Asset not found in this active test." });
+    }
+    if (voteResult.status === "duplicate") {
+      return res.status(409).json({ error: "You already voted on this asset." });
+    }
+    if (voteResult.status === "full") {
+      return res.status(409).json({ error: "This asset already has enough votes." });
+    }
 
-    await completeTestIfSatisfied({ testId: test.id, minVotes });
+    if (voteResult.nextVoteCount >= minVotes) {
+      await completeTestIfSatisfied({ testId: voteResult.testId, minVotes });
+    }
 
     return res.status(201).json({
       status: "recorded",
-      next_vote_count: voteCount + 1,
+      next_vote_count: voteResult.nextVoteCount,
     });
   } catch (error) {
     if (isDuplicateVoteError(error)) {
@@ -122,15 +121,26 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
     }
 
     const minVotes = env.tester.minVotesPerAsset;
-    const candidates = await getTestAssetCandidates({ testUuid, minVotes, testerUuid });
-    const eligibleCandidates = candidates.filter(
-      (asset) => !isDownloadableAsset(asset)
-    );
     const totalAssets = await getTestAssetTotals(testUuid);
-    const filteredCandidates = eligibleCandidates.filter(
-      (asset) => !excludeAssetUuids.includes(asset.asset_uuid)
-    );
-    const filtered = filteredCandidates;
+    const remainingAssets = await getRemainingTestAssetCandidateCount({
+      testUuid,
+      minVotes,
+      testerUuid,
+    });
+    let filtered = await getRandomTestAssetCandidates({
+      testUuid,
+      minVotes,
+      testerUuid,
+      excludeAssetUuids,
+      limit: 12,
+    });
+    filtered = filtered.filter((asset) => !isDownloadableAsset(asset));
+    if (!filtered.length) {
+      const candidates = await getTestAssetCandidates({ testUuid, minVotes, testerUuid });
+      filtered = candidates
+        .filter((asset) => !isDownloadableAsset(asset))
+        .filter((asset) => !excludeAssetUuids.includes(asset.asset_uuid));
+    }
 
     if (!filtered.length) {
       return res.status(200).json({
@@ -143,7 +153,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
         },
         progress: {
           total_assets: totalAssets,
-          remaining_assets: eligibleCandidates.length,
+          remaining_assets: remainingAssets,
           min_votes: minVotes,
         },
       });
@@ -169,7 +179,7 @@ async function handleNextAsset(req, res, excludeAssetUuids) {
       },
       progress: {
         total_assets: totalAssets,
-        remaining_assets: eligibleCandidates.length,
+        remaining_assets: remainingAssets,
         min_votes: minVotes,
       },
     });

@@ -36,8 +36,14 @@ router.get("/image-proxy", async (req, res) => {
       signal: controller.signal,
       headers: {
         "User-Agent": "TGC-Art-Test-Proxy/1.0",
+        ...buildConditionalHeaders(req),
       },
     });
+
+    if (response.status === 304) {
+      setCacheHeaders(res, response);
+      return res.status(304).end();
+    }
 
     if (!response.ok) {
       return res.status(response.status).json({ error: "Unable to fetch image." });
@@ -45,7 +51,11 @@ router.get("/image-proxy", async (req, res) => {
 
     const contentType = response.headers.get("content-type") || "application/octet-stream";
     res.setHeader("Content-Type", contentType);
-    res.setHeader("Cache-Control", "public, max-age=86400");
+    setCacheHeaders(res, response);
+    const contentLength = response.headers.get("content-length");
+    if (contentLength) {
+      res.setHeader("Content-Length", contentLength);
+    }
 
     if (!response.body) {
       return res.status(502).json({ error: "No image data received." });
@@ -61,3 +71,28 @@ router.get("/image-proxy", async (req, res) => {
 });
 
 export default router;
+
+function buildConditionalHeaders(req) {
+  const headers = {};
+  const ifNoneMatch = req.header("if-none-match");
+  const ifModifiedSince = req.header("if-modified-since");
+  if (ifNoneMatch) {
+    headers["If-None-Match"] = ifNoneMatch;
+  }
+  if (ifModifiedSince) {
+    headers["If-Modified-Since"] = ifModifiedSince;
+  }
+  return headers;
+}
+
+function setCacheHeaders(res, upstreamResponse) {
+  res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+  const etag = upstreamResponse.headers.get("etag");
+  const lastModified = upstreamResponse.headers.get("last-modified");
+  if (etag) {
+    res.setHeader("ETag", etag);
+  }
+  if (lastModified) {
+    res.setHeader("Last-Modified", lastModified);
+  }
+}
