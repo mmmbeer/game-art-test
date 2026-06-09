@@ -9,14 +9,18 @@ import gamesRoutes from "./routes/games.js";
 import testsRoutes from "./routes/tests.js";
 import testerRoutes from "./routes/tester.js";
 import imageProxyRoutes from "./routes/imageProxy.js";
+import { createRequestActivityTracker } from "./lifecycle.js";
 
 const app = express();
+const requestActivity = createRequestActivityTracker();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicDir = path.resolve(__dirname, "..", "public");
 const basePath = normalizeBasePath(env.app.basePath);
 
+app.locals.requestActivity = requestActivity;
+app.use(requestActivity.middleware);
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 app.use(cookieParser());
